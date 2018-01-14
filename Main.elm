@@ -13,8 +13,13 @@ main =
         }
 
 
-type alias Model =
+type alias Puzzle =
     {}
+
+
+type alias Model =
+    { puzzle : Puzzle
+    }
 
 
 type Msg
@@ -28,12 +33,12 @@ subscriptions model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( { puzzle = {} }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( {}, Cmd.none )
+    ( { puzzle = {} }, Cmd.none )
 
 
 view : Model -> Html Msg
