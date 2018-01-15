@@ -30,15 +30,15 @@ type Square
 
 initGrid : Grid
 initGrid =
-    [ Open { x = 0, y = 0 } 'A'
-    , Open { x = 1, y = 0 } 'B'
-    , Open { x = 2, y = 0 } 'C'
-    , Open { x = 0, y = 1 } 'D'
-    , Filled { x = 1, y = 1 }
-    , Open { x = 2, y = 1 } 'E'
-    , Open { x = 0, y = 2 } 'F'
-    , Open { x = 1, y = 2 } 'G'
-    , Open { x = 2, y = 2 } 'H'
+    [ Open ( 0, 0 ) 'A'
+    , Open ( 1, 0 ) 'B'
+    , Open ( 2, 0 ) 'C'
+    , Open ( 0, 1 ) 'D'
+    , Filled ( 1, 1 )
+    , Open ( 2, 1 ) 'E'
+    , Open ( 0, 2 ) 'F'
+    , Open ( 1, 2 ) 'G'
+    , Open ( 2, 2 ) 'H'
     ]
 
 
@@ -68,9 +68,7 @@ squareCoordinates square =
 
 
 type alias Coordinates =
-    { x : Int
-    , y : Int
-    }
+    ( Int, Int )
 
 
 type alias Model =
@@ -140,10 +138,10 @@ gridToRows : Grid -> List (List Square)
 gridToRows grid =
     let
         hasSameY square1 square2 =
-            (squareCoordinates square1).y == (squareCoordinates square2).y
+            Tuple.second (squareCoordinates square1) == Tuple.second (squareCoordinates square2)
     in
         grid
-            |> List.sortBy (squareCoordinates >> .y)
+            |> List.sortBy (squareCoordinates >> Tuple.second)
             |> List.Extra.groupWhile hasSameY
 
 
