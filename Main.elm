@@ -28,18 +28,86 @@ type Square
     | Filled Coordinates
 
 
+blankSquare : Coordinates -> Square
+blankSquare coordinates =
+    Open coordinates ' '
+
+
+filledSquare : Coordinates -> Square
+filledSquare coordinates =
+    Filled coordinates
+
+
+blankSquares : Coordinates -> Int -> List Square
+blankSquares ( x, y ) number =
+    if number <= 0 then
+        []
+    else
+        blankSquare ( x, y ) :: blankSquares ( x + 1, y ) (number - 1)
+
+
+filledSquares : Coordinates -> Int -> List Square
+filledSquares ( x, y ) number =
+    if number <= 0 then
+        []
+    else
+        filledSquare ( x, y ) :: filledSquares ( x + 1, y ) (number - 1)
+
+
 initGrid : Grid
 initGrid =
-    [ Open ( 0, 0 ) 'A'
-    , Open ( 1, 0 ) 'B'
-    , Open ( 2, 0 ) 'C'
-    , Open ( 0, 1 ) 'D'
-    , Filled ( 1, 1 )
-    , Open ( 2, 1 ) 'E'
-    , Open ( 0, 2 ) 'F'
-    , Open ( 1, 2 ) 'G'
-    , Open ( 2, 2 ) 'H'
-    ]
+    createGridWithRotationalSymmetry
+        [ [ 6, 1, 3, 1, 4 ]
+        , [ 6, 1, 3, 1, 4 ]
+        , [ 6, 1, 8 ]
+        , [ 4, 1, 3, 2, 5 ]
+        , [ 3, 1, 7, 1, 3 ]
+        , [ 7, 1, 6, 1, 0 ]
+        , [ 5, 2, 5, 3, 0 ]
+        , [ 0, 1, 3, 1, 5, 1, 3, 1, 0 ]
+        ]
+
+
+createGridWithRotationalSymmetry : List (List Int) -> Grid
+createGridWithRotationalSymmetry gridSpec =
+    let
+        flipGridSpec spec =
+            spec
+                |> List.map (List.reverse)
+                |> List.reverse
+                |> List.drop 1
+    in
+        doCreateGrid (gridSpec ++ flipGridSpec gridSpec)
+
+
+doCreateGrid : List (List Int) -> Grid
+doCreateGrid gridSpec =
+    createGrid gridSpec [] 0
+        |> List.concat
+        |> List.concat
+
+
+createGrid : List (List Int) -> Grid -> Int -> List (List Grid)
+createGrid lists grid index =
+    case lists of
+        [] ->
+            []
+
+        intList :: intLists ->
+            gridRow intList [] ( 0, index ) :: (createGrid intLists grid (index + 1))
+
+
+gridRow : List Int -> Grid -> Coordinates -> List Grid
+gridRow squareLists grid ( x, y ) =
+    case squareLists of
+        [] ->
+            []
+
+        int :: ints ->
+            if List.length ints % 2 == 0 then
+                blankSquares ( x, y ) int :: gridRow ints grid ( x + int, y )
+            else
+                filledSquares ( x, y ) int :: gridRow ints grid ( x + int, y )
 
 
 getSquareByCoordinates : Grid -> Coordinates -> Maybe Square
@@ -163,14 +231,25 @@ gridToRows grid =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
-            [ ( "display", "inline-block" )
-            , ( "border-left", "1px solid gray" )
-            , ( "border-top", "1px solid gray" )
+    let
+        sortRow : List Square -> List Square
+        sortRow squares =
+            List.sortBy (\s -> squareXCoordinate s) squares
+
+        drawRow : List Square -> Html Msg
+        drawRow squares =
+            div []
+                (List.map (squareView) squares)
+    in
+        (div
+            [ style
+                [ ( "display", "inline-block" )
+                , ( "border-left", "1px solid gray" )
+                , ( "border-top", "1px solid gray" )
+                ]
             ]
-        ]
-    <|
-        List.map
-            (List.map squareView >> div [])
-            (gridToRows model.grid)
+        )
+            (model.grid
+                |> gridToRows
+                |> List.map (sortRow >> drawRow)
+            )
