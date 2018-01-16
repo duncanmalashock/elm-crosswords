@@ -67,6 +67,26 @@ squareCoordinates square =
             coords
 
 
+xCoordinate : Coordinates -> Int
+xCoordinate ( x, _ ) =
+    x
+
+
+yCoordinate : Coordinates -> Int
+yCoordinate ( _, y ) =
+    y
+
+
+squareXCoordinate : Square -> Int
+squareXCoordinate square =
+    xCoordinate <| squareCoordinates square
+
+
+squareYCoordinate : Square -> Int
+squareYCoordinate square =
+    yCoordinate <| squareCoordinates square
+
+
 type alias Coordinates =
     ( Int, Int )
 
@@ -93,10 +113,6 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     ( model, Cmd.none )
-
-
-
--- placeholder view code for now
 
 
 squareView : Square -> Html Msg
@@ -138,10 +154,10 @@ gridToRows : Grid -> List (List Square)
 gridToRows grid =
     let
         hasSameY square1 square2 =
-            Tuple.second (squareCoordinates square1) == Tuple.second (squareCoordinates square2)
+            squareYCoordinate square1 == squareYCoordinate square2
     in
         grid
-            |> List.sortBy (squareCoordinates >> Tuple.second)
+            |> List.sortBy (squareCoordinates >> yCoordinate)
             |> List.Extra.groupWhile hasSameY
 
 
