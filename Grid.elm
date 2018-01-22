@@ -54,7 +54,7 @@ view grid =
         drawRow : List Square -> Html msg
         drawRow squares =
             div []
-                (List.map (squareView) squares)
+                (List.map (squareView grid) squares)
     in
         (div
             [ style
@@ -70,39 +70,57 @@ view grid =
             )
 
 
-squareView : Square -> Html msg
-squareView square =
-    case square of
-        White coords letter ->
-            div
-                [ class "square--open"
-                , style
-                    [ ( "width", "32px" )
-                    , ( "height", "32px" )
-                    , ( "display", "inline-block" )
-                    , ( "box-sizing", "border-box" )
-                    , ( "vertical-align", "top" )
-                    , ( "padding", "8px 0" )
-                    , ( "text-align", "center" )
-                    , ( "border-right", "1px solid gray" )
-                    , ( "border-bottom", "1px solid gray" )
-                    ]
-                ]
-                [ text <| String.fromChar letter ]
+squareView : Grid -> Square -> Html msg
+squareView grid square =
+    let
+        isAcrossEntryStart =
+            (not <| hasWhiteSquareAtLeft grid square)
 
-        Black coords ->
-            div
-                [ class "square--filled"
-                , style
-                    [ ( "width", "32px" )
-                    , ( "height", "32px" )
-                    , ( "display", "inline-block" )
-                    , ( "background-color", "black" )
-                    , ( "box-sizing", "border-box" )
-                    , ( "vertical-align", "top" )
+        isDownEntryStart =
+            (not <| hasWhiteSquareAbove grid square)
+
+        char =
+            if isAcrossEntryStart then
+                if isDownEntryStart then
+                    'B'
+                else
+                    'A'
+            else if isDownEntryStart then
+                'D'
+            else
+                ' '
+    in
+        case square of
+            White coords letter ->
+                div
+                    [ class "square--open"
+                    , style
+                        [ ( "width", "32px" )
+                        , ( "height", "32px" )
+                        , ( "display", "inline-block" )
+                        , ( "box-sizing", "border-box" )
+                        , ( "vertical-align", "top" )
+                        , ( "padding", "8px 0" )
+                        , ( "text-align", "center" )
+                        , ( "border-right", "1px solid gray" )
+                        , ( "border-bottom", "1px solid gray" )
+                        ]
                     ]
-                ]
-                []
+                    [ text <| String.fromChar char ]
+
+            Black coords ->
+                div
+                    [ class "square--filled"
+                    , style
+                        [ ( "width", "32px" )
+                        , ( "height", "32px" )
+                        , ( "display", "inline-block" )
+                        , ( "background-color", "black" )
+                        , ( "box-sizing", "border-box" )
+                        , ( "vertical-align", "top" )
+                        ]
+                    ]
+                    []
 
 
 createGridWithRotationalSymmetry : List (List Int) -> Grid
