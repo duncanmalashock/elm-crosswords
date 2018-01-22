@@ -1,5 +1,6 @@
 module Grid exposing (Grid, initGrid, view)
 
+import Coordinates exposing (Coordinates)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import List.Extra
@@ -16,10 +17,6 @@ type alias Letter =
 type Square
     = White Coordinates Letter
     | Black Coordinates
-
-
-type alias Coordinates =
-    ( Int, Int )
 
 
 initGrid : Grid
@@ -43,7 +40,7 @@ gridToRows grid =
             squareYCoordinate square1 == squareYCoordinate square2
     in
         grid
-            |> List.sortBy (squareCoordinates >> yCoordinate)
+            |> List.sortBy (squareCoordinates >> Coordinates.yCoordinate)
             |> List.Extra.groupWhile hasSameY
 
 
@@ -122,19 +119,19 @@ createGridWithRotationalSymmetry gridSpec =
 
 doCreateGrid : List (List Int) -> Grid
 doCreateGrid gridSpec =
-    createGrid gridSpec [] 0
+    recursiveCreateGrid gridSpec [] 0
         |> List.concat
         |> List.concat
 
 
-createGrid : List (List Int) -> Grid -> Int -> List (List Grid)
-createGrid lists grid index =
+recursiveCreateGrid : List (List Int) -> Grid -> Int -> List (List Grid)
+recursiveCreateGrid lists grid index =
     case lists of
         [] ->
             []
 
         intList :: intLists ->
-            gridRow intList [] ( 0, index ) :: (createGrid intLists grid (index + 1))
+            gridRow intList [] ( 0, index ) :: (recursiveCreateGrid intLists grid (index + 1))
 
 
 gridRow : List Int -> Grid -> Coordinates -> List Grid
@@ -186,21 +183,11 @@ squareCoordinates square =
             coords
 
 
-xCoordinate : Coordinates -> Int
-xCoordinate ( x, _ ) =
-    x
-
-
-yCoordinate : Coordinates -> Int
-yCoordinate ( _, y ) =
-    y
-
-
 squareXCoordinate : Square -> Int
 squareXCoordinate square =
-    xCoordinate <| squareCoordinates square
+    Coordinates.xCoordinate <| squareCoordinates square
 
 
 squareYCoordinate : Square -> Int
 squareYCoordinate square =
-    yCoordinate <| squareCoordinates square
+    Coordinates.yCoordinate <| squareCoordinates square

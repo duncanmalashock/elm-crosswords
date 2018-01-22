@@ -43,21 +43,9 @@ view model =
     Grid.view model.grid
 
 
-type Direction
-    = Across
-    | Down
-
-
 
 -- startsEntry : Grid -> Square -> Bool
 -- entries : Grid -> Square -> List Entry
---
--- type alias Entry =
---     { startingCoordinates : Coordinates
---     , direction : Direction
---     , word : String
---     , clue : String
---     }
 --
 --
 -- type alias Puzzle =
