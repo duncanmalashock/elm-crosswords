@@ -30,7 +30,7 @@ type Square
 
 initGrid : Grid
 initGrid =
-    createGridWithRotationalSymmetry
+    gridWithRotationalSymmetry
         [ [ 6, 1, 3, 1, 4 ]
         , [ 6, 1, 3, 1, 4 ]
         , [ 6, 1, 8 ]
@@ -136,8 +136,8 @@ squareView grid square =
                     []
 
 
-createGridWithRotationalSymmetry : List (List Int) -> Grid
-createGridWithRotationalSymmetry gridSpec =
+gridWithRotationalSymmetry : List (List Int) -> Grid
+gridWithRotationalSymmetry gridSpec =
     let
         flipGridSpec spec =
             spec
@@ -145,11 +145,11 @@ createGridWithRotationalSymmetry gridSpec =
                 |> List.reverse
                 |> List.drop 1
     in
-        doCreateGrid (gridSpec ++ flipGridSpec gridSpec)
+        createGrid (gridSpec ++ flipGridSpec gridSpec)
 
 
-doCreateGrid : List (List Int) -> Grid
-doCreateGrid gridSpec =
+createGrid : List (List Int) -> Grid
+createGrid gridSpec =
     recursiveCreateGrid gridSpec [] 0
         |> List.concat
         |> List.concat
