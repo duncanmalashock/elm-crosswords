@@ -1,4 +1,13 @@
-module Grid exposing (Grid, initGrid, view)
+module Grid
+    exposing
+        ( Grid
+        , Square
+        , initGrid
+        , view
+        , squareCoordinates
+        , isAcrossEntryStart
+        , isDownEntryStart
+        )
 
 import Coordinates exposing (Coordinates)
 import Html exposing (Html, div, text)
@@ -70,22 +79,26 @@ view grid =
             )
 
 
+isAcrossEntryStart : Grid -> Square -> Bool
+isAcrossEntryStart grid square =
+    (not <| hasWhiteSquareAtLeft grid square)
+
+
+isDownEntryStart : Grid -> Square -> Bool
+isDownEntryStart grid square =
+    (not <| hasWhiteSquareAbove grid square)
+
+
 squareView : Grid -> Square -> Html msg
 squareView grid square =
     let
-        isAcrossEntryStart =
-            (not <| hasWhiteSquareAtLeft grid square)
-
-        isDownEntryStart =
-            (not <| hasWhiteSquareAbove grid square)
-
         char =
-            if isAcrossEntryStart then
-                if isDownEntryStart then
+            if isAcrossEntryStart grid square then
+                if isDownEntryStart grid square then
                     'B'
                 else
                     'A'
-            else if isDownEntryStart then
+            else if isDownEntryStart grid square then
                 'D'
             else
                 ' '
@@ -230,16 +243,6 @@ squareIsWhite square =
             True
 
         Black _ ->
-            False
-
-
-squareIsBlack : Square -> Bool
-squareIsBlack square =
-    case square of
-        Black _ ->
-            True
-
-        White _ _ ->
             False
 
 

@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Puzzle
 import Grid exposing (Grid)
 import Html exposing (Html, div, text)
 
@@ -40,14 +41,8 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Grid.view model.grid
-
-
-
--- startsEntry : Grid -> Square -> Bool
--- entries : Grid -> Square -> List Entry
---
---
--- type alias Puzzle =
---     { entries : List Entry
---     }
+    div []
+        [ Grid.view model.grid
+        , div []
+            [ text <| toString <| Puzzle.entriesFromGrid model.grid ]
+        ]

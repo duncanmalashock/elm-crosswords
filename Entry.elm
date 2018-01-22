@@ -1,4 +1,4 @@
-module Entry exposing (Entry)
+module Entry exposing (Entry, Direction(..))
 
 import Coordinates exposing (Coordinates)
 
@@ -11,6 +11,5 @@ type Direction
 type alias Entry =
     { startingCoordinates : Coordinates
     , direction : Direction
-    , word : String
-    , clue : String
+    , length : Int
     }
