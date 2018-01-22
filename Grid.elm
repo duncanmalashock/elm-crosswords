@@ -191,3 +191,59 @@ squareXCoordinate square =
 squareYCoordinate : Square -> Int
 squareYCoordinate square =
     Coordinates.yCoordinate <| squareCoordinates square
+
+
+squareIsAtCoordinates : Square -> Coordinates -> Bool
+squareIsAtCoordinates square coordinates =
+    (squareCoordinates square == coordinates)
+
+
+squareAtCoordinates : Grid -> Coordinates -> Maybe Square
+squareAtCoordinates grid coordinates =
+    grid
+        |> List.filter (\square -> squareIsAtCoordinates square coordinates)
+        |> List.head
+
+
+squareIsWhite : Square -> Bool
+squareIsWhite square =
+    case square of
+        White _ _ ->
+            True
+
+        Black _ ->
+            False
+
+
+squareIsBlack : Square -> Bool
+squareIsBlack square =
+    case square of
+        Black _ ->
+            True
+
+        White _ _ ->
+            False
+
+
+squareAbove : Grid -> Square -> Maybe Square
+squareAbove grid square =
+    squareAtCoordinates grid <| Coordinates.above <| squareCoordinates square
+
+
+squareAtLeft : Grid -> Square -> Maybe Square
+squareAtLeft grid square =
+    squareAtCoordinates grid <| Coordinates.atLeft <| squareCoordinates square
+
+
+hasWhiteSquareAbove : Grid -> Square -> Bool
+hasWhiteSquareAbove grid square =
+    squareAbove grid square
+        |> Maybe.map squareIsWhite
+        |> Maybe.withDefault False
+
+
+hasWhiteSquareAtLeft : Grid -> Square -> Bool
+hasWhiteSquareAtLeft grid square =
+    squareAtLeft grid square
+        |> Maybe.map squareIsWhite
+        |> Maybe.withDefault False

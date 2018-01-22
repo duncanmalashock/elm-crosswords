@@ -1,4 +1,11 @@
-module Coordinates exposing (Coordinates, xCoordinate, yCoordinate)
+module Coordinates
+    exposing
+        ( Coordinates
+        , xCoordinate
+        , yCoordinate
+        , above
+        , atLeft
+        )
 
 
 type alias Coordinates =
@@ -13,3 +20,13 @@ xCoordinate ( x, _ ) =
 yCoordinate : Coordinates -> Int
 yCoordinate ( _, y ) =
     y
+
+
+above : Coordinates -> Coordinates
+above ( x, y ) =
+    ( x, y - 1 )
+
+
+atLeft : Coordinates -> Coordinates
+atLeft ( x, y ) =
+    ( x - 1, y )
