@@ -1,8 +1,9 @@
 module Grid
     exposing
         ( Grid
-        , Square
+        , Square(..)
         , initGrid
+        , fromString
         , view
         , squareCoordinates
         , isAcrossEntryStart
@@ -24,22 +25,54 @@ type alias Letter =
 
 
 type Square
-    = White Coordinates Letter
-    | Black Coordinates
+    = LetterSquare Coordinates Letter
+    | BlockSquare Coordinates
+
+
+fromString : Int -> Int -> String -> Grid
+fromString gridWidth gridHeight string =
+    let
+        charList =
+            string
+                |> String.toList
+    in
+        charsToSquares gridWidth gridHeight ( 0, 0 ) charList
+
+
+charsToSquares : Int -> Int -> Coordinates -> List Char -> List Square
+charsToSquares gridWidth gridHeight ( curX, curY ) charList =
+    case charList of
+        [] ->
+            []
+
+        head :: tail ->
+            let
+                ( newX, newY ) =
+                    if curX >= gridWidth then
+                        ( 0, curY + 1 )
+                    else
+                        ( curX, curY )
+            in
+                (charToSquare head ( newX, newY ))
+                    :: charsToSquares gridWidth gridHeight ( newX + 1, newY ) tail
+
+
+charToSquare : Char -> Coordinates -> Square
+charToSquare char coords =
+    case char of
+        '.' ->
+            LetterSquare coords ' '
+
+        '*' ->
+            BlockSquare coords
+
+        _ ->
+            BlockSquare coords
 
 
 initGrid : Grid
 initGrid =
-    gridWithRotationalSymmetry
-        [ [ 6, 1, 3, 1, 4 ]
-        , [ 6, 1, 3, 1, 4 ]
-        , [ 6, 1, 8 ]
-        , [ 4, 1, 3, 2, 5 ]
-        , [ 3, 1, 7, 1, 3 ]
-        , [ 7, 1, 6, 1, 0 ]
-        , [ 5, 2, 5, 3, 0 ]
-        , [ 0, 1, 3, 1, 5, 1, 3, 1, 0 ]
-        ]
+    fromString 3 3 "..**.*.*."
 
 
 gridToRows : Grid -> List (List Square)
@@ -81,136 +114,66 @@ view grid =
 
 isAcrossEntryStart : Grid -> Square -> Bool
 isAcrossEntryStart grid square =
-    (not <| hasWhiteSquareAtLeft grid square)
+    (not <| hasLetterSquareSquareAtLeft grid square)
 
 
 isDownEntryStart : Grid -> Square -> Bool
 isDownEntryStart grid square =
-    (not <| hasWhiteSquareAbove grid square)
+    (not <| hasLetterSquareSquareAbove grid square)
 
 
 squareView : Grid -> Square -> Html msg
 squareView grid square =
-    let
-        char =
-            if isAcrossEntryStart grid square then
-                if isDownEntryStart grid square then
-                    'B'
-                else
-                    'A'
-            else if isDownEntryStart grid square then
-                'D'
-            else
-                ' '
-    in
-        case square of
-            White coords letter ->
-                div
-                    [ class "square--open"
-                    , style
-                        [ ( "width", "32px" )
-                        , ( "height", "32px" )
-                        , ( "display", "inline-block" )
-                        , ( "box-sizing", "border-box" )
-                        , ( "vertical-align", "top" )
-                        , ( "padding", "8px 0" )
-                        , ( "text-align", "center" )
-                        , ( "border-right", "1px solid gray" )
-                        , ( "border-bottom", "1px solid gray" )
-                        ]
+    case square of
+        LetterSquare coords letter ->
+            div
+                [ class "square--open"
+                , style
+                    [ ( "width", "32px" )
+                    , ( "height", "32px" )
+                    , ( "display", "inline-block" )
+                    , ( "box-sizing", "border-box" )
+                    , ( "vertical-align", "top" )
+                    , ( "padding", "8px 0" )
+                    , ( "text-align", "center" )
+                    , ( "border-right", "1px solid gray" )
+                    , ( "border-bottom", "1px solid gray" )
                     ]
-                    [ text <| String.fromChar char ]
+                ]
+                [ text "" ]
 
-            Black coords ->
-                div
-                    [ class "square--filled"
-                    , style
-                        [ ( "width", "32px" )
-                        , ( "height", "32px" )
-                        , ( "display", "inline-block" )
-                        , ( "background-color", "black" )
-                        , ( "box-sizing", "border-box" )
-                        , ( "vertical-align", "top" )
-                        ]
+        BlockSquare coords ->
+            div
+                [ class "square--filled"
+                , style
+                    [ ( "width", "32px" )
+                    , ( "height", "32px" )
+                    , ( "display", "inline-block" )
+                    , ( "background-color", "black" )
+                    , ( "box-sizing", "border-box" )
+                    , ( "vertical-align", "top" )
                     ]
-                    []
-
-
-gridWithRotationalSymmetry : List (List Int) -> Grid
-gridWithRotationalSymmetry gridSpec =
-    let
-        flipGridSpec spec =
-            spec
-                |> List.map (List.reverse)
-                |> List.reverse
-                |> List.drop 1
-    in
-        createGrid (gridSpec ++ flipGridSpec gridSpec)
-
-
-createGrid : List (List Int) -> Grid
-createGrid gridSpec =
-    recursiveCreateGrid gridSpec [] 0
-        |> List.concat
-        |> List.concat
-
-
-recursiveCreateGrid : List (List Int) -> Grid -> Int -> List (List Grid)
-recursiveCreateGrid lists grid index =
-    case lists of
-        [] ->
-            []
-
-        intList :: intLists ->
-            gridRow intList [] ( 0, index ) :: (recursiveCreateGrid intLists grid (index + 1))
-
-
-gridRow : List Int -> Grid -> Coordinates -> List Grid
-gridRow squareLists grid ( x, y ) =
-    case squareLists of
-        [] ->
-            []
-
-        int :: ints ->
-            if List.length ints % 2 == 0 then
-                blankSquares ( x, y ) int :: gridRow ints grid ( x + int, y )
-            else
-                filledSquares ( x, y ) int :: gridRow ints grid ( x + int, y )
+                ]
+                []
 
 
 blankSquare : Coordinates -> Square
 blankSquare coordinates =
-    White coordinates ' '
+    LetterSquare coordinates ' '
 
 
-filledSquare : Coordinates -> Square
-filledSquare coordinates =
-    Black coordinates
-
-
-blankSquares : Coordinates -> Int -> List Square
-blankSquares ( x, y ) number =
-    if number <= 0 then
-        []
-    else
-        blankSquare ( x, y ) :: blankSquares ( x + 1, y ) (number - 1)
-
-
-filledSquares : Coordinates -> Int -> List Square
-filledSquares ( x, y ) number =
-    if number <= 0 then
-        []
-    else
-        filledSquare ( x, y ) :: filledSquares ( x + 1, y ) (number - 1)
+blockSquare : Coordinates -> Square
+blockSquare coordinates =
+    BlockSquare coordinates
 
 
 squareCoordinates : Square -> Coordinates
 squareCoordinates square =
     case square of
-        White coords _ ->
+        LetterSquare coords _ ->
             coords
 
-        Black coords ->
+        BlockSquare coords ->
             coords
 
 
@@ -236,13 +199,13 @@ squareAtCoordinates grid coordinates =
         |> List.head
 
 
-squareIsWhite : Square -> Bool
-squareIsWhite square =
+squareIsLetterSquare : Square -> Bool
+squareIsLetterSquare square =
     case square of
-        White _ _ ->
+        LetterSquare _ _ ->
             True
 
-        Black _ ->
+        BlockSquare _ ->
             False
 
 
@@ -256,15 +219,15 @@ squareAtLeft grid square =
     squareAtCoordinates grid <| Coordinates.atLeft <| squareCoordinates square
 
 
-hasWhiteSquareAbove : Grid -> Square -> Bool
-hasWhiteSquareAbove grid square =
+hasLetterSquareSquareAbove : Grid -> Square -> Bool
+hasLetterSquareSquareAbove grid square =
     squareAbove grid square
-        |> Maybe.map squareIsWhite
+        |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False
 
 
-hasWhiteSquareAtLeft : Grid -> Square -> Bool
-hasWhiteSquareAtLeft grid square =
+hasLetterSquareSquareAtLeft : Grid -> Square -> Bool
+hasLetterSquareSquareAtLeft grid square =
     squareAtLeft grid square
-        |> Maybe.map squareIsWhite
+        |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False

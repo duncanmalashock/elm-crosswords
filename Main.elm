@@ -43,6 +43,4 @@ view : Model -> Html Msg
 view model =
     div []
         [ Grid.view model.grid
-        , div []
-            [ text <| toString <| Puzzle.entriesFromGrid model.grid ]
         ]

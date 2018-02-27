@@ -12,4 +12,6 @@ type alias Entry =
     { startingCoordinates : Coordinates
     , direction : Direction
     , length : Int
+    , value : List Char
+    , clue : String
     }
