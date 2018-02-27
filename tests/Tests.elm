@@ -13,8 +13,9 @@ suite =
                 \_ ->
                     let
                         expectedOutput =
-                            [ LetterSquare ( 0, 0 ) ' '
-                            ]
+                            Ok
+                                [ LetterSquare ( 0, 0 ) ' '
+                                ]
 
                         input =
                             "."
@@ -24,9 +25,10 @@ suite =
                 \_ ->
                     let
                         expectedOutput =
-                            [ LetterSquare ( 0, 0 ) ' '
-                            , LetterSquare ( 1, 0 ) ' '
-                            ]
+                            Ok
+                                [ LetterSquare ( 0, 0 ) ' '
+                                , LetterSquare ( 1, 0 ) ' '
+                                ]
 
                         input =
                             ".."
@@ -36,34 +38,26 @@ suite =
                 \_ ->
                     let
                         expectedOutput =
-                            [ LetterSquare ( 0, 0 ) ' '
-                            , BlockSquare ( 1, 0 )
-                            , BlockSquare ( 0, 1 )
-                            , LetterSquare ( 1, 1 ) ' '
-                            ]
+                            Ok
+                                [ LetterSquare ( 0, 0 ) ' '
+                                , BlockSquare ( 1, 0 )
+                                , BlockSquare ( 0, 1 )
+                                , LetterSquare ( 1, 1 ) ' '
+                                ]
 
                         input =
                             ".**."
                     in
                         Expect.equal (Grid.fromString 2 2 input) expectedOutput
-            , skip <|
-                test "decodes a string into a Grid" <|
-                    \_ ->
-                        let
-                            expectedOutput =
-                                [ LetterSquare ( 1, 0 ) ' '
-                                , BlockSquare ( 2, 0 )
-                                , LetterSquare ( 0, 1 ) ' '
-                                , LetterSquare ( 1, 1 ) ' '
-                                , LetterSquare ( 2, 1 ) ' '
-                                , BlockSquare ( 0, 2 )
-                                , LetterSquare ( 1, 2 ) ' '
-                                , LetterSquare ( 2, 2 ) ' '
-                                ]
+            , test "invalid characters" <|
+                \_ ->
+                    let
+                        expectedOutput =
+                            Err "Invalid characters"
 
-                            input =
-                                "3,3[..*...*..]"
-                        in
-                            Expect.equal (Grid.fromString 3 3 input) expectedOutput
+                        input =
+                            "junk"
+                    in
+                        Expect.equal (Grid.fromString 2 2 input) expectedOutput
             ]
         ]

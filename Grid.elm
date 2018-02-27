@@ -29,7 +29,7 @@ type Square
     | BlockSquare Coordinates
 
 
-fromString : Int -> Int -> String -> Grid
+fromString : Int -> Int -> String -> Result String Grid
 fromString gridWidth gridHeight string =
     let
         charList =
@@ -39,11 +39,11 @@ fromString gridWidth gridHeight string =
         charsToSquares gridWidth gridHeight ( 0, 0 ) charList
 
 
-charsToSquares : Int -> Int -> Coordinates -> List Char -> List Square
+charsToSquares : Int -> Int -> Coordinates -> List Char -> Result String (List Square)
 charsToSquares gridWidth gridHeight ( curX, curY ) charList =
     case charList of
         [] ->
-            []
+            Ok []
 
         head :: tail ->
             let
@@ -53,26 +53,28 @@ charsToSquares gridWidth gridHeight ( curX, curY ) charList =
                     else
                         ( curX, curY )
             in
-                (charToSquare head ( newX, newY ))
-                    :: charsToSquares gridWidth gridHeight ( newX + 1, newY ) tail
+                Result.map2 (::)
+                    (charToSquare head ( newX, newY ))
+                    (charsToSquares gridWidth gridHeight ( newX + 1, newY ) tail)
 
 
-charToSquare : Char -> Coordinates -> Square
+charToSquare : Char -> Coordinates -> Result String Square
 charToSquare char coords =
     case char of
         '.' ->
-            LetterSquare coords ' '
+            Ok <| LetterSquare coords ' '
 
         '*' ->
-            BlockSquare coords
+            Ok <| BlockSquare coords
 
         _ ->
-            BlockSquare coords
+            Err "Invalid characters"
 
 
 initGrid : Grid
 initGrid =
     fromString 3 3 "..**.*.*."
+        |> Result.withDefault []
 
 
 gridToRows : Grid -> List (List Square)
