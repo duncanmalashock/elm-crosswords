@@ -1,6 +1,6 @@
 module Entry exposing (Entry, Direction(..))
 
-import Coordinates exposing (Coordinates)
+import Coordinate exposing (Coordinate)
 
 
 type Direction
@@ -9,7 +9,7 @@ type Direction
 
 
 type alias Entry =
-    { startingCoordinates : Coordinates
+    { startingCoordinate : Coordinate
     , direction : Direction
     , length : Int
     , value : List Char

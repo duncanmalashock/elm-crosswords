@@ -53,7 +53,7 @@ suite =
                 \_ ->
                     let
                         expectedOutput =
-                            Err "Invalid characters"
+                            Err "Invalid character"
 
                         input =
                             "junk"

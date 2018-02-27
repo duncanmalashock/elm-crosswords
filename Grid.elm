@@ -5,12 +5,12 @@ module Grid
         , initGrid
         , fromString
         , view
-        , squareCoordinates
+        , squareCoordinate
         , isAcrossEntryStart
         , isDownEntryStart
         )
 
-import Coordinates exposing (Coordinates)
+import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import List.Extra
@@ -25,8 +25,8 @@ type alias Letter =
 
 
 type Square
-    = LetterSquare Coordinates Letter
-    | BlockSquare Coordinates
+    = LetterSquare Coordinate Letter
+    | BlockSquare Coordinate
 
 
 fromString : Int -> Int -> String -> Result String Grid
@@ -39,7 +39,7 @@ fromString gridWidth gridHeight string =
         charsToSquares gridWidth gridHeight ( 0, 0 ) charList
 
 
-charsToSquares : Int -> Int -> Coordinates -> List Char -> Result String (List Square)
+charsToSquares : Int -> Int -> Coordinate -> List Char -> Result String (List Square)
 charsToSquares gridWidth gridHeight ( curX, curY ) charList =
     case charList of
         [] ->
@@ -58,7 +58,7 @@ charsToSquares gridWidth gridHeight ( curX, curY ) charList =
                     (charsToSquares gridWidth gridHeight ( newX + 1, newY ) tail)
 
 
-charToSquare : Char -> Coordinates -> Result String Square
+charToSquare : Char -> Coordinate -> Result String Square
 charToSquare char coords =
     case char of
         '.' ->
@@ -68,7 +68,7 @@ charToSquare char coords =
             Ok <| BlockSquare coords
 
         _ ->
-            Err "Invalid characters"
+            Err "Invalid character"
 
 
 initGrid : Grid
@@ -84,7 +84,7 @@ gridToRows grid =
             squareYCoordinate square1 == squareYCoordinate square2
     in
         grid
-            |> List.sortBy (squareCoordinates >> Coordinates.yCoordinate)
+            |> List.sortBy (squareCoordinate >> Coordinate.yCoordinate)
             |> List.Extra.groupWhile hasSameY
 
 
@@ -159,18 +159,18 @@ squareView grid square =
                 []
 
 
-blankSquare : Coordinates -> Square
+blankSquare : Coordinate -> Square
 blankSquare coordinates =
     LetterSquare coordinates ' '
 
 
-blockSquare : Coordinates -> Square
+blockSquare : Coordinate -> Square
 blockSquare coordinates =
     BlockSquare coordinates
 
 
-squareCoordinates : Square -> Coordinates
-squareCoordinates square =
+squareCoordinate : Square -> Coordinate
+squareCoordinate square =
     case square of
         LetterSquare coords _ ->
             coords
@@ -181,23 +181,23 @@ squareCoordinates square =
 
 squareXCoordinate : Square -> Int
 squareXCoordinate square =
-    Coordinates.xCoordinate <| squareCoordinates square
+    Coordinate.xCoordinate <| squareCoordinate square
 
 
 squareYCoordinate : Square -> Int
 squareYCoordinate square =
-    Coordinates.yCoordinate <| squareCoordinates square
+    Coordinate.yCoordinate <| squareCoordinate square
 
 
-squareIsAtCoordinates : Square -> Coordinates -> Bool
-squareIsAtCoordinates square coordinates =
-    (squareCoordinates square == coordinates)
+squareIsAtCoordinate : Square -> Coordinate -> Bool
+squareIsAtCoordinate square coordinates =
+    (squareCoordinate square == coordinates)
 
 
-squareAtCoordinates : Grid -> Coordinates -> Maybe Square
-squareAtCoordinates grid coordinates =
+squareAtCoordinate : Grid -> Coordinate -> Maybe Square
+squareAtCoordinate grid coordinates =
     grid
-        |> List.filter (\square -> squareIsAtCoordinates square coordinates)
+        |> List.filter (\square -> squareIsAtCoordinate square coordinates)
         |> List.head
 
 
@@ -213,12 +213,12 @@ squareIsLetterSquare square =
 
 squareAbove : Grid -> Square -> Maybe Square
 squareAbove grid square =
-    squareAtCoordinates grid <| Coordinates.above <| squareCoordinates square
+    squareAtCoordinate grid <| Coordinate.above <| squareCoordinate square
 
 
 squareAtLeft : Grid -> Square -> Maybe Square
 squareAtLeft grid square =
-    squareAtCoordinates grid <| Coordinates.atLeft <| squareCoordinates square
+    squareAtCoordinate grid <| Coordinate.atLeft <| squareCoordinate square
 
 
 hasLetterSquareSquareAbove : Grid -> Square -> Bool
