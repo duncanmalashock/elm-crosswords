@@ -30,8 +30,12 @@ fromString gridWidth gridHeight string =
         charList =
             string
                 |> String.toList
+
+        result =
+            charsToSquares gridWidth gridHeight ( 0, 0 ) charList
     in
-        charsToSquares gridWidth gridHeight ( 0, 0 ) charList
+        result
+            |> Result.andThen (checkLength ( gridWidth, gridHeight ))
 
 
 charsToSquares : Int -> Int -> Coordinate -> List Char -> Result String (List Square)
@@ -75,6 +79,36 @@ gridToRows grid =
         grid
             |> List.sortBy (squareCoordinate >> Coordinate.yCoordinate)
             |> List.Extra.groupWhile hasSameY
+
+
+lengthMismatchError length fewOrMany ( width, height ) =
+    String.concat
+        [ (toString length)
+        , " is too "
+        , fewOrMany
+        , " characters for a "
+        , (toString width)
+        , "x"
+        , (toString height)
+        , " Grid"
+        ]
+
+
+checkLength : ( Int, Int ) -> List Square -> Result String (List Square)
+checkLength ( gridWidth, gridHeight ) list =
+    let
+        expectedLength =
+            gridWidth * gridHeight
+
+        actualLength =
+            List.length list
+    in
+        if actualLength == expectedLength then
+            Ok list
+        else if actualLength < expectedLength then
+            Err <| lengthMismatchError actualLength "few" ( gridWidth, gridHeight )
+        else
+            Err <| lengthMismatchError actualLength "many" ( gridWidth, gridHeight )
 
 
 view : Grid -> Html msg

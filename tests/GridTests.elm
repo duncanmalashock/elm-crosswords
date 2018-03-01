@@ -20,7 +20,7 @@ suite =
                         input =
                             "."
                     in
-                        Expect.equal (Grid.fromString 2 2 input) expectedOutput
+                        Expect.equal (Grid.fromString 1 1 input) expectedOutput
             , test "two-squared Grid" <|
                 \_ ->
                     let
@@ -33,7 +33,7 @@ suite =
                         input =
                             ".."
                     in
-                        Expect.equal (Grid.fromString 2 2 input) expectedOutput
+                        Expect.equal (Grid.fromString 2 1 input) expectedOutput
             , test "four-squared Grid" <|
                 \_ ->
                     let
@@ -59,5 +59,25 @@ suite =
                             "junk"
                     in
                         Expect.equal (Grid.fromString 2 2 input) expectedOutput
+            , test "too few characters" <|
+                \_ ->
+                    let
+                        expectedOutput =
+                            Err "2 is too few characters for a 2x2 Grid"
+
+                        input =
+                            ".."
+                    in
+                        Expect.equal (Grid.fromString 2 2 input) expectedOutput
+            , test "too many characters" <|
+                \_ ->
+                    let
+                        expectedOutput =
+                            Err "10 is too many characters for a 3x3 Grid"
+
+                        input =
+                            ".........."
+                    in
+                        Expect.equal (Grid.fromString 3 3 input) expectedOutput
             ]
         ]
