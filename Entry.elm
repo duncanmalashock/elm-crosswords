@@ -39,13 +39,16 @@ allFromGridHelp currentEntryNumber squares grid =
                             else
                                 []
 
+                        entries =
+                            acrossEntry ++ downEntry
+
                         nextEntryNumber =
-                            if (List.length (acrossEntry ++ downEntry)) > 0 then
+                            if (List.length entries) > 0 then
                                 currentEntryNumber + 1
                             else
                                 currentEntryNumber
                     in
-                        (acrossEntry ++ downEntry)
+                        entries
                             ++ allFromGridHelp nextEntryNumber rest grid
 
                 BlockSquare ( x, y ) ->
