@@ -43,10 +43,10 @@ allFromGridHelp currentEntryNumber squares grid =
                             acrossEntry ++ downEntry
 
                         nextEntryNumber =
-                            if (List.length entries) > 0 then
-                                currentEntryNumber + 1
-                            else
+                            if List.isEmpty entries then
                                 currentEntryNumber
+                            else
+                                currentEntryNumber + 1
                     in
                         entries
                             ++ allFromGridHelp nextEntryNumber rest grid
