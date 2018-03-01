@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Puzzle
 import Grid exposing (Grid)
 import Html exposing (Html, div, text)
 

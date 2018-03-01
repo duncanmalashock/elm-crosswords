@@ -20,12 +20,8 @@ type alias Grid =
     List Square
 
 
-type alias Letter =
-    Char
-
-
 type Square
-    = LetterSquare Coordinate Letter
+    = LetterSquare Coordinate Char
     | BlockSquare Coordinate
 
 
@@ -73,7 +69,7 @@ charToSquare char coords =
 
 initGrid : Grid
 initGrid =
-    fromString 3 3 "..**.*.*."
+    fromString 4 4 "......*..*..*..."
         |> Result.withDefault []
 
 
@@ -116,12 +112,12 @@ view grid =
 
 isAcrossEntryStart : Grid -> Square -> Bool
 isAcrossEntryStart grid square =
-    (not <| hasLetterSquareSquareAtLeft grid square)
+    (not <| hasLetterSquareAtLeft grid square)
 
 
 isDownEntryStart : Grid -> Square -> Bool
 isDownEntryStart grid square =
-    (not <| hasLetterSquareSquareAbove grid square)
+    (not <| hasLetterSquareAbove grid square)
 
 
 squareView : Grid -> Square -> Html msg
@@ -221,15 +217,15 @@ squareAtLeft grid square =
     squareAtCoordinate grid <| Coordinate.atLeft <| squareCoordinate square
 
 
-hasLetterSquareSquareAbove : Grid -> Square -> Bool
-hasLetterSquareSquareAbove grid square =
+hasLetterSquareAbove : Grid -> Square -> Bool
+hasLetterSquareAbove grid square =
     squareAbove grid square
         |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False
 
 
-hasLetterSquareSquareAtLeft : Grid -> Square -> Bool
-hasLetterSquareSquareAtLeft grid square =
+hasLetterSquareAtLeft : Grid -> Square -> Bool
+hasLetterSquareAtLeft grid square =
     squareAtLeft grid square
         |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False

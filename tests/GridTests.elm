@@ -1,4 +1,4 @@
-module Tests exposing (..)
+module GridTests exposing (..)
 
 import Grid exposing (Square(..))
 import Test exposing (Test, describe, test, skip)
