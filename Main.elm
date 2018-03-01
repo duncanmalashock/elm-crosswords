@@ -30,7 +30,12 @@ subscriptions model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { grid = Grid.initGrid }, Cmd.none )
+    ( { grid =
+            Grid.fromString 4 4 "......*..*..*..."
+                |> Result.withDefault []
+      }
+    , Cmd.none
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

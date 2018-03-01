@@ -2,7 +2,6 @@ module Grid
     exposing
         ( Grid
         , Square(..)
-        , initGrid
         , fromString
         , view
         , squareCoordinate
@@ -65,12 +64,6 @@ charToSquare char coords =
 
         _ ->
             Err "Invalid character"
-
-
-initGrid : Grid
-initGrid =
-    fromString 4 4 "......*..*..*..."
-        |> Result.withDefault []
 
 
 gridToRows : Grid -> List (List Square)
