@@ -76,7 +76,15 @@ suite =
                             [ Entry 1 Across
                             , Entry 1 Down
                             , Entry 2 Down
-                            , Entry 3 Across
+                            , Entry 3 Down
+                            , Entry 4 Down
+                            , Entry 5 Across
+                            , Entry 6 Across
+                            , Entry 7 Across
+                            , Entry 8 Across
+                            , Entry 8 Down
+                            , Entry 9 Across
+                            , Entry 9 Down
                             ]
 
                         input =
