@@ -14,14 +14,14 @@ type Direction
 
 allFromGrid : Grid -> List Entry
 allFromGrid grid =
-    allFromGridHelp 1 grid grid
+    allFromGridHelp 1 grid grid []
 
 
-allFromGridHelp : Int -> List Square -> Grid -> List Entry
-allFromGridHelp currentEntryNumber squares grid =
+allFromGridHelp : Int -> List Square -> Grid -> List Entry -> List Entry
+allFromGridHelp currentEntryNumber squares grid entriesSoFar =
     case squares of
         [] ->
-            []
+            List.reverse entriesSoFar
 
         first :: rest ->
             case first of
@@ -40,7 +40,7 @@ allFromGridHelp currentEntryNumber squares grid =
                                 []
 
                         entries =
-                            acrossEntry ++ downEntry
+                            downEntry ++ acrossEntry
 
                         nextEntryNumber =
                             if List.isEmpty entries then
@@ -48,8 +48,7 @@ allFromGridHelp currentEntryNumber squares grid =
                             else
                                 currentEntryNumber + 1
                     in
-                        entries
-                            ++ allFromGridHelp nextEntryNumber rest grid
+                        allFromGridHelp nextEntryNumber rest grid (entries ++ entriesSoFar)
 
                 BlockSquare ( x, y ) ->
-                    allFromGridHelp currentEntryNumber rest grid
+                    allFromGridHelp currentEntryNumber rest grid entriesSoFar
