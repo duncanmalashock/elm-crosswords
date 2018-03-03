@@ -2,6 +2,8 @@ module Grid
     exposing
         ( Grid
         , Square(..)
+        , flatten
+        , empty
         , fromString
         , view
         , squareCoordinate
@@ -13,10 +15,12 @@ import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import List.Extra
+import Matrix exposing (Matrix)
+import Array.Hamt as Array
 
 
 type alias Grid =
-    List Square
+    Matrix Square
 
 
 type Square
@@ -24,25 +28,42 @@ type Square
     | BlockSquare Coordinate
 
 
+flatten : Grid -> List Square
+flatten grid =
+    grid.data
+        |> Array.toList
+
+
+empty : Grid
+empty =
+    Matrix.empty
+
+
 fromString : Int -> Int -> String -> Result String Grid
 fromString gridWidth gridHeight string =
     let
-        charList =
+        input =
             string
                 |> String.toList
+                |> checkLength ( gridWidth, gridHeight )
 
-        result =
-            charsToSquares gridWidth gridHeight ( 0, 0 ) charList
+        startingGrid =
+            Matrix.repeat gridWidth gridHeight (blankSquare ( 0, 0 ))
+                |> Ok
     in
-        result
-            |> Result.andThen (checkLength ( gridWidth, gridHeight ))
+        case input of
+            Ok charList ->
+                fromStringHelp gridWidth gridHeight ( 0, 0 ) charList startingGrid
+
+            Err error ->
+                Err error
 
 
-charsToSquares : Int -> Int -> Coordinate -> List Char -> Result String (List Square)
-charsToSquares gridWidth gridHeight ( curX, curY ) charList =
+fromStringHelp : Int -> Int -> Coordinate -> List Char -> Result String (Matrix Square) -> Result String (Matrix Square)
+fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
     case charList of
         [] ->
-            Ok []
+            gridSoFar
 
         head :: tail ->
             let
@@ -52,9 +73,9 @@ charsToSquares gridWidth gridHeight ( curX, curY ) charList =
                     else
                         ( curX, curY )
             in
-                Result.map2 (::)
+                Result.map2 (Matrix.set newX newY)
                     (charToSquare head ( newX, newY ))
-                    (charsToSquares gridWidth gridHeight ( newX + 1, newY ) tail)
+                    (fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail gridSoFar)
 
 
 charToSquare : Char -> Coordinate -> Result String Square
@@ -77,10 +98,12 @@ gridToRows grid =
             squareYCoordinate square1 == squareYCoordinate square2
     in
         grid
+            |> flatten
             |> List.sortBy (squareCoordinate >> Coordinate.yCoordinate)
             |> List.Extra.groupWhile hasSameY
 
 
+lengthMismatchError : Int -> String -> ( Int, Int ) -> String
 lengthMismatchError length fewOrMany ( width, height ) =
     String.concat
         [ (toString length)
@@ -94,17 +117,17 @@ lengthMismatchError length fewOrMany ( width, height ) =
         ]
 
 
-checkLength : ( Int, Int ) -> List Square -> Result String (List Square)
-checkLength ( gridWidth, gridHeight ) list =
+checkLength : ( Int, Int ) -> List Char -> Result String (List Char)
+checkLength ( gridWidth, gridHeight ) charList =
     let
         expectedLength =
             gridWidth * gridHeight
 
         actualLength =
-            List.length list
+            List.length charList
     in
         if actualLength == expectedLength then
-            Ok list
+            Ok charList
         else if actualLength < expectedLength then
             Err <| lengthMismatchError actualLength "few" ( gridWidth, gridHeight )
         else
@@ -220,6 +243,7 @@ squareIsAtCoordinate square coordinates =
 squareAtCoordinate : Grid -> Coordinate -> Maybe Square
 squareAtCoordinate grid coordinates =
     grid
+        |> flatten
         |> List.filter (\square -> squareIsAtCoordinate square coordinates)
         |> List.head
 

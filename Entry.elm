@@ -14,7 +14,7 @@ type Direction
 
 allFromGrid : Grid -> List Entry
 allFromGrid grid =
-    allFromGridHelp 1 grid grid []
+    allFromGridHelp 1 (Grid.flatten grid) grid []
 
 
 allFromGridHelp : Int -> List Square -> Grid -> List Entry -> List Entry

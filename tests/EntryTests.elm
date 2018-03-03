@@ -20,7 +20,7 @@ suite =
 
                         input =
                             Grid.fromString 1 1 "."
-                                |> Result.withDefault []
+                                |> Result.withDefault Grid.empty
                                 |> Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -35,7 +35,7 @@ suite =
 
                         input =
                             Grid.fromString 2 1 ".."
-                                |> Result.withDefault []
+                                |> Result.withDefault Grid.empty
                                 |> Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -49,7 +49,7 @@ suite =
 
                         input =
                             Grid.fromString 2 1 ".*"
-                                |> Result.withDefault []
+                                |> Result.withDefault Grid.empty
                                 |> Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -65,7 +65,7 @@ suite =
 
                         input =
                             Grid.fromString 2 2 "...."
-                                |> Result.withDefault []
+                                |> Result.withDefault Grid.empty
                                 |> Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -89,7 +89,7 @@ suite =
 
                         input =
                             Grid.fromString 4 4 "......*..*..*..."
-                                |> Result.withDefault []
+                                |> Result.withDefault Grid.empty
                                 |> Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput

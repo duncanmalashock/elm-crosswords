@@ -32,7 +32,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { grid =
             Grid.fromString 4 4 "......*..*..*..."
-                |> Result.withDefault []
+                |> Result.withDefault Grid.empty
       }
     , Cmd.none
     )
