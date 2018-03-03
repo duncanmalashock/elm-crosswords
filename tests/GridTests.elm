@@ -18,7 +18,7 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ LetterSquare ( 0, 0 ) ' '
+                                [ LetterSquare ' '
                                 ]
 
                         input =
@@ -30,8 +30,8 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ LetterSquare ( 0, 0 ) ' '
-                                , LetterSquare ( 1, 0 ) ' '
+                                [ LetterSquare ' '
+                                , LetterSquare ' '
                                 ]
 
                         input =
@@ -43,10 +43,10 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ LetterSquare ( 0, 0 ) ' '
-                                , BlockSquare ( 1, 0 )
-                                , BlockSquare ( 0, 1 )
-                                , LetterSquare ( 1, 1 ) ' '
+                                [ LetterSquare ' '
+                                , BlockSquare
+                                , BlockSquare
+                                , LetterSquare ' '
                                 ]
 
                         input =

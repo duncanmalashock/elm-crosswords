@@ -6,7 +6,6 @@ module Grid
         , empty
         , fromString
         , view
-        , squareCoordinate
         , isAcrossEntryStart
         , isDownEntryStart
         )
@@ -24,8 +23,8 @@ type alias Grid =
 
 
 type Square
-    = LetterSquare Coordinate Char
-    | BlockSquare Coordinate
+    = LetterSquare Char
+    | BlockSquare
 
 
 flatten : Grid -> List Square
@@ -48,7 +47,7 @@ fromString gridWidth gridHeight string =
                 |> checkLength ( gridWidth, gridHeight )
 
         startingGrid =
-            Matrix.repeat gridWidth gridHeight (blankSquare ( 0, 0 ))
+            Matrix.repeat gridWidth gridHeight blankSquare
                 |> Ok
     in
         case input of
@@ -74,18 +73,18 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
                         ( curX, curY )
             in
                 Result.map2 (Matrix.set newX newY)
-                    (charToSquare head ( newX, newY ))
+                    (charToSquare head)
                     (fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail gridSoFar)
 
 
-charToSquare : Char -> Coordinate -> Result String Square
-charToSquare char coords =
+charToSquare : Char -> Result String Square
+charToSquare char =
     case char of
         '.' ->
-            Ok <| LetterSquare coords ' '
+            Ok <| LetterSquare ' '
 
         '*' ->
-            Ok <| BlockSquare coords
+            Ok <| BlockSquare
 
         _ ->
             Err "Invalid character"
@@ -93,14 +92,8 @@ charToSquare char coords =
 
 gridToRows : Grid -> List (List Square)
 gridToRows grid =
-    let
-        hasSameY square1 square2 =
-            squareYCoordinate square1 == squareYCoordinate square2
-    in
-        grid
-            |> flatten
-            |> List.sortBy (squareCoordinate >> Coordinate.yCoordinate)
-            |> List.Extra.groupWhile hasSameY
+    List.map (\r -> Matrix.getRow r grid) (List.range 0 (Matrix.height grid))
+        |> List.map (Maybe.withDefault Array.empty >> Array.toList)
 
 
 lengthMismatchError : Int -> String -> ( Int, Int ) -> String
@@ -137,10 +130,6 @@ checkLength ( gridWidth, gridHeight ) charList =
 view : Grid -> Html msg
 view grid =
     let
-        sortRow : List Square -> List Square
-        sortRow squares =
-            List.sortBy (\s -> squareXCoordinate s) squares
-
         drawRow : List Square -> Html msg
         drawRow squares =
             div []
@@ -156,24 +145,24 @@ view grid =
         )
             (grid
                 |> gridToRows
-                |> List.map (sortRow >> drawRow)
+                |> List.map (drawRow)
             )
 
 
-isAcrossEntryStart : Grid -> Square -> Bool
-isAcrossEntryStart grid square =
-    (not <| hasLetterSquareAtLeft grid square)
+isAcrossEntryStart : Grid -> Coordinate -> Bool
+isAcrossEntryStart grid coordinate =
+    (not <| hasLetterSquareAtLeft grid coordinate)
 
 
-isDownEntryStart : Grid -> Square -> Bool
-isDownEntryStart grid square =
-    (not <| hasLetterSquareAbove grid square)
+isDownEntryStart : Grid -> Coordinate -> Bool
+isDownEntryStart grid coordinate =
+    (not <| hasLetterSquareAbove grid coordinate)
 
 
 squareView : Grid -> Square -> Html msg
 squareView grid square =
     case square of
-        LetterSquare coords letter ->
+        LetterSquare letter ->
             div
                 [ class "square--open"
                 , style
@@ -190,7 +179,7 @@ squareView grid square =
                 ]
                 [ text "" ]
 
-        BlockSquare coords ->
+        BlockSquare ->
             div
                 [ class "square--filled"
                 , style
@@ -205,78 +194,50 @@ squareView grid square =
                 []
 
 
-blankSquare : Coordinate -> Square
-blankSquare coordinates =
-    LetterSquare coordinates ' '
+blankSquare : Square
+blankSquare =
+    LetterSquare ' '
 
 
-blockSquare : Coordinate -> Square
-blockSquare coordinates =
-    BlockSquare coordinates
-
-
-squareCoordinate : Square -> Coordinate
-squareCoordinate square =
-    case square of
-        LetterSquare coords _ ->
-            coords
-
-        BlockSquare coords ->
-            coords
-
-
-squareXCoordinate : Square -> Int
-squareXCoordinate square =
-    Coordinate.xCoordinate <| squareCoordinate square
-
-
-squareYCoordinate : Square -> Int
-squareYCoordinate square =
-    Coordinate.yCoordinate <| squareCoordinate square
-
-
-squareIsAtCoordinate : Square -> Coordinate -> Bool
-squareIsAtCoordinate square coordinates =
-    (squareCoordinate square == coordinates)
+blockSquare : Square
+blockSquare =
+    BlockSquare
 
 
 squareAtCoordinate : Grid -> Coordinate -> Maybe Square
-squareAtCoordinate grid coordinates =
-    grid
-        |> flatten
-        |> List.filter (\square -> squareIsAtCoordinate square coordinates)
-        |> List.head
+squareAtCoordinate grid ( x, y ) =
+    Matrix.get x y grid
 
 
 squareIsLetterSquare : Square -> Bool
 squareIsLetterSquare square =
     case square of
-        LetterSquare _ _ ->
+        LetterSquare _ ->
             True
 
-        BlockSquare _ ->
+        BlockSquare ->
             False
 
 
-squareAbove : Grid -> Square -> Maybe Square
-squareAbove grid square =
-    squareAtCoordinate grid <| Coordinate.above <| squareCoordinate square
+squareAbove : Grid -> Coordinate -> Maybe Square
+squareAbove grid coordinate =
+    squareAtCoordinate grid <| Coordinate.above coordinate
 
 
-squareAtLeft : Grid -> Square -> Maybe Square
-squareAtLeft grid square =
-    squareAtCoordinate grid <| Coordinate.atLeft <| squareCoordinate square
+squareAtLeft : Grid -> Coordinate -> Maybe Square
+squareAtLeft grid coordinate =
+    squareAtCoordinate grid <| Coordinate.atLeft coordinate
 
 
-hasLetterSquareAbove : Grid -> Square -> Bool
-hasLetterSquareAbove grid square =
-    squareAbove grid square
+hasLetterSquareAbove : Grid -> Coordinate -> Bool
+hasLetterSquareAbove grid coordinate =
+    squareAbove grid coordinate
         |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False
 
 
-hasLetterSquareAtLeft : Grid -> Square -> Bool
-hasLetterSquareAtLeft grid square =
-    squareAtLeft grid square
+hasLetterSquareAtLeft : Grid -> Coordinate -> Bool
+hasLetterSquareAtLeft grid coordinate =
+    squareAtLeft grid coordinate
         |> Maybe.map squareIsLetterSquare
         |> Maybe.withDefault False
