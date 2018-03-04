@@ -1,7 +1,9 @@
 module Main exposing (main)
 
+import Views
+import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
-import Entry
+import Entry exposing (EntryListings)
 import Html exposing (Html, div, text)
 
 
@@ -16,12 +18,13 @@ main =
 
 
 type alias Model =
-    { grid : Grid
+    { grid : Result String Grid
+    , entryListings : EntryListings
     }
 
 
 type Msg
-    = NoOp
+    = SetSquare Coordinate
 
 
 subscriptions : Model -> Sub Msg
@@ -31,22 +34,37 @@ subscriptions model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { grid =
-            Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                |> Result.withDefault Grid.empty
-      }
-    , Cmd.none
-    )
+    let
+        grid =
+            -- Grid.blank 15 15
+            Grid.fromString 15 15 "HAZY*BRECHT*ECOOREO*MULLAH*COXSTAYSINSIDE*URI**LOW*TACOSTANDTHOMAS***NOIDEAHITANERVE*UBOATYDS**REIN*TERSE***LEFTRIGHT***STREP*ONAT**ATLTHANI*WACOTEXASARMADA***SAILEDMORSECODE*LTR**IWO*MUSICSCHOOLNOD*ITHACA*ESSOANS*CEASED*REST"
+    in
+        ( { grid = grid
+          , entryListings = Entry.allFromGrid (Result.withDefault Grid.empty grid)
+          }
+        , Cmd.none
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        SetSquare coord ->
+            let
+                updatedGrid =
+                    Result.map (Grid.setAtCoordinate coord) model.grid
+            in
+                ( { model
+                    | grid = updatedGrid
+                    , entryListings = Entry.allFromGrid (updatedGrid |> Result.withDefault Grid.empty)
+                  }
+                , Cmd.none
+                )
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ Grid.view model.grid
-        , Entry.view model.grid
+        [ Views.gridView (model.grid |> Result.withDefault Grid.empty) SetSquare
+        , Views.entriesView model.entryListings
         ]

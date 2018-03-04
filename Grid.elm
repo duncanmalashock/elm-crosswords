@@ -6,10 +6,11 @@ module Grid
         , empty
         , blank
         , fromString
-        , view
+        , toRows
         , isAcrossEntryStart
         , isDownEntryStart
         , squareAtCoordinate
+        , setAtCoordinate
         , squareAtRight
         , squareBelow
         )
@@ -99,8 +100,8 @@ charToSquare char =
         Err "Invalid character"
 
 
-gridToRows : Grid -> List (List Square)
-gridToRows grid =
+toRows : Grid -> List (List Square)
+toRows grid =
     List.map (\r -> Matrix.getRow r grid) (List.range 0 (Matrix.height grid))
         |> List.map (Maybe.withDefault Array.empty >> Array.toList)
 
@@ -136,28 +137,6 @@ checkLength ( gridWidth, gridHeight ) charList =
             Err <| lengthMismatchError actualLength "many" ( gridWidth, gridHeight )
 
 
-view : Grid -> Html msg
-view grid =
-    let
-        drawRow : List Square -> Html msg
-        drawRow squares =
-            div []
-                (List.map (squareView grid) squares)
-    in
-        (div
-            [ style
-                [ ( "display", "inline-block" )
-                , ( "border-left", "1px solid gray" )
-                , ( "border-top", "1px solid gray" )
-                ]
-            ]
-        )
-            (grid
-                |> gridToRows
-                |> List.map (drawRow)
-            )
-
-
 isAcrossEntryStart : Grid -> Coordinate -> Bool
 isAcrossEntryStart grid coordinate =
     (not <| hasLetterSquareAtLeft grid coordinate)
@@ -166,41 +145,6 @@ isAcrossEntryStart grid coordinate =
 isDownEntryStart : Grid -> Coordinate -> Bool
 isDownEntryStart grid coordinate =
     (not <| hasLetterSquareAbove grid coordinate)
-
-
-squareView : Grid -> Square -> Html msg
-squareView grid square =
-    case square of
-        LetterSquare letter ->
-            div
-                [ class "square--open"
-                , style
-                    [ ( "width", "32px" )
-                    , ( "height", "32px" )
-                    , ( "display", "inline-block" )
-                    , ( "box-sizing", "border-box" )
-                    , ( "vertical-align", "top" )
-                    , ( "padding", "8px 0" )
-                    , ( "text-align", "center" )
-                    , ( "border-right", "1px solid gray" )
-                    , ( "border-bottom", "1px solid gray" )
-                    ]
-                ]
-                [ text (String.fromChar letter) ]
-
-        BlockSquare ->
-            div
-                [ class "square--filled"
-                , style
-                    [ ( "width", "32px" )
-                    , ( "height", "32px" )
-                    , ( "display", "inline-block" )
-                    , ( "background-color", "black" )
-                    , ( "box-sizing", "border-box" )
-                    , ( "vertical-align", "top" )
-                    ]
-                ]
-                []
 
 
 blankSquare : Square
@@ -216,6 +160,11 @@ blockSquare =
 squareAtCoordinate : Grid -> Coordinate -> Maybe Square
 squareAtCoordinate grid ( x, y ) =
     Matrix.get x y grid
+
+
+setAtCoordinate : Coordinate -> Grid -> Grid
+setAtCoordinate ( x, y ) grid =
+    Matrix.set x y BlockSquare grid
 
 
 squareIsLetterSquare : Square -> Bool

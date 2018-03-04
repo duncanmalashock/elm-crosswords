@@ -1,4 +1,4 @@
-module Entry exposing (Entry, EntryStart(..), allFromGrid, view)
+module Entry exposing (Entry, EntryStart(..), EntryListings, allFromGrid, acrossList, downList)
 
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid, Square(..))
@@ -25,57 +25,6 @@ type alias EntryListings =
 emptyEntryListings : EntryListings
 emptyEntryListings =
     []
-
-
-view : Grid -> Html msg
-view grid =
-    let
-        acrossEntries =
-            grid
-                |> allFromGrid
-                |> acrossList
-                |> List.map entryView
-
-        downEntries =
-            grid
-                |> allFromGrid
-                |> downList
-                |> List.map entryView
-    in
-        div
-            [ style
-                [ ( "display", "inline-block" )
-                , ( "vertical-align", "top" )
-                , ( "margin-left", "10px" )
-                ]
-            ]
-            [ div
-                [ style
-                    [ ( "display", "inline-block" )
-                    , ( "vertical-align", "top" )
-                    , ( "margin-left", "10px" )
-                    ]
-                ]
-                ((div [] [ text "Across" ])
-                    :: acrossEntries
-                )
-            , div
-                [ style
-                    [ ( "display", "inline-block" )
-                    , ( "vertical-align", "top" )
-                    , ( "margin-left", "10px" )
-                    ]
-                ]
-                ((div [] [ text "Down" ])
-                    :: downEntries
-                )
-            ]
-
-
-entryView : ( Int, Entry ) -> Html msg
-entryView ( int, entry ) =
-    div []
-        [ text <| (toString int) ++ ": " ++ entry ]
 
 
 acrossList : EntryListings -> List ( Int, Entry )
