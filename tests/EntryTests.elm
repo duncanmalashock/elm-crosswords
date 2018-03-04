@@ -15,11 +15,11 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 {} {}
+                                [ AcrossAndDown 1 "A" "A"
                                 ]
 
                         input =
-                            Grid.fromString 1 1 "."
+                            Grid.fromString 1 1 "A"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -28,12 +28,12 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 {} {}
-                                , DownOnly 2 {}
+                                [ AcrossAndDown 1 "AB" "A"
+                                , DownOnly 2 "B"
                                 ]
 
                         input =
-                            Grid.fromString 2 1 ".."
+                            Grid.fromString 2 1 "AB"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -42,11 +42,11 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 {} {}
+                                [ AcrossAndDown 1 "C" "C"
                                 ]
 
                         input =
-                            Grid.fromString 2 1 ".*"
+                            Grid.fromString 2 1 "C*"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -55,13 +55,13 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 {} {}
-                                , DownOnly 2 {}
-                                , AcrossOnly 3 {}
+                                [ AcrossAndDown 1 "DO" "DA"
+                                , DownOnly 2 "OH"
+                                , AcrossOnly 3 "AH"
                                 ]
 
                         input =
-                            Grid.fromString 2 2 "...."
+                            Grid.fromString 2 2 "DOAH"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput
@@ -70,20 +70,20 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                ([ AcrossAndDown 1 {} {}
-                                 , DownOnly 2 {}
-                                 , DownOnly 3 {}
-                                 , DownOnly 4 {}
-                                 , AcrossOnly 5 {}
-                                 , AcrossOnly 6 {}
-                                 , AcrossOnly 7 {}
-                                 , AcrossAndDown 8 {} {}
-                                 , AcrossAndDown 9 {} {}
+                                ([ AcrossAndDown 1 "BING" "BYE"
+                                 , DownOnly 2 "IN"
+                                 , DownOnly 3 "N"
+                                 , DownOnly 4 "GOLF"
+                                 , AcrossOnly 5 "YN"
+                                 , AcrossOnly 6 "O"
+                                 , AcrossOnly 7 "E"
+                                 , AcrossAndDown 8 "AL" "AI"
+                                 , AcrossAndDown 9 "KIF" "K"
                                  ]
                                 )
 
                         input =
-                            Grid.fromString 4 4 "......*..*..*..."
+                            Grid.fromString 4 4 "BINGYN*OE*AL*KIF"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput

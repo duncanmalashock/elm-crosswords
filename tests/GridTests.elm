@@ -60,7 +60,7 @@ suite =
                             Err "Invalid character"
 
                         input =
-                            "junk"
+                            "&$()"
                     in
                         Expect.equal (Grid.fromString 2 2 input |> flattenResult) expectedOutput
             , test "too few characters" <|

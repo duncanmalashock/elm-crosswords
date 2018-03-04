@@ -8,8 +8,12 @@ module Grid
         , view
         , isAcrossEntryStart
         , isDownEntryStart
+        , squareAtCoordinate
+        , squareAtRight
+        , squareBelow
         )
 
+import Char
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
@@ -79,15 +83,14 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
 
 charToSquare : Char -> Result String Square
 charToSquare char =
-    case char of
-        '.' ->
-            Ok <| LetterSquare ' '
-
-        '*' ->
-            Ok <| BlockSquare
-
-        _ ->
-            Err "Invalid character"
+    if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
+        Ok <| LetterSquare (Char.toUpper char)
+    else if char == '.' then
+        Ok blankSquare
+    else if char == '*' then
+        Ok blockSquare
+    else
+        Err "Invalid character"
 
 
 gridToRows : Grid -> List (List Square)
@@ -224,9 +227,19 @@ squareAbove grid coordinate =
     squareAtCoordinate grid <| Coordinate.above coordinate
 
 
+squareBelow : Grid -> Coordinate -> Maybe Square
+squareBelow grid coordinate =
+    squareAtCoordinate grid <| Coordinate.below coordinate
+
+
 squareAtLeft : Grid -> Coordinate -> Maybe Square
 squareAtLeft grid coordinate =
     squareAtCoordinate grid <| Coordinate.atLeft coordinate
+
+
+squareAtRight : Grid -> Coordinate -> Maybe Square
+squareAtRight grid coordinate =
+    squareAtCoordinate grid <| Coordinate.atRight coordinate
 
 
 hasLetterSquareAbove : Grid -> Coordinate -> Bool
