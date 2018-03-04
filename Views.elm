@@ -1,7 +1,7 @@
 module Views exposing (..)
 
 import Grid exposing (Grid, Square(..))
-import Entry exposing (Entry, EntryListings)
+import Entry exposing (EntryListings)
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
@@ -111,7 +111,7 @@ entriesView entryListings =
             ]
 
 
-entryView : ( Int, Entry ) -> Html msg
+entryView : ( Int, String ) -> Html msg
 entryView ( int, entry ) =
     div []
         [ text <| (toString int) ++ ": " ++ entry ]

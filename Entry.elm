@@ -1,43 +1,42 @@
-module Entry exposing (Entry, EntryStart(..), EntryListings, allFromGrid, acrossList, downList)
+module Entry exposing (EntryStart(..), EntryListings, allFromGrid, acrossList, downList)
 
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid, Square(..))
 import Matrix exposing (Matrix)
 import Array.Hamt as Array exposing (Array)
+import Dict exposing (Dict)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 
 
-type alias Entry =
-    String
-
-
 type EntryStart
-    = AcrossOnly Int Entry
-    | DownOnly Int Entry
-    | AcrossAndDown Int Entry Entry
+    = AcrossOnly Int String
+    | DownOnly Int String
+    | AcrossAndDown Int String String
 
 
 type alias EntryListings =
-    List EntryStart
+    Dict Coordinate EntryStart
 
 
 emptyEntryListings : EntryListings
 emptyEntryListings =
-    []
+    Dict.empty
 
 
-acrossList : EntryListings -> List ( Int, Entry )
+acrossList : EntryListings -> List ( Int, String )
 acrossList entryListings =
     entryListings
+        |> Dict.values
         |> List.map acrossFromEntryStart
         |> List.filter isJust
         |> List.map (Maybe.withDefault ( -1, "" ))
 
 
-downList : EntryListings -> List ( Int, Entry )
+downList : EntryListings -> List ( Int, String )
 downList entryListings =
     entryListings
+        |> Dict.values
         |> List.map downFromEntryStart
         |> List.filter isJust
         |> List.map (Maybe.withDefault ( -1, "" ))
@@ -53,7 +52,7 @@ isJust maybe =
             False
 
 
-acrossFromEntryStart : EntryStart -> Maybe ( Int, Entry )
+acrossFromEntryStart : EntryStart -> Maybe ( Int, String )
 acrossFromEntryStart entryStart =
     case entryStart of
         AcrossOnly int acrossEntry ->
@@ -66,7 +65,7 @@ acrossFromEntryStart entryStart =
             Just ( int, acrossEntry )
 
 
-downFromEntryStart : EntryStart -> Maybe ( Int, Entry )
+downFromEntryStart : EntryStart -> Maybe ( Int, String )
 downFromEntryStart entryStart =
     case entryStart of
         AcrossOnly int acrossEntry ->
@@ -83,33 +82,38 @@ allFromGrid : Grid -> EntryListings
 allFromGrid grid =
     grid
         |> Matrix.toIndexedArray
-        |> Array.foldl (atIndex grid) ( 1, [] )
+        |> Array.foldl (updateFromCoordinate grid) ( 1, Dict.empty )
         |> Tuple.second
 
 
-atIndex : Grid -> ( ( Int, Int ), Square ) -> ( Int, List EntryStart ) -> ( Int, List EntryStart )
-atIndex grid ( coord, square ) ( currentEntryNumber, entriesSoFar ) =
+updateFromCoordinate : Grid -> ( ( Int, Int ), Square ) -> ( Int, EntryListings ) -> ( Int, EntryListings )
+updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar ) =
     case square of
         LetterSquare _ ->
             let
-                newEntryStart =
-                    if Grid.isAcrossEntryStart grid coord then
-                        if Grid.isDownEntryStart grid coord then
-                            [ AcrossAndDown currentEntryNumber (acrossEntry grid coord) (downEntry grid coord) ]
-                        else
-                            [ AcrossOnly currentEntryNumber (acrossEntry grid coord) ]
-                    else if Grid.isDownEntryStart grid coord then
-                        [ DownOnly currentEntryNumber (downEntry grid coord) ]
-                    else
-                        []
+                createNewEntryStart =
+                    Grid.isAcrossEntryStart grid coord || Grid.isDownEntryStart grid coord
 
                 nextEntryNumber =
-                    if List.isEmpty newEntryStart then
-                        currentEntryNumber
-                    else
+                    if createNewEntryStart then
                         currentEntryNumber + 1
+                    else
+                        currentEntryNumber
             in
-                ( nextEntryNumber, entriesSoFar ++ newEntryStart )
+                if createNewEntryStart then
+                    let
+                        newEntryStart =
+                            if Grid.isAcrossEntryStart grid coord then
+                                if Grid.isDownEntryStart grid coord then
+                                    AcrossAndDown currentEntryNumber (acrossEntry grid coord) (downEntry grid coord)
+                                else
+                                    AcrossOnly currentEntryNumber (acrossEntry grid coord)
+                            else
+                                DownOnly currentEntryNumber (downEntry grid coord)
+                    in
+                        ( nextEntryNumber, Dict.insert coord newEntryStart entriesSoFar )
+                else
+                    ( currentEntryNumber, entriesSoFar )
 
         BlockSquare ->
             ( currentEntryNumber, entriesSoFar )

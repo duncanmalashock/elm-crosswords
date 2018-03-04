@@ -6,6 +6,13 @@ import Test exposing (Test, describe, test, skip)
 import Expect
 
 
+getEntries =
+    Result.map
+        (Entry.allFromGrid
+            >> (\l -> (Entry.acrossList l) ++ (Entry.downList l))
+        )
+
+
 suite : Test
 suite =
     describe "Entry"
@@ -15,12 +22,13 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 "A" "A"
+                                [ ( 1, "A" )
+                                , ( 1, "A" )
                                 ]
 
                         input =
                             Grid.fromString 1 1 "A"
-                                |> Result.map Entry.allFromGrid
+                                |> getEntries
                     in
                         Expect.equal input expectedOutput
             , test "two-squared Grid" <|
@@ -28,13 +36,14 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 "AB" "A"
-                                , DownOnly 2 "B"
+                                [ ( 1, "AB" )
+                                , ( 1, "A" )
+                                , ( 2, "B" )
                                 ]
 
                         input =
                             Grid.fromString 2 1 "AB"
-                                |> Result.map Entry.allFromGrid
+                                |> getEntries
                     in
                         Expect.equal input expectedOutput
             , test "two-squared Grid with a block" <|
@@ -42,12 +51,13 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 "C" "C"
+                                [ ( 1, "C" )
+                                , ( 1, "C" )
                                 ]
 
                         input =
                             Grid.fromString 2 1 "C*"
-                                |> Result.map Entry.allFromGrid
+                                |> getEntries
                     in
                         Expect.equal input expectedOutput
             , test "four-squared Grid" <|
@@ -55,14 +65,15 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ AcrossAndDown 1 "DO" "DA"
-                                , DownOnly 2 "OH"
-                                , AcrossOnly 3 "AH"
+                                [ ( 1, "DO" )
+                                , ( 3, "AH" )
+                                , ( 1, "DA" )
+                                , ( 2, "OH" )
                                 ]
 
                         input =
                             Grid.fromString 2 2 "DOAH"
-                                |> Result.map Entry.allFromGrid
+                                |> getEntries
                     in
                         Expect.equal input expectedOutput
             , test "four-by-four Grid" <|
@@ -70,21 +81,23 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                ([ AcrossAndDown 1 "ABCD" "AEH"
-                                 , DownOnly 2 "BF"
-                                 , DownOnly 3 "C"
-                                 , DownOnly 4 "DGJM"
-                                 , AcrossOnly 5 "EF"
-                                 , AcrossOnly 6 "G"
-                                 , AcrossOnly 7 "H"
-                                 , AcrossAndDown 8 "IJ" "IL"
-                                 , AcrossAndDown 9 "KLM" "K"
-                                 ]
-                                )
+                                [ ( 1, "ABCD" )
+                                , ( 5, "EF" )
+                                , ( 7, "H" )
+                                , ( 9, "KLM" )
+                                , ( 8, "IJ" )
+                                , ( 6, "G" )
+                                , ( 1, "AEH" )
+                                , ( 2, "BF" )
+                                , ( 9, "K" )
+                                , ( 3, "C" )
+                                , ( 8, "IL" )
+                                , ( 4, "DGJM" )
+                                ]
 
                         input =
                             Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                                |> Result.map Entry.allFromGrid
+                                |> getEntries
                     in
                         Expect.equal input expectedOutput
             ]
