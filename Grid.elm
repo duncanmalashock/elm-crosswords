@@ -21,7 +21,7 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import List.Extra
 import Matrix exposing (Matrix)
-import Array.Hamt as Array
+import Array.Hamt as Array exposing (Array)
 
 
 type alias Grid =
@@ -100,10 +100,26 @@ charToSquare char =
         Err "Invalid character"
 
 
-toRows : Grid -> List (List Square)
+toRows : Grid -> List (List ( Coordinate, Square ))
 toRows grid =
-    List.map (\r -> Matrix.getRow r grid) (List.range 0 (Matrix.height grid))
-        |> List.map (Maybe.withDefault Array.empty >> Array.toList)
+    let
+        gridYIndices =
+            (List.range 0 (Matrix.height grid))
+
+        getIndexedWithYIndexBefore y =
+            ( y, Array.toIndexedList (getRow grid y) )
+
+        moveYIndexIntoCoordinate =
+            List.map (\( y, a ) -> (List.map (\( x, a ) -> ( ( x, y ), a )) a))
+    in
+        List.map getIndexedWithYIndexBefore gridYIndices
+            |> moveYIndexIntoCoordinate
+
+
+getRow : Grid -> Int -> Array Square
+getRow grid index =
+    Matrix.getRow index grid
+        |> Maybe.withDefault Array.empty
 
 
 lengthMismatchError : Int -> String -> ( Int, Int ) -> String

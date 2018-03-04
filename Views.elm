@@ -11,10 +11,10 @@ import Html.Events exposing (onClick)
 gridView : Grid -> (Coordinate -> msg) -> Html msg
 gridView grid clickMsg =
     let
-        drawRow : List Square -> Html msg
-        drawRow squares =
+        drawRow : List ( Coordinate, Square ) -> Html msg
+        drawRow coordsWithSquares =
             div []
-                (List.map (squareView grid clickMsg) squares)
+                (List.map (\( coord, sq ) -> squareView grid clickMsg coord sq) coordsWithSquares)
     in
         (div
             [ style
@@ -31,13 +31,13 @@ gridView grid clickMsg =
             )
 
 
-squareView : Grid -> (Coordinate -> msg) -> Square -> Html msg
-squareView grid clickMsg square =
+squareView : Grid -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
+squareView grid clickMsg ( x, y ) square =
     case square of
         LetterSquare letter ->
             div
                 [ class "square--open"
-                , onClick <| clickMsg ( 2, 2 )
+                , onClick <| clickMsg ( x, y )
                 , style
                     [ ( "width", "32px" )
                     , ( "height", "32px" )
