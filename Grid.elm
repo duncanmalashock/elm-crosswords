@@ -4,6 +4,7 @@ module Grid
         , Square(..)
         , flatten
         , empty
+        , blank
         , fromString
         , view
         , isAcrossEntryStart
@@ -40,6 +41,11 @@ flatten grid =
 empty : Grid
 empty =
     Matrix.empty
+
+
+blank : Int -> Int -> Grid
+blank gridWidth gridHeight =
+    Matrix.repeat gridWidth gridHeight blankSquare
 
 
 fromString : Int -> Int -> String -> Result String Grid
@@ -180,7 +186,7 @@ squareView grid square =
                     , ( "border-bottom", "1px solid gray" )
                     ]
                 ]
-                [ text "" ]
+                [ text (String.fromChar letter) ]
 
         BlockSquare ->
             div

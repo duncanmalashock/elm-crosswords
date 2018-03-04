@@ -70,20 +70,20 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                ([ AcrossAndDown 1 "BING" "BYE"
-                                 , DownOnly 2 "IN"
-                                 , DownOnly 3 "N"
-                                 , DownOnly 4 "GOLF"
-                                 , AcrossOnly 5 "YN"
-                                 , AcrossOnly 6 "O"
-                                 , AcrossOnly 7 "E"
-                                 , AcrossAndDown 8 "AL" "AI"
-                                 , AcrossAndDown 9 "KIF" "K"
+                                ([ AcrossAndDown 1 "ABCD" "AEH"
+                                 , DownOnly 2 "BF"
+                                 , DownOnly 3 "C"
+                                 , DownOnly 4 "DGJM"
+                                 , AcrossOnly 5 "EF"
+                                 , AcrossOnly 6 "G"
+                                 , AcrossOnly 7 "H"
+                                 , AcrossAndDown 8 "IJ" "IL"
+                                 , AcrossAndDown 9 "KLM" "K"
                                  ]
                                 )
 
                         input =
-                            Grid.fromString 4 4 "BINGYN*OE*AL*KIF"
+                            Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
                                 |> Result.map Entry.allFromGrid
                     in
                         Expect.equal input expectedOutput

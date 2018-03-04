@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Grid exposing (Grid)
+import Entry
 import Html exposing (Html, div, text)
 
 
@@ -31,7 +32,7 @@ subscriptions model =
 init : ( Model, Cmd Msg )
 init =
     ( { grid =
-            Grid.fromString 4 4 "......*..*..*..."
+            Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
                 |> Result.withDefault Grid.empty
       }
     , Cmd.none
@@ -47,4 +48,5 @@ view : Model -> Html Msg
 view model =
     div []
         [ Grid.view model.grid
+        , Entry.view model.grid
         ]

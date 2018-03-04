@@ -1,9 +1,11 @@
-module Entry exposing (Entry, EntryStart(..), allFromGrid)
+module Entry exposing (Entry, EntryStart(..), allFromGrid, view)
 
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid, Square(..))
 import Matrix exposing (Matrix)
 import Array.Hamt as Array exposing (Array)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (style)
 
 
 type alias Entry =
@@ -16,7 +18,119 @@ type EntryStart
     | AcrossAndDown Int Entry Entry
 
 
-allFromGrid : Grid -> List EntryStart
+type alias EntryListings =
+    List EntryStart
+
+
+emptyEntryListings : EntryListings
+emptyEntryListings =
+    []
+
+
+view : Grid -> Html msg
+view grid =
+    let
+        acrossEntries =
+            grid
+                |> allFromGrid
+                |> acrossList
+                |> List.map entryView
+
+        downEntries =
+            grid
+                |> allFromGrid
+                |> downList
+                |> List.map entryView
+    in
+        div
+            [ style
+                [ ( "display", "inline-block" )
+                , ( "vertical-align", "top" )
+                , ( "margin-left", "10px" )
+                ]
+            ]
+            [ div
+                [ style
+                    [ ( "display", "inline-block" )
+                    , ( "vertical-align", "top" )
+                    , ( "margin-left", "10px" )
+                    ]
+                ]
+                ((div [] [ text "Across" ])
+                    :: acrossEntries
+                )
+            , div
+                [ style
+                    [ ( "display", "inline-block" )
+                    , ( "vertical-align", "top" )
+                    , ( "margin-left", "10px" )
+                    ]
+                ]
+                ((div [] [ text "Down" ])
+                    :: downEntries
+                )
+            ]
+
+
+entryView : ( Int, Entry ) -> Html msg
+entryView ( int, entry ) =
+    div []
+        [ text <| (toString int) ++ ": " ++ entry ]
+
+
+acrossList : EntryListings -> List ( Int, Entry )
+acrossList entryListings =
+    entryListings
+        |> List.map acrossFromEntryStart
+        |> List.filter isJust
+        |> List.map (Maybe.withDefault ( -1, "" ))
+
+
+downList : EntryListings -> List ( Int, Entry )
+downList entryListings =
+    entryListings
+        |> List.map downFromEntryStart
+        |> List.filter isJust
+        |> List.map (Maybe.withDefault ( -1, "" ))
+
+
+isJust : Maybe a -> Bool
+isJust maybe =
+    case maybe of
+        Just _ ->
+            True
+
+        Nothing ->
+            False
+
+
+acrossFromEntryStart : EntryStart -> Maybe ( Int, Entry )
+acrossFromEntryStart entryStart =
+    case entryStart of
+        AcrossOnly int acrossEntry ->
+            Just ( int, acrossEntry )
+
+        DownOnly int downEntry ->
+            Nothing
+
+        AcrossAndDown int acrossEntry downEntry ->
+            Just ( int, acrossEntry )
+
+
+downFromEntryStart : EntryStart -> Maybe ( Int, Entry )
+downFromEntryStart entryStart =
+    case entryStart of
+        AcrossOnly int acrossEntry ->
+            Nothing
+
+        DownOnly int downEntry ->
+            Just ( int, downEntry )
+
+        AcrossAndDown int acrossEntry downEntry ->
+            Just ( int, downEntry )
+
+
+allFromGrid : Grid -> EntryListings
 allFromGrid grid =
     grid
         |> Matrix.toIndexedArray
