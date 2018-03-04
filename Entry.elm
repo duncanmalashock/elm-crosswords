@@ -1,20 +1,21 @@
-module Entry exposing (Entry(..), Direction(..), allFromGrid)
+module Entry exposing (Entry, EntryStart(..), allFromGrid)
 
 import Grid exposing (Grid, Square(..))
 import Matrix exposing (Matrix)
 import Array.Hamt as Array exposing (Array)
 
 
-type Entry
-    = Entry Int Direction
+type alias Entry =
+    {}
 
 
-type Direction
-    = Across
-    | Down
+type EntryStart
+    = AcrossOnly Int Entry
+    | DownOnly Int Entry
+    | AcrossAndDown Int Entry Entry
 
 
-allFromGrid : Grid -> List Entry
+allFromGrid : Grid -> List EntryStart
 allFromGrid grid =
     grid
         |> Matrix.toIndexedArray
@@ -22,33 +23,29 @@ allFromGrid grid =
         |> Tuple.second
 
 
-atIndex : Grid -> ( ( Int, Int ), Square ) -> ( Int, List Entry ) -> ( Int, List Entry )
+atIndex : Grid -> ( ( Int, Int ), Square ) -> ( Int, List EntryStart ) -> ( Int, List EntryStart )
 atIndex grid ( ( x, y ), square ) ( currentEntryNumber, entriesSoFar ) =
     case square of
         LetterSquare _ ->
             let
-                acrossEntry =
+                newEntryStart =
                     if Grid.isAcrossEntryStart grid ( x, y ) then
-                        [ Entry currentEntryNumber Across ]
+                        if Grid.isDownEntryStart grid ( x, y ) then
+                            [ AcrossAndDown currentEntryNumber {} {} ]
+                        else
+                            [ AcrossOnly currentEntryNumber {} ]
+                    else if Grid.isDownEntryStart grid ( x, y ) then
+                        [ DownOnly currentEntryNumber {} ]
                     else
                         []
-
-                downEntry =
-                    if Grid.isDownEntryStart grid ( x, y ) then
-                        [ Entry currentEntryNumber Down ]
-                    else
-                        []
-
-                entries =
-                    acrossEntry ++ downEntry
 
                 nextEntryNumber =
-                    if List.isEmpty entries then
+                    if List.isEmpty newEntryStart then
                         currentEntryNumber
                     else
                         currentEntryNumber + 1
             in
-                ( nextEntryNumber, entriesSoFar ++ entries )
+                ( nextEntryNumber, entriesSoFar ++ newEntryStart )
 
         BlockSquare ->
             ( currentEntryNumber, entriesSoFar )

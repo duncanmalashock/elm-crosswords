@@ -1,6 +1,6 @@
 module EntryTests exposing (..)
 
-import Entry exposing (Entry(..), Direction(..))
+import Entry exposing (EntryStart(..))
 import Grid
 import Test exposing (Test, describe, test, skip)
 import Expect
@@ -15,8 +15,7 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ Entry 1 Across
-                                , Entry 1 Down
+                                [ AcrossAndDown 1 {} {}
                                 ]
 
                         input =
@@ -29,9 +28,8 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ Entry 1 Across
-                                , Entry 1 Down
-                                , Entry 2 Down
+                                [ AcrossAndDown 1 {} {}
+                                , DownOnly 2 {}
                                 ]
 
                         input =
@@ -44,8 +42,7 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ Entry 1 Across
-                                , Entry 1 Down
+                                [ AcrossAndDown 1 {} {}
                                 ]
 
                         input =
@@ -58,10 +55,9 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ Entry 1 Across
-                                , Entry 1 Down
-                                , Entry 2 Down
-                                , Entry 3 Across
+                                [ AcrossAndDown 1 {} {}
+                                , DownOnly 2 {}
+                                , AcrossOnly 3 {}
                                 ]
 
                         input =
@@ -74,19 +70,17 @@ suite =
                     let
                         expectedOutput =
                             Ok
-                                [ Entry 1 Across
-                                , Entry 1 Down
-                                , Entry 2 Down
-                                , Entry 3 Down
-                                , Entry 4 Down
-                                , Entry 5 Across
-                                , Entry 6 Across
-                                , Entry 7 Across
-                                , Entry 8 Across
-                                , Entry 8 Down
-                                , Entry 9 Across
-                                , Entry 9 Down
-                                ]
+                                ([ AcrossAndDown 1 {} {}
+                                 , DownOnly 2 {}
+                                 , DownOnly 3 {}
+                                 , DownOnly 4 {}
+                                 , AcrossOnly 5 {}
+                                 , AcrossOnly 6 {}
+                                 , AcrossOnly 7 {}
+                                 , AcrossAndDown 8 {} {}
+                                 , AcrossAndDown 9 {} {}
+                                 ]
+                                )
 
                         input =
                             Grid.fromString 4 4 "......*..*..*..."
