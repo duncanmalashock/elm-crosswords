@@ -35,12 +35,32 @@ subscriptions model =
 init : ( Model, Cmd Msg )
 init =
     let
+        stringInput =
+            [ "HAZY*BRECHT*ECO"
+            , "OREO*MULLAH*COX"
+            , "STAYSINSIDE*URI"
+            , "**LOW*TACOSTAND"
+            , "THOMAS***NOIDEA"
+            , "HITANERVE*UBOAT"
+            , "YDS**REIN*TERSE"
+            , "***LEFTRIGHT***"
+            , "STREP*ONAT**ATL"
+            , "THANI*WACOTEXAS"
+            , "ARMADA***SAILED"
+            , "MORSECODE*LTR**"
+            , "IWO*MUSICSCHOOL"
+            , "NOD*ITHACA*ESSO"
+            , "ANS*CEASED*REST"
+            ]
+                |> String.concat
+
         grid =
-            -- Grid.blank 15 15
-            Grid.fromString 15 15 "HAZY*BRECHT*ECOOREO*MULLAH*COXSTAYSINSIDE*URI**LOW*TACOSTANDTHOMAS***NOIDEAHITANERVE*UBOATYDS**REIN*TERSE***LEFTRIGHT***STREP*ONAT**ATLTHANI*WACOTEXASARMADA***SAILEDMORSECODE*LTR**IWO*MUSICSCHOOLNOD*ITHACA*ESSOANS*CEASED*REST"
+            Grid.fromString 15 15 stringInput
     in
         ( { grid = grid
-          , entryListings = Entry.allFromGrid (Result.withDefault Grid.empty grid)
+          , entryListings =
+                Entry.allFromGrid
+                    (Result.withDefault Grid.empty grid)
           }
         , Cmd.none
         )
@@ -56,7 +76,9 @@ update msg model =
             in
                 ( { model
                     | grid = updatedGrid
-                    , entryListings = Entry.allFromGrid (updatedGrid |> Result.withDefault Grid.empty)
+                    , entryListings =
+                        Entry.allFromGrid
+                            (updatedGrid |> Result.withDefault Grid.empty)
                   }
                 , Cmd.none
                 )

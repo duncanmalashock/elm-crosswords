@@ -91,7 +91,7 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
 charToSquare : Char -> Result String Square
 charToSquare char =
     if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
-        Ok <| LetterSquare (Char.toUpper char)
+        Ok <| letterSquare (Char.toUpper char)
     else if char == '.' then
         Ok blankSquare
     else if char == '*' then
@@ -110,7 +110,10 @@ toRows grid =
             ( y, Array.toIndexedList (getRow grid y) )
 
         moveYIndexIntoCoordinate =
-            List.map (\( y, a ) -> (List.map (\( x, a ) -> ( ( x, y ), a )) a))
+            List.map
+                (\( y, ss ) ->
+                    List.map (\( x, s ) -> ( ( x, y ), s )) ss
+                )
     in
         List.map getIndexedWithYIndexBefore gridYIndices
             |> moveYIndexIntoCoordinate
@@ -161,6 +164,11 @@ isAcrossEntryStart grid coordinate =
 isDownEntryStart : Grid -> Coordinate -> Bool
 isDownEntryStart grid coordinate =
     (not <| hasLetterSquareAbove grid coordinate)
+
+
+letterSquare : Char -> Square
+letterSquare char =
+    LetterSquare char
 
 
 blankSquare : Square

@@ -14,7 +14,9 @@ gridView grid clickMsg =
         drawRow : List ( Coordinate, Square ) -> Html msg
         drawRow coordsWithSquares =
             div []
-                (List.map (\( coord, sq ) -> squareView grid clickMsg coord sq) coordsWithSquares)
+                (List.map (\( coord, sq ) -> squareView grid clickMsg coord sq)
+                    coordsWithSquares
+                )
     in
         (div
             [ style

@@ -24,7 +24,11 @@ suite =
                         input =
                             "."
                     in
-                        Expect.equal (Grid.fromString 1 1 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 1 1 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             , test "two-squared Grid" <|
                 \_ ->
                     let
@@ -37,7 +41,11 @@ suite =
                         input =
                             ".."
                     in
-                        Expect.equal (Grid.fromString 2 1 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 2 1 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             , test "four-squared Grid" <|
                 \_ ->
                     let
@@ -52,7 +60,11 @@ suite =
                         input =
                             ".**."
                     in
-                        Expect.equal (Grid.fromString 2 2 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 2 2 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             , test "invalid characters" <|
                 \_ ->
                     let
@@ -62,7 +74,11 @@ suite =
                         input =
                             "&$()"
                     in
-                        Expect.equal (Grid.fromString 2 2 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 2 2 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             , test "too few characters" <|
                 \_ ->
                     let
@@ -72,7 +88,11 @@ suite =
                         input =
                             ".."
                     in
-                        Expect.equal (Grid.fromString 2 2 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 2 2 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             , test "too many characters" <|
                 \_ ->
                     let
@@ -82,6 +102,10 @@ suite =
                         input =
                             ".........."
                     in
-                        Expect.equal (Grid.fromString 3 3 input |> flattenResult) expectedOutput
+                        Expect.equal
+                            (Grid.fromString 3 3 input
+                                |> flattenResult
+                            )
+                            expectedOutput
             ]
         ]

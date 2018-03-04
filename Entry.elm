@@ -1,4 +1,11 @@
-module Entry exposing (EntryStart(..), EntryListings, allFromGrid, acrossList, downList)
+module Entry
+    exposing
+        ( EntryStart(..)
+        , EntryListings
+        , allFromGrid
+        , acrossList
+        , downList
+        )
 
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid, Square(..))
@@ -7,6 +14,10 @@ import Array.Hamt as Array exposing (Array)
 import Dict exposing (Dict)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
+
+
+type alias Entry =
+    ( Int, String )
 
 
 type EntryStart
@@ -24,22 +35,29 @@ emptyEntryListings =
     Dict.empty
 
 
-acrossList : EntryListings -> List ( Int, String )
+acrossList : EntryListings -> List Entry
 acrossList entryListings =
     entryListings
         |> Dict.values
         |> List.map acrossFromEntryStart
         |> List.filter isJust
         |> List.map (Maybe.withDefault ( -1, "" ))
+        |> sortEntries
 
 
-downList : EntryListings -> List ( Int, String )
+downList : EntryListings -> List Entry
 downList entryListings =
     entryListings
         |> Dict.values
         |> List.map downFromEntryStart
         |> List.filter isJust
         |> List.map (Maybe.withDefault ( -1, "" ))
+        |> sortEntries
+
+
+sortEntries : List Entry -> List Entry
+sortEntries =
+    List.sortBy (\( i, e ) -> i)
 
 
 isJust : Maybe a -> Bool
@@ -52,7 +70,7 @@ isJust maybe =
             False
 
 
-acrossFromEntryStart : EntryStart -> Maybe ( Int, String )
+acrossFromEntryStart : EntryStart -> Maybe Entry
 acrossFromEntryStart entryStart =
     case entryStart of
         AcrossOnly int acrossEntry ->
@@ -65,7 +83,7 @@ acrossFromEntryStart entryStart =
             Just ( int, acrossEntry )
 
 
-downFromEntryStart : EntryStart -> Maybe ( Int, String )
+downFromEntryStart : EntryStart -> Maybe Entry
 downFromEntryStart entryStart =
     case entryStart of
         AcrossOnly int acrossEntry ->
@@ -92,7 +110,8 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
         LetterSquare _ ->
             let
                 createNewEntryStart =
-                    Grid.isAcrossEntryStart grid coord || Grid.isDownEntryStart grid coord
+                    Grid.isAcrossEntryStart grid coord
+                        || Grid.isDownEntryStart grid coord
 
                 nextEntryNumber =
                     if createNewEntryStart then
@@ -105,11 +124,15 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
                         newEntryStart =
                             if Grid.isAcrossEntryStart grid coord then
                                 if Grid.isDownEntryStart grid coord then
-                                    AcrossAndDown currentEntryNumber (acrossEntry grid coord) (downEntry grid coord)
+                                    AcrossAndDown currentEntryNumber
+                                        (acrossEntry grid coord)
+                                        (downEntry grid coord)
                                 else
-                                    AcrossOnly currentEntryNumber (acrossEntry grid coord)
+                                    AcrossOnly currentEntryNumber
+                                        (acrossEntry grid coord)
                             else
-                                DownOnly currentEntryNumber (downEntry grid coord)
+                                DownOnly currentEntryNumber
+                                    (downEntry grid coord)
                     in
                         ( nextEntryNumber, Dict.insert coord newEntryStart entriesSoFar )
                 else
@@ -129,7 +152,9 @@ acrossEntryHelp : Grid -> Coordinate -> String -> String
 acrossEntryHelp grid coordinate entrySoFar =
     case Grid.squareAtCoordinate grid coordinate of
         Just (LetterSquare char) ->
-            acrossEntryHelp grid (Coordinate.atRight coordinate) (String.cons char entrySoFar)
+            acrossEntryHelp grid
+                (Coordinate.atRight coordinate)
+                (String.cons char entrySoFar)
 
         _ ->
             entrySoFar
@@ -145,7 +170,9 @@ downEntryHelp : Grid -> Coordinate -> String -> String
 downEntryHelp grid coordinate entrySoFar =
     case Grid.squareAtCoordinate grid coordinate of
         Just (LetterSquare char) ->
-            downEntryHelp grid (Coordinate.below coordinate) (String.cons char entrySoFar)
+            downEntryHelp grid
+                (Coordinate.below coordinate)
+                (String.cons char entrySoFar)
 
         _ ->
             entrySoFar
