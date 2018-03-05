@@ -87,6 +87,6 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ Views.gridView (model.grid |> Result.withDefault Grid.empty) SetSquare
+        [ Views.gridView (model.grid |> Result.withDefault Grid.empty) model.entryListings SetSquare
         , Views.entriesView model.entryListings
         ]

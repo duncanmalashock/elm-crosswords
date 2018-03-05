@@ -3,6 +3,7 @@ module Entry
         ( EntryStart(..)
         , EntryListings
         , allFromGrid
+        , entryNumberAt
         , acrossList
         , downList
         )
@@ -33,6 +34,24 @@ type alias EntryListings =
 emptyEntryListings : EntryListings
 emptyEntryListings =
     Dict.empty
+
+
+entryNumberAt : EntryListings -> Coordinate -> Maybe Int
+entryNumberAt entryListings coordinate =
+    let
+        getEntryNumber entryStart =
+            case entryStart of
+                AcrossOnly i _ ->
+                    i
+
+                DownOnly i _ ->
+                    i
+
+                AcrossAndDown i _ _ ->
+                    i
+    in
+        Dict.get coordinate entryListings
+            |> Maybe.map getEntryNumber
 
 
 acrossList : EntryListings -> List Entry
