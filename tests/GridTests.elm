@@ -9,6 +9,20 @@ flattenResult =
     Result.map (Grid.flatten)
 
 
+
+-- TODO: tests for:
+-- flatten
+-- empty
+-- blank
+-- toRows
+-- isAcrossEntryStart
+-- isDownEntryStart
+-- squareAtCoordinate
+-- setAtCoordinate
+-- squareAtRight
+-- squareBelow
+
+
 suite : Test
 suite =
     describe "Grid"
