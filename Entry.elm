@@ -1,7 +1,6 @@
 module Entry
     exposing
-        ( EntryStart(..)
-        , EntryListings
+        ( EntryListings
         , allFromGrid
         , entryNumberAt
         , acrossList
@@ -29,11 +28,6 @@ type EntryStart
 
 type alias EntryListings =
     Dict Coordinate EntryStart
-
-
-emptyEntryListings : EntryListings
-emptyEntryListings =
-    Dict.empty
 
 
 entryNumberAt : EntryListings -> Coordinate -> Maybe Int

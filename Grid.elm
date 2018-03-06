@@ -11,8 +11,6 @@ module Grid
         , isDownEntryStart
         , squareAtCoordinate
         , setAtCoordinate
-        , squareAtRight
-        , squareBelow
         )
 
 import Char
@@ -206,19 +204,9 @@ squareAbove grid coordinate =
     squareAtCoordinate grid <| Coordinate.above coordinate
 
 
-squareBelow : Grid -> Coordinate -> Maybe Square
-squareBelow grid coordinate =
-    squareAtCoordinate grid <| Coordinate.below coordinate
-
-
 squareAtLeft : Grid -> Coordinate -> Maybe Square
 squareAtLeft grid coordinate =
     squareAtCoordinate grid <| Coordinate.atLeft coordinate
-
-
-squareAtRight : Grid -> Coordinate -> Maybe Square
-squareAtRight grid coordinate =
-    squareAtCoordinate grid <| Coordinate.atRight coordinate
 
 
 hasLetterSquareAbove : Grid -> Coordinate -> Bool
