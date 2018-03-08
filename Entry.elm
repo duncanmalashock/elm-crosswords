@@ -1,6 +1,7 @@
 module Entry
     exposing
         ( EntryListings
+        , EntryStart(..)
         , allFromGrid
         , entryNumberAt
         , acrossList

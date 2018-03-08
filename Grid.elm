@@ -2,6 +2,8 @@ module Grid
     exposing
         ( Grid
         , Square(..)
+        , width
+        , height
         , flatten
         , empty
         , blank
@@ -29,6 +31,16 @@ type alias Grid =
 type Square
     = LetterSquare Char
     | BlockSquare
+
+
+width : Grid -> Int
+width grid =
+    Matrix.width grid
+
+
+height : Grid -> Int
+height grid =
+    Matrix.height grid
 
 
 flatten : Grid -> List Square

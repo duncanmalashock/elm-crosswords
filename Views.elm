@@ -8,13 +8,13 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
 
-gridView : Grid -> EntryListings -> (Coordinate -> msg) -> Html msg
-gridView grid entryListings clickMsg =
+gridView : Grid -> Maybe Coordinate -> EntryListings -> (Coordinate -> msg) -> Html msg
+gridView grid currentSelection entryListings clickMsg =
     let
         drawRow : List ( Coordinate, Square ) -> Html msg
         drawRow coordsWithSquares =
             div []
-                (List.map (\( coord, sq ) -> squareView grid entryListings clickMsg coord sq)
+                (List.map (\( coord, sq ) -> squareView grid currentSelection entryListings clickMsg coord sq)
                     coordsWithSquares
                 )
     in
@@ -33,11 +33,22 @@ gridView grid entryListings clickMsg =
             )
 
 
-squareView : Grid -> EntryListings -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
-squareView grid entryListings clickMsg ( x, y ) square =
+squareView : Grid -> Maybe Coordinate -> EntryListings -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
+squareView grid currentSelection entryListings clickMsg (( x, y ) as coordinate) square =
     case square of
         LetterSquare letter ->
             let
+                highlightStyle =
+                    case currentSelection of
+                        Just selectionCoordinate ->
+                            if coordinate == selectionCoordinate then
+                                [ ( "background-color", "yellow" ) ]
+                            else
+                                []
+
+                        Nothing ->
+                            []
+
                 entryStartView =
                     case Entry.entryNumberAt entryListings ( x, y ) of
                         Just i ->
@@ -58,7 +69,7 @@ squareView grid entryListings clickMsg ( x, y ) square =
                 div
                     [ class "square--open"
                     , onClick <| clickMsg ( x, y )
-                    , style
+                    , style <|
                         [ ( "width", "32px" )
                         , ( "height", "32px" )
                         , ( "display", "inline-block" )
@@ -71,6 +82,7 @@ squareView grid entryListings clickMsg ( x, y ) square =
                         , ( "border-bottom", "1px solid gray" )
                         , ( "position", "relative" )
                         ]
+                            ++ highlightStyle
                     ]
                     ([ text (String.fromChar letter)
                      ]

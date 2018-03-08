@@ -1,9 +1,11 @@
 module Main exposing (main)
 
 import Views
+import Puzzle exposing (Puzzle)
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry exposing (EntryListings)
+import Dict
 import Html exposing (Html, div, text)
 
 
@@ -18,13 +20,12 @@ main =
 
 
 type alias Model =
-    { grid : Result String Grid
-    , entryListings : EntryListings
+    { puzzle : Puzzle
     }
 
 
 type Msg
-    = SetSquare Coordinate
+    = ClickedSquare Coordinate
 
 
 subscriptions : Model -> Sub Msg
@@ -53,14 +54,8 @@ init =
             , "ANS*CEASED*REST"
             ]
                 |> String.concat
-
-        grid =
-            Grid.fromString 15 15 stringInput
     in
-        ( { grid = grid
-          , entryListings =
-                Entry.allFromGrid
-                    (Result.withDefault Grid.empty grid)
+        ( { puzzle = Puzzle.fromString 15 15 stringInput
           }
         , Cmd.none
         )
@@ -69,24 +64,18 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetSquare coord ->
-            let
-                updatedGrid =
-                    Result.map (Grid.setAtCoordinate coord) model.grid
-            in
-                ( { model
-                    | grid = updatedGrid
-                    , entryListings =
-                        Entry.allFromGrid
-                            (updatedGrid |> Result.withDefault Grid.empty)
-                  }
-                , Cmd.none
-                )
+        ClickedSquare coordinate ->
+            ( { model | puzzle = Puzzle.setSelection coordinate model.puzzle }
+            , Cmd.none
+            )
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ Views.gridView (model.grid |> Result.withDefault Grid.empty) model.entryListings SetSquare
-        , Views.entriesView model.entryListings
+        [ Views.gridView
+            (model.puzzle.grid |> Result.withDefault Grid.empty)
+            model.puzzle.currentSelection
+            Dict.empty
+            ClickedSquare
         ]

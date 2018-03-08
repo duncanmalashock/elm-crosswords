@@ -122,4 +122,22 @@ suite =
                             )
                             expectedOutput
             ]
+        , describe "width"
+            [ test "returns the number of columns for a valid grid" <|
+                \_ ->
+                    let
+                        grid =
+                            Grid.fromString 2 2 "...."
+                    in
+                        Expect.equal (Result.map Grid.width grid) <| Ok 2
+            ]
+        , describe "height"
+            [ test "returns the number of columns for a valid grid" <|
+                \_ ->
+                    let
+                        grid =
+                            Grid.fromString 2 2 "...."
+                    in
+                        Expect.equal (Result.map Grid.height grid) <| Ok 2
+            ]
         ]
