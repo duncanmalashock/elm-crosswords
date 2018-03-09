@@ -6,6 +6,7 @@ import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry exposing (EntryListings)
 import Dict
+import Keyboard.Extra exposing (Key(..))
 import Html exposing (Html, div, text)
 
 
@@ -21,16 +22,19 @@ main =
 
 type alias Model =
     { puzzle : Puzzle
+    , pressedKeys : List Key
+    , message : String
     }
 
 
 type Msg
     = ClickedSquare Coordinate
+    | KeyboardMsg Keyboard.Extra.Msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.map KeyboardMsg Keyboard.Extra.subscriptions
 
 
 init : ( Model, Cmd Msg )
@@ -56,6 +60,8 @@ init =
                 |> String.concat
     in
         ( { puzzle = Puzzle.fromString 15 15 stringInput
+          , pressedKeys = []
+          , message = ""
           }
         , Cmd.none
         )
@@ -69,6 +75,31 @@ update msg model =
             , Cmd.none
             )
 
+        KeyboardMsg keyMsg ->
+            let
+                newPressedKeys =
+                    Keyboard.Extra.update keyMsg model.pressedKeys
+
+                changedKeys =
+                    List.filter (\k -> not (List.member k model.pressedKeys)) newPressedKeys
+
+                newMessage =
+                    if (List.member Keyboard.Extra.CharA changedKeys) then
+                        "A"
+                    else if (List.member Keyboard.Extra.CharB changedKeys) then
+                        "B"
+                    else if (List.member Keyboard.Extra.CharC changedKeys) then
+                        "C"
+                    else
+                        ""
+            in
+                ( { model
+                    | pressedKeys = newPressedKeys
+                    , message = newMessage
+                  }
+                , Cmd.none
+                )
+
 
 view : Model -> Html Msg
 view model =
@@ -76,6 +107,6 @@ view model =
         [ Views.gridView
             (model.puzzle.grid |> Result.withDefault Grid.empty)
             model.puzzle.currentSelection
-            Dict.empty
+            (Entry.allFromGrid (model.puzzle.grid |> Result.withDefault Grid.empty))
             ClickedSquare
         ]
