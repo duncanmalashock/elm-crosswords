@@ -23,7 +23,6 @@ main =
 type alias Model =
     { puzzle : Puzzle
     , pressedKeys : List Key
-    , message : String
     }
 
 
@@ -61,7 +60,6 @@ init =
     in
         ( { puzzle = Puzzle.fromString 15 15 stringInput
           , pressedKeys = []
-          , message = ""
           }
         , Cmd.none
         )
@@ -83,19 +81,21 @@ update msg model =
                 changedKeys =
                     List.filter (\k -> not (List.member k model.pressedKeys)) newPressedKeys
 
-                newMessage =
-                    if (List.member Keyboard.Extra.CharA changedKeys) then
-                        "A"
-                    else if (List.member Keyboard.Extra.CharB changedKeys) then
-                        "B"
-                    else if (List.member Keyboard.Extra.CharC changedKeys) then
-                        "C"
+                updatedPuzzle =
+                    if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
+                        Puzzle.moveSelectionLeft model.puzzle
+                    else if (List.member Keyboard.Extra.ArrowRight changedKeys) then
+                        Puzzle.moveSelectionRight model.puzzle
+                    else if (List.member Keyboard.Extra.ArrowUp changedKeys) then
+                        Puzzle.moveSelectionUp model.puzzle
+                    else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
+                        Puzzle.moveSelectionDown model.puzzle
                     else
-                        ""
+                        model.puzzle
             in
                 ( { model
                     | pressedKeys = newPressedKeys
-                    , message = newMessage
+                    , puzzle = updatedPuzzle
                   }
                 , Cmd.none
                 )

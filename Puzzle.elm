@@ -1,4 +1,13 @@
-module Puzzle exposing (Puzzle, fromString, setSelection)
+module Puzzle
+    exposing
+        ( Puzzle
+        , fromString
+        , setSelection
+        , moveSelectionLeft
+        , moveSelectionRight
+        , moveSelectionUp
+        , moveSelectionDown
+        )
 
 import Grid exposing (Grid)
 import Coordinate exposing (Coordinate)
@@ -15,6 +24,53 @@ fromString gridWidth gridHeight string =
     { grid = Grid.fromString gridWidth gridHeight string
     , currentSelection = Nothing
     }
+
+
+moveSelectionLeft : Puzzle -> Puzzle
+moveSelectionLeft puzzle =
+    moveSelection Coordinate.atLeft puzzle
+
+
+moveSelectionRight : Puzzle -> Puzzle
+moveSelectionRight puzzle =
+    moveSelection Coordinate.atRight puzzle
+
+
+moveSelectionUp : Puzzle -> Puzzle
+moveSelectionUp puzzle =
+    moveSelection Coordinate.above puzzle
+
+
+moveSelectionDown : Puzzle -> Puzzle
+moveSelectionDown puzzle =
+    moveSelection Coordinate.below puzzle
+
+
+moveSelection : (Coordinate -> Coordinate) -> Puzzle -> Puzzle
+moveSelection newCoordFn puzzle =
+    let
+        newSelection =
+            case puzzle.currentSelection of
+                Just coordinate ->
+                    let
+                        squareAtNewCoord =
+                            newCoordFn coordinate
+
+                        trySquareAtNewCoord =
+                            Result.map (\g -> Grid.squareAtCoordinate g squareAtNewCoord) puzzle.grid
+                                |> Result.toMaybe
+                    in
+                        case trySquareAtNewCoord of
+                            Nothing ->
+                                puzzle.currentSelection
+
+                            Just _ ->
+                                Just squareAtNewCoord
+
+                Nothing ->
+                    Nothing
+    in
+        { puzzle | currentSelection = newSelection }
 
 
 setSelection : Coordinate -> Puzzle -> Puzzle
