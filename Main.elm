@@ -77,28 +77,36 @@ update msg model =
             let
                 newPressedKeys =
                     Keyboard.Extra.update keyMsg model.pressedKeys
-
-                changedKeys =
-                    List.filter (\k -> not (List.member k model.pressedKeys)) newPressedKeys
-
-                updatedPuzzle =
-                    if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
-                        Puzzle.moveSelectionLeft model.puzzle
-                    else if (List.member Keyboard.Extra.ArrowRight changedKeys) then
-                        Puzzle.moveSelectionRight model.puzzle
-                    else if (List.member Keyboard.Extra.ArrowUp changedKeys) then
-                        Puzzle.moveSelectionUp model.puzzle
-                    else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
-                        Puzzle.moveSelectionDown model.puzzle
-                    else
-                        model.puzzle
             in
-                ( { model
-                    | pressedKeys = newPressedKeys
-                    , puzzle = updatedPuzzle
-                  }
-                , Cmd.none
-                )
+                updateWithNewPressedKeys newPressedKeys model
+
+
+updateWithNewPressedKeys : List Key -> Model -> ( Model, Cmd Msg )
+updateWithNewPressedKeys newPressedKeys model =
+    let
+        changedKeys =
+            List.filter
+                (\k -> not (List.member k model.pressedKeys))
+                newPressedKeys
+
+        updatedPuzzle =
+            if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
+                Puzzle.moveSelectionLeft model.puzzle
+            else if (List.member Keyboard.Extra.ArrowRight changedKeys) then
+                Puzzle.moveSelectionRight model.puzzle
+            else if (List.member Keyboard.Extra.ArrowUp changedKeys) then
+                Puzzle.moveSelectionUp model.puzzle
+            else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
+                Puzzle.moveSelectionDown model.puzzle
+            else
+                model.puzzle
+    in
+        ( { model
+            | pressedKeys = newPressedKeys
+            , puzzle = updatedPuzzle
+          }
+        , Cmd.none
+        )
 
 
 view : Model -> Html Msg
