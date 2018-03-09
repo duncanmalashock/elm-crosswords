@@ -64,8 +64,13 @@ moveSelection newCoordFn puzzle =
                             Nothing ->
                                 puzzle.currentSelection
 
-                            Just _ ->
-                                Just squareAtNewCoord
+                            Just maybeSquare ->
+                                case maybeSquare of
+                                    Nothing ->
+                                        puzzle.currentSelection
+
+                                    Just _ ->
+                                        Just squareAtNewCoord
 
                 Nothing ->
                     Nothing
