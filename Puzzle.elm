@@ -57,14 +57,15 @@ moveSelection newCoordFn puzzle =
                             newCoordFn coordinate
 
                         trySquareAtNewCoord =
-                            Result.map (\g -> Grid.squareAtCoordinate g squareAtNewCoord) puzzle.grid
-                                |> Result.toMaybe
+                            Result.map
+                                (\g -> Grid.squareAtCoordinate g squareAtNewCoord)
+                                puzzle.grid
                     in
                         case trySquareAtNewCoord of
-                            Nothing ->
+                            Err _ ->
                                 puzzle.currentSelection
 
-                            Just maybeSquare ->
+                            Ok maybeSquare ->
                                 case maybeSquare of
                                     Nothing ->
                                         puzzle.currentSelection
