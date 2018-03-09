@@ -92,6 +92,7 @@ squareView grid currentSelection entryListings clickMsg (( x, y ) as coordinate)
         BlockSquare ->
             div
                 [ class "square--filled"
+                , onClick <| clickMsg ( x, y )
                 , style
                     [ ( "width", "32px" )
                     , ( "height", "32px" )
