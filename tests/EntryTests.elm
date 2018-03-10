@@ -13,9 +13,16 @@ flattenResult =
         )
 
 
+testEntryNumberAt : Test
+testEntryNumberAt =
+    describe "Entry.entryNumberAt"
+        [ test "non-start square" <|
+            \_ ->
+                let
+                    entryListings =
+                        Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
+                            |> Result.map Entry.allFromGrid
 
--- TODO: tests for:
--- entryNumberAt
                     input =
                         Result.map
                             (\e -> Entry.entryNumberAt e ( 2, 3 ))
