@@ -12,7 +12,6 @@ module Grid
         , isAcrossEntryStart
         , isDownEntryStart
         , squareAtCoordinate
-        , setAtCoordinate
         )
 
 import Char
@@ -194,11 +193,6 @@ blockSquare =
 squareAtCoordinate : Grid -> Coordinate -> Maybe Square
 squareAtCoordinate grid ( x, y ) =
     Matrix.get x y grid
-
-
-setAtCoordinate : Coordinate -> Grid -> Grid
-setAtCoordinate ( x, y ) grid =
-    Matrix.set x y BlockSquare grid
 
 
 squareIsLetterSquare : Square -> Bool
