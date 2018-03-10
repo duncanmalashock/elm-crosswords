@@ -1,8 +1,6 @@
 module Coordinate
     exposing
         ( Coordinate
-        , xCoordinate
-        , yCoordinate
         , above
         , below
         , atLeft
@@ -12,16 +10,6 @@ module Coordinate
 
 type alias Coordinate =
     ( Int, Int )
-
-
-xCoordinate : Coordinate -> Int
-xCoordinate ( x, _ ) =
-    x
-
-
-yCoordinate : Coordinate -> Int
-yCoordinate ( _, y ) =
-    y
 
 
 above : Coordinate -> Coordinate
