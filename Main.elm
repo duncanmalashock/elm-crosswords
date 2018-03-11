@@ -111,10 +111,14 @@ updateWithNewPressedKeys newPressedKeys model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Views.gridView
-            (model.puzzle.grid |> Result.withDefault Grid.empty)
-            model.puzzle.currentSelection
-            (Entry.allFromGrid (model.puzzle.grid |> Result.withDefault Grid.empty))
-            ClickedSquare
-        ]
+    case model.puzzle.grid of
+        Ok grid ->
+            div []
+                [ Views.gridView grid
+                    model.puzzle.currentSelection
+                    (Entry.allFromGrid grid)
+                    ClickedSquare
+                ]
+
+        Err string ->
+            div [] [ text "couldn't load!" ]

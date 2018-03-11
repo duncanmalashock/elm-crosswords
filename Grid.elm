@@ -5,7 +5,6 @@ module Grid
         , width
         , height
         , flatten
-        , empty
         , blank
         , fromString
         , toRows
@@ -47,11 +46,6 @@ flatten : Grid -> List Square
 flatten grid =
     grid.data
         |> Array.toList
-
-
-empty : Grid
-empty =
-    Matrix.empty
 
 
 blank : Int -> Int -> Grid

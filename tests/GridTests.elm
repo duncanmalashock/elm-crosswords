@@ -31,28 +31,6 @@ testFlatten =
         ]
 
 
-testEmpty : Test
-testEmpty =
-    describe "Grid.empty"
-        [ test "is empty with 0 height and width" <|
-            \_ ->
-                let
-                    expectedOutput =
-                        ( [], 0, 0 )
-
-                    emptyGrid =
-                        Grid.empty
-
-                    input =
-                        ( Grid.flatten emptyGrid
-                        , Grid.width emptyGrid
-                        , Grid.height emptyGrid
-                        )
-                in
-                    Expect.equal input expectedOutput
-        ]
-
-
 testBlank : Test
 testBlank =
     describe "Grid.blank"
