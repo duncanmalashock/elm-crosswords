@@ -1,6 +1,7 @@
 module Puzzle
     exposing
         ( Puzzle
+        , SelectionPermit(..)
         , fromString
         , setSelection
         , moveSelectionLeft
@@ -19,6 +20,11 @@ type alias Puzzle =
     }
 
 
+type SelectionPermit
+    = CanSelectAllSquares
+    | CanSelectOnlyLetterSquares
+
+
 fromString : Int -> Int -> String -> Puzzle
 fromString gridWidth gridHeight string =
     { grid = Grid.fromString gridWidth gridHeight string
@@ -26,39 +32,39 @@ fromString gridWidth gridHeight string =
     }
 
 
-moveSelectionLeft : Puzzle -> Puzzle
-moveSelectionLeft puzzle =
-    moveSelection Coordinate.atLeft puzzle
+moveSelectionLeft : SelectionPermit -> Puzzle -> Puzzle
+moveSelectionLeft permit puzzle =
+    moveSelection Coordinate.atLeft permit puzzle
 
 
-moveSelectionRight : Puzzle -> Puzzle
-moveSelectionRight puzzle =
-    moveSelection Coordinate.atRight puzzle
+moveSelectionRight : SelectionPermit -> Puzzle -> Puzzle
+moveSelectionRight permit puzzle =
+    moveSelection Coordinate.atRight permit puzzle
 
 
-moveSelectionUp : Puzzle -> Puzzle
-moveSelectionUp puzzle =
-    moveSelection Coordinate.above puzzle
+moveSelectionUp : SelectionPermit -> Puzzle -> Puzzle
+moveSelectionUp permit puzzle =
+    moveSelection Coordinate.above permit puzzle
 
 
-moveSelectionDown : Puzzle -> Puzzle
-moveSelectionDown puzzle =
-    moveSelection Coordinate.below puzzle
+moveSelectionDown : SelectionPermit -> Puzzle -> Puzzle
+moveSelectionDown permit puzzle =
+    moveSelection Coordinate.below permit puzzle
 
 
-moveSelection : (Coordinate -> Coordinate) -> Puzzle -> Puzzle
-moveSelection newCoordFn puzzle =
+moveSelection : (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
+moveSelection newCoordFn permit puzzle =
     let
         newSelection =
             case puzzle.currentSelection of
                 Just coordinate ->
                     let
-                        squareAtNewCoord =
+                        newCoord =
                             newCoordFn coordinate
 
                         trySquareAtNewCoord =
                             Result.map
-                                (\g -> Grid.squareAtCoordinate g squareAtNewCoord)
+                                (\g -> Grid.squareAtCoordinate g newCoord)
                                 puzzle.grid
                     in
                         case trySquareAtNewCoord of
@@ -66,12 +72,8 @@ moveSelection newCoordFn puzzle =
                                 puzzle.currentSelection
 
                             Ok maybeSquare ->
-                                case maybeSquare of
-                                    Nothing ->
-                                        puzzle.currentSelection
-
-                                    Just _ ->
-                                        Just squareAtNewCoord
+                                setSelection newCoord permit puzzle
+                                    |> .currentSelection
 
                 Nothing ->
                     Nothing
@@ -79,8 +81,8 @@ moveSelection newCoordFn puzzle =
         { puzzle | currentSelection = newSelection }
 
 
-setSelection : Coordinate -> Puzzle -> Puzzle
-setSelection (( x, y ) as coordinate) puzzle =
+setSelection : Coordinate -> SelectionPermit -> Puzzle -> Puzzle
+setSelection (( x, y ) as coordinate) permit puzzle =
     case puzzle.grid of
         Ok grid ->
             let
@@ -89,11 +91,15 @@ setSelection (( x, y ) as coordinate) puzzle =
 
                 isInYBounds yVal =
                     yVal >= 0 && yVal < (Grid.height grid)
+
+                squareIsPermitted =
+                    (Grid.hasLetterSquareAt grid coordinate)
+                        || (permit == CanSelectAllSquares)
             in
-                if (isInXBounds x && isInYBounds y) then
+                if (isInXBounds x && isInYBounds y && squareIsPermitted) then
                     { puzzle | currentSelection = Just coordinate }
                 else
-                    { puzzle | currentSelection = Nothing }
+                    puzzle
 
         Err _ ->
             { puzzle | currentSelection = Nothing }

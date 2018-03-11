@@ -1,6 +1,6 @@
 module PuzzleTests exposing (..)
 
-import Puzzle
+import Puzzle exposing (SelectionPermit(..))
 import Grid exposing (Square(..))
 import Test exposing (Test, describe, test, skip)
 import Expect
@@ -71,116 +71,136 @@ testFromString =
 testSetSelection : Test
 testSetSelection =
     describe "Puzzle.setSelection"
-        [ test "sets a valid selection" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 1 )
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
-        , test "doesn't set an invalid selection" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 6 )
-                in
-                    Expect.equal newPuzzle.currentSelection Nothing
+        [ describe "with all squares permitted for selection"
+            [ test "sets a valid selection" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            , test "doesn't set an invalid selection" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 6 ) CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection Nothing
+            ]
+        , describe "with only letter squares permitted for selection"
+            [ test "doesn't select a block square" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "AB*D"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Nothing
+            ]
         ]
 
 
 testMoveSelectionLeft : Test
 testMoveSelectionLeft =
     describe "Puzzle.moveSelectionLeft"
-        [ test "moves left if there is a square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 1, 0 )
-                            |> Puzzle.moveSelectionLeft
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
-        , test "doesn't move left if there is no square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 1 )
-                            |> Puzzle.moveSelectionLeft
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+        [ describe "with all squares permitted for selection"
+            [ test "moves left if there is a square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 1, 0 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+            , test "doesn't move left if there is no square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            ]
         ]
 
 
 testMoveSelectionRight : Test
 testMoveSelectionRight =
     describe "Puzzle.moveSelectionRight"
-        [ test "moves right if there is a square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 0 )
-                            |> Puzzle.moveSelectionRight
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
-        , test "doesn't move right if there is no square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 1, 1 )
-                            |> Puzzle.moveSelectionRight
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 1, 1 )
+        [ describe "with all squares permitted for selection"
+            [ test "moves right if there is a square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionRight CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
+            , test "doesn't move right if there is no square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 1, 1 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionRight CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 1 )
+            ]
         ]
 
 
 testMoveSelectionUp : Test
 testMoveSelectionUp =
     describe "Puzzle.moveSelectionUp"
-        [ test "moves up if there is a square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 1 )
-                            |> Puzzle.moveSelectionUp
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
-        , test "doesn't move up if there is no square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 0 )
-                            |> Puzzle.moveSelectionUp
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+        [ describe "with all squares permitted for selection"
+            [ test "moves up if there is a square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionUp CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+            , test "doesn't move up if there is no square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionUp CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+            ]
         ]
 
 
 testMoveSelectionDown : Test
 testMoveSelectionDown =
     describe "Puzzle.moveSelectionDown"
-        [ test "moves down if there is a square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 0 )
-                            |> Puzzle.moveSelectionDown
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
-        , test "doesn't move down if there is no square in bounds" <|
-            \_ ->
-                let
-                    newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 1 )
-                            |> Puzzle.moveSelectionDown
-                in
-                    Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+        [ describe "with all squares permitted for selection"
+            [ test "moves down if there is a square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionDown CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            , test "doesn't move down if there is no square in bounds" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 2 2 "ABCD"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.moveSelectionDown CanSelectAllSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            ]
         ]

@@ -12,6 +12,7 @@ module Grid
         , isAcrossEntryStart
         , isDownEntryStart
         , squareAtCoordinate
+        , hasLetterSquareAt
         )
 
 import Char
@@ -213,6 +214,13 @@ squareAbove grid coordinate =
 squareAtLeft : Grid -> Coordinate -> Maybe Square
 squareAtLeft grid coordinate =
     squareAtCoordinate grid <| Coordinate.atLeft coordinate
+
+
+hasLetterSquareAt : Grid -> Coordinate -> Bool
+hasLetterSquareAt grid coordinate =
+    squareAtCoordinate grid coordinate
+        |> Maybe.map squareIsLetterSquare
+        |> Maybe.withDefault False
 
 
 hasLetterSquareAbove : Grid -> Coordinate -> Bool
