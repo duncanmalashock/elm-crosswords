@@ -10,6 +10,7 @@ module Grid
         , toRows
         , isAcrossEntryStart
         , isDownEntryStart
+        , coordIsInBounds
         , squareAtCoordinate
         , hasLetterSquareAt
         )
@@ -183,6 +184,18 @@ blankSquare =
 blockSquare : Square
 blockSquare =
     BlockSquare
+
+
+coordIsInBounds : Grid -> Coordinate -> Bool
+coordIsInBounds grid ( x, y ) =
+    let
+        isInXBounds xVal =
+            xVal >= 0 && xVal < (width grid)
+
+        isInYBounds yVal =
+            yVal >= 0 && yVal < (height grid)
+    in
+        (isInXBounds x) && (isInYBounds y)
 
 
 squareAtCoordinate : Grid -> Coordinate -> Maybe Square

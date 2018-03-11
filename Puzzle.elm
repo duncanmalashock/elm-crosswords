@@ -54,31 +54,44 @@ moveSelectionDown permit puzzle =
 
 moveSelection : (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
 moveSelection newCoordFn permit puzzle =
-    let
-        newSelection =
-            case puzzle.currentSelection of
-                Just coordinate ->
-                    let
-                        newCoord =
-                            newCoordFn coordinate
+    case puzzle.currentSelection of
+        Just coordinate ->
+            let
+                newCoordToTry =
+                    newCoordFn coordinate
 
-                        trySquareAtNewCoord =
-                            Result.map
-                                (\g -> Grid.squareAtCoordinate g newCoord)
-                                puzzle.grid
-                    in
-                        case trySquareAtNewCoord of
+                newCoordIsInBounds grid =
+                    Grid.coordIsInBounds grid newCoordToTry
+
+                newSquareIsPermitted grid =
+                    (Grid.hasLetterSquareAt grid newCoordToTry)
+                        || (permit == CanSelectAllSquares)
+            in
+                case (Result.map newCoordIsInBounds puzzle.grid) of
+                    Ok True ->
+                        case (Result.map newSquareIsPermitted puzzle.grid) of
+                            Ok True ->
+                                setSelection newCoordToTry permit puzzle
+
+                            Ok False ->
+                                moveSelection newCoordFn
+                                    permit
+                                    { puzzle
+                                        | currentSelection =
+                                            Maybe.map (\s -> newCoordFn s) puzzle.currentSelection
+                                    }
+
                             Err _ ->
-                                puzzle.currentSelection
+                                puzzle
 
-                            Ok maybeSquare ->
-                                setSelection newCoord permit puzzle
-                                    |> .currentSelection
+                    Ok False ->
+                        puzzle
 
-                Nothing ->
-                    Nothing
-    in
-        { puzzle | currentSelection = newSelection }
+                    Err _ ->
+                        puzzle
+
+        Nothing ->
+            puzzle
 
 
 setSelection : Coordinate -> SelectionPermit -> Puzzle -> Puzzle

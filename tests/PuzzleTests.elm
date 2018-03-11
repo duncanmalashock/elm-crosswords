@@ -125,6 +125,17 @@ testMoveSelectionLeft =
                     in
                         Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
             ]
+        , describe "with only letter squares permitted for selection"
+            [ test "jumps over block squares to the next available letter square" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 3 3 "ABCD*FGHI"
+                                |> Puzzle.setSelection ( 2, 1 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.moveSelectionLeft CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            ]
         ]
 
 
@@ -150,6 +161,17 @@ testMoveSelectionRight =
                                 |> Puzzle.moveSelectionRight CanSelectAllSquares
                     in
                         Expect.equal newPuzzle.currentSelection <| Just ( 1, 1 )
+            ]
+        , describe "with only letter squares permitted for selection"
+            [ test "jumps over block squares to the next available letter square" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 3 3 "ABCD*FGHI"
+                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.moveSelectionRight CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 2, 1 )
             ]
         ]
 
@@ -177,6 +199,17 @@ testMoveSelectionUp =
                     in
                         Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
             ]
+        , describe "with only letter squares permitted for selection"
+            [ test "jumps over block squares to the next available letter square" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 3 3 "ABCD*FGHI"
+                                |> Puzzle.setSelection ( 1, 2 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.moveSelectionUp CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
+            ]
         ]
 
 
@@ -202,5 +235,16 @@ testMoveSelectionDown =
                                 |> Puzzle.moveSelectionDown CanSelectAllSquares
                     in
                         Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+            ]
+        , describe "with only letter squares permitted for selection"
+            [ test "jumps over block squares to the next available letter square" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 3 3 "ABCD*FGHI"
+                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 2 )
             ]
         ]
