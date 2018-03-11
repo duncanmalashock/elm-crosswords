@@ -34,26 +34,26 @@ fromString gridWidth gridHeight string =
 
 moveSelectionLeft : SelectionPermit -> Puzzle -> Puzzle
 moveSelectionLeft permit puzzle =
-    moveSelection Coordinate.atLeft permit puzzle
+    moveSelection puzzle.currentSelection Coordinate.atLeft permit puzzle
 
 
 moveSelectionRight : SelectionPermit -> Puzzle -> Puzzle
 moveSelectionRight permit puzzle =
-    moveSelection Coordinate.atRight permit puzzle
+    moveSelection puzzle.currentSelection Coordinate.atRight permit puzzle
 
 
 moveSelectionUp : SelectionPermit -> Puzzle -> Puzzle
 moveSelectionUp permit puzzle =
-    moveSelection Coordinate.above permit puzzle
+    moveSelection puzzle.currentSelection Coordinate.above permit puzzle
 
 
 moveSelectionDown : SelectionPermit -> Puzzle -> Puzzle
 moveSelectionDown permit puzzle =
-    moveSelection Coordinate.below permit puzzle
+    moveSelection puzzle.currentSelection Coordinate.below permit puzzle
 
 
-moveSelection : (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
-moveSelection newCoordFn permit puzzle =
+moveSelection : Maybe Coordinate -> (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
+moveSelection startingSelection newCoordFn permit puzzle =
     case puzzle.currentSelection of
         Just coordinate ->
             let
@@ -74,18 +74,21 @@ moveSelection newCoordFn permit puzzle =
                                 setSelection newCoordToTry permit puzzle
 
                             Ok False ->
-                                moveSelection newCoordFn
+                                moveSelection
+                                    startingSelection
+                                    newCoordFn
                                     permit
                                     { puzzle
                                         | currentSelection =
-                                            Maybe.map (\s -> newCoordFn s) puzzle.currentSelection
+                                            Maybe.map (\s -> newCoordFn s)
+                                                puzzle.currentSelection
                                     }
 
                             Err _ ->
                                 puzzle
 
                     Ok False ->
-                        puzzle
+                        { puzzle | currentSelection = startingSelection }
 
                     Err _ ->
                         puzzle

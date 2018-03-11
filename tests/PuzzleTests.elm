@@ -246,5 +246,14 @@ testMoveSelectionDown =
                                 |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
                     in
                         Expect.equal newPuzzle.currentSelection <| Just ( 1, 2 )
+            , test "doesn't move if there are no valid squares left in the column" <|
+                \_ ->
+                    let
+                        newPuzzle =
+                            Puzzle.fromString 3 3 "ABCD*FG*I"
+                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                    in
+                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
             ]
         ]
