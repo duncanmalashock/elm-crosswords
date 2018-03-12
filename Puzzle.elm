@@ -16,12 +16,15 @@ module Puzzle
         )
 
 import Grid exposing (Grid)
+import Entry
 import Coordinate exposing (Coordinate)
 
 
 type alias Puzzle =
     { grid : Result String Grid
     , currentSelection : Maybe Selection
+    , entryStarts : Entry.EntryListings
+    , entryMemberships : Entry.EntryMemberships
     }
 
 
@@ -41,9 +44,24 @@ type SelectionPermit
 
 fromString : Int -> Int -> String -> Puzzle
 fromString gridWidth gridHeight string =
-    { grid = Grid.fromString gridWidth gridHeight string
-    , currentSelection = Nothing
-    }
+    let
+        gridResult =
+            Grid.fromString gridWidth gridHeight string
+
+        gridDefault =
+            Result.withDefault (Grid.blank 1 1) gridResult
+
+        entryStarts =
+            Entry.allFromGrid gridDefault
+
+        entryMemberships =
+            Entry.entryMembershipsFromEntryListings gridDefault entryStarts
+    in
+        { grid = gridResult
+        , currentSelection = Nothing
+        , entryStarts = entryStarts
+        , entryMemberships = entryMemberships
+        }
 
 
 selection : Puzzle -> Maybe Selection

@@ -2,9 +2,12 @@ module Entry
     exposing
         ( EntryListings
         , EntryStart(..)
+        , EntryMemberships
         , allFromGrid
         , entryNumberAt
         , entryMembershipsFromEntryListings
+        , acrossEntryMembership
+        , downEntryMembership
         , flattenEntryMemberships
         , acrossList
         , downList
@@ -227,6 +230,40 @@ membershipToIntList entryMembership =
 
         BelongsToEntries { across, down } ->
             [ across, down ]
+
+
+acrossEntryMembership : Coordinate -> EntryMemberships -> Maybe Int
+acrossEntryMembership coordinate entryMemberships =
+    let
+        entryMembership =
+            Dict.get coordinate entryMemberships
+    in
+        case entryMembership of
+            Just BelongsToNoEntries ->
+                Nothing
+
+            Just (BelongsToEntries { across, down }) ->
+                Just across
+
+            Nothing ->
+                Nothing
+
+
+downEntryMembership : Coordinate -> EntryMemberships -> Maybe Int
+downEntryMembership coordinate entryMemberships =
+    let
+        entryMembership =
+            Dict.get coordinate entryMemberships
+    in
+        case entryMembership of
+            Just BelongsToNoEntries ->
+                Nothing
+
+            Just (BelongsToEntries { across, down }) ->
+                Just down
+
+            Nothing ->
+                Nothing
 
 
 acrossEntry : Grid -> Coordinate -> String

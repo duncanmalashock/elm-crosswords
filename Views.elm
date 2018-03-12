@@ -1,21 +1,21 @@
 module Views exposing (..)
 
-import Puzzle exposing (Selection)
+import Puzzle exposing (Selection, Direction(..))
 import Grid exposing (Grid, Square(..))
-import Entry exposing (EntryListings)
+import Entry exposing (EntryListings, EntryMemberships)
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
 
-gridView : Grid -> Maybe Selection -> EntryListings -> (Coordinate -> msg) -> Html msg
-gridView grid currentSelection entryListings clickMsg =
+gridView : Grid -> Maybe Selection -> EntryListings -> EntryMemberships -> (Coordinate -> msg) -> Html msg
+gridView grid currentSelection entryListings entryMemberships clickMsg =
     let
         drawRow : List ( Coordinate, Square ) -> Html msg
         drawRow coordsWithSquares =
             div []
-                (List.map (\( coord, sq ) -> squareView grid currentSelection entryListings clickMsg coord sq)
+                (List.map (\( coord, sq ) -> squareView grid currentSelection entryListings entryMemberships clickMsg coord sq)
                     coordsWithSquares
                 )
     in
@@ -34,18 +34,38 @@ gridView grid currentSelection entryListings clickMsg =
             )
 
 
-squareView : Grid -> Maybe Selection -> EntryListings -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
-squareView grid currentSelection entryListings clickMsg (( x, y ) as coordinate) square =
+squareView : Grid -> Maybe Selection -> EntryListings -> EntryMemberships -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
+squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y ) as coordinate) square =
     case square of
         LetterSquare letter ->
             let
                 highlightStyle =
                     case currentSelection of
                         Just ( selectionCoordinate, direction ) ->
-                            if coordinate == selectionCoordinate then
-                                [ ( "background-color", "yellow" ) ]
-                            else
-                                []
+                            case direction of
+                                Across ->
+                                    let
+                                        selectionEntry =
+                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
+                                    in
+                                        if coordinate == selectionCoordinate then
+                                            [ ( "background-color", "red" ) ]
+                                        else if (Entry.acrossEntryMembership coordinate entryMemberships == selectionEntry) then
+                                            [ ( "background-color", "yellow" ) ]
+                                        else
+                                            []
+
+                                Down ->
+                                    let
+                                        selectionEntry =
+                                            Entry.downEntryMembership selectionCoordinate entryMemberships
+                                    in
+                                        if coordinate == selectionCoordinate then
+                                            [ ( "background-color", "red" ) ]
+                                        else if (Entry.downEntryMembership coordinate entryMemberships == selectionEntry) then
+                                            [ ( "background-color", "yellow" ) ]
+                                        else
+                                            []
 
                         Nothing ->
                             []

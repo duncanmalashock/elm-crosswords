@@ -118,7 +118,8 @@ view model =
             div []
                 [ Views.gridView grid
                     model.puzzle.currentSelection
-                    (Entry.allFromGrid grid)
+                    model.puzzle.entryStarts
+                    model.puzzle.entryMemberships
                     ClickedSquare
                 ]
 
