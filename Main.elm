@@ -92,6 +92,7 @@ updateWithNewPressedKeys newPressedKeys model =
         letterKeys =
             [ Keyboard.Extra.CharA
             , Keyboard.Extra.CharB
+            , Keyboard.Extra.CharC
             , Keyboard.Extra.CharD
             , Keyboard.Extra.CharE
             , Keyboard.Extra.CharF
