@@ -69,9 +69,22 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedSquare coordinate ->
-            ( { model | puzzle = Puzzle.setSelection ( coordinate, Across ) CanSelectOnlyLetterSquares model.puzzle }
-            , Cmd.none
-            )
+            let
+                updateSelectionDirectionFn =
+                    case model.puzzle.currentSelection of
+                        Just ( currentCoordinate, _ ) ->
+                            if currentCoordinate == coordinate then
+                                (\m -> { m | puzzle = Puzzle.switchSelectionDirection m.puzzle })
+                            else
+                                identity
+
+                        Nothing ->
+                            identity
+            in
+                ( { model | puzzle = Puzzle.setSelection coordinate CanSelectOnlyLetterSquares model.puzzle }
+                    |> updateSelectionDirectionFn
+                , Cmd.none
+                )
 
         KeyboardMsg keyMsg ->
             let
@@ -219,7 +232,7 @@ updateWithNewPressedKeys newPressedKeys model =
             else if (List.member Keyboard.Extra.Space changedKeys) then
                 Puzzle.switchSelectionDirection model.puzzle
             else if (containsLetterKeys changedKeys) then
-                List.foldl (\k -> Puzzle.typeLetter (toLetterChar k)) model.puzzle (filterLetterKeys changedKeys)
+                List.foldl (\k -> Puzzle.typeLetter (toLetterChar k) CanSelectOnlyLetterSquares) model.puzzle (filterLetterKeys changedKeys)
             else
                 model.puzzle
     in

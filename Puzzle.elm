@@ -78,18 +78,18 @@ toLetterChar key =
     'x'
 
 
-typeLetter : Char -> Puzzle -> Puzzle
-typeLetter char puzzle =
+typeLetter : Char -> SelectionPermit -> Puzzle -> Puzzle
+typeLetter char permit puzzle =
     case puzzle.currentSelection of
         Just ( coord, direction ) ->
             case direction of
                 Across ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
-                        |> moveSelectionRight CanSelectOnlyLetterSquares
+                        |> moveSelectionRight permit
 
                 Down ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
-                        |> moveSelectionDown CanSelectOnlyLetterSquares
+                        |> moveSelectionDown permit
 
         Nothing ->
             puzzle
@@ -168,7 +168,7 @@ moveSelection startingSelection newCoordFn permit puzzle =
                     Ok True ->
                         case (Result.map newSquareIsPermitted puzzle.grid) of
                             Ok True ->
-                                setSelection ( newCoordToTry, direction ) permit puzzle
+                                setSelection newCoordToTry permit puzzle
 
                             Ok False ->
                                 moveSelection
@@ -194,8 +194,8 @@ moveSelection startingSelection newCoordFn permit puzzle =
             puzzle
 
 
-setSelection : Selection -> SelectionPermit -> Puzzle -> Puzzle
-setSelection ( ( x, y ) as coordinate, direction ) permit puzzle =
+setSelection : Coordinate -> SelectionPermit -> Puzzle -> Puzzle
+setSelection (( x, y ) as coordinate) permit puzzle =
     case puzzle.grid of
         Ok grid ->
             let
