@@ -13,11 +13,15 @@ module Puzzle
         , moveSelectionRight
         , moveSelectionUp
         , moveSelectionDown
+        , filterOnlyLetterKeys
+        , toLetterChar
+        , typeLetter
         )
 
 import Grid exposing (Grid)
 import Entry
 import Coordinate exposing (Coordinate)
+import Keyboard.Extra exposing (Key(..))
 
 
 type alias Puzzle =
@@ -62,6 +66,33 @@ fromString gridWidth gridHeight string =
         , entryStarts = entryStarts
         , entryMemberships = entryMemberships
         }
+
+
+filterOnlyLetterKeys : List Key -> List Key
+filterOnlyLetterKeys keyList =
+    []
+
+
+toLetterChar : Key -> Char
+toLetterChar key =
+    'x'
+
+
+typeLetter : Char -> Puzzle -> Puzzle
+typeLetter char puzzle =
+    case puzzle.currentSelection of
+        Just ( coord, direction ) ->
+            case direction of
+                Across ->
+                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
+                        |> moveSelectionRight CanSelectOnlyLetterSquares
+
+                Down ->
+                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
+                        |> moveSelectionDown CanSelectOnlyLetterSquares
+
+        Nothing ->
+            puzzle
 
 
 selection : Puzzle -> Maybe Selection

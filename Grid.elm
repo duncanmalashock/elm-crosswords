@@ -13,6 +13,7 @@ module Grid
         , coordIsInBounds
         , squareAtCoordinate
         , hasLetterSquareAt
+        , updateLetterSquare
         )
 
 import Char
@@ -103,6 +104,11 @@ charToSquare char =
         Ok blockSquare
     else
         Err "Invalid character"
+
+
+updateLetterSquare : Coordinate -> Char -> Grid -> Grid
+updateLetterSquare ( x, y ) char grid =
+    Matrix.set x y (letterSquare (Char.toUpper char)) grid
 
 
 toRows : Grid -> List (List ( Coordinate, Square ))
