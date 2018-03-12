@@ -4,6 +4,8 @@ module Entry
         , EntryStart(..)
         , allFromGrid
         , entryNumberAt
+        , entryMembershipsFromEntryListings
+        , flattenEntryMemberships
         , acrossList
         , downList
         )
@@ -29,6 +31,15 @@ type EntryStart
 
 type alias EntryListings =
     Dict Coordinate EntryStart
+
+
+type EntryMembership
+    = BelongsToNoEntries
+    | BelongsToEntries { across : Int, down : Int }
+
+
+type alias EntryMemberships =
+    Dict Coordinate EntryMembership
 
 
 entryNumberAt : EntryListings -> Coordinate -> Maybe Int
@@ -154,6 +165,68 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
 
         BlockSquare ->
             ( currentEntryNumber, entriesSoFar )
+
+
+entryMembershipsFromEntryListings : Grid -> EntryListings -> EntryMemberships
+entryMembershipsFromEntryListings grid entryListings =
+    grid
+        |> Matrix.toIndexedArray
+        |> Array.foldl (setEntryMembership grid entryListings) Dict.empty
+
+
+setEntryMembership : Grid -> EntryListings -> ( Coordinate, Square ) -> EntryMemberships -> EntryMemberships
+setEntryMembership grid entryListings ( coord, square ) entryMemberships =
+    let
+        membership =
+            case square of
+                LetterSquare _ ->
+                    BelongsToEntries
+                        { across = findAcrossEntryMembership grid entryListings coord
+                        , down = findDownEntryMembership grid entryListings coord
+                        }
+
+                BlockSquare ->
+                    BelongsToNoEntries
+    in
+        Dict.insert coord membership entryMemberships
+
+
+findAcrossEntryMembership : Grid -> EntryListings -> Coordinate -> Int
+findAcrossEntryMembership grid entryListings coordinate =
+    case Grid.isAcrossEntryStart grid coordinate of
+        True ->
+            entryNumberAt entryListings coordinate
+                |> Maybe.withDefault 0
+
+        False ->
+            findAcrossEntryMembership grid entryListings (Coordinate.atLeft coordinate)
+
+
+findDownEntryMembership : Grid -> EntryListings -> Coordinate -> Int
+findDownEntryMembership grid entryListings coordinate =
+    case Grid.isDownEntryStart grid coordinate of
+        True ->
+            entryNumberAt entryListings coordinate
+                |> Maybe.withDefault 0
+
+        False ->
+            findDownEntryMembership grid entryListings (Coordinate.above coordinate)
+
+
+flattenEntryMemberships : EntryMemberships -> List ( Coordinate, List Int )
+flattenEntryMemberships entryMemberships =
+    Dict.map (\m -> membershipToIntList) entryMemberships
+        |> Dict.toList
+
+
+membershipToIntList : EntryMembership -> List Int
+membershipToIntList entryMembership =
+    case entryMembership of
+        BelongsToNoEntries ->
+            []
+
+        BelongsToEntries { across, down } ->
+            [ across, down ]
 
 
 acrossEntry : Grid -> Coordinate -> String

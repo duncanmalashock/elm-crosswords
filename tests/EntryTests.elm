@@ -159,3 +159,43 @@ testAllFromGrid =
                 in
                     Expect.equal input expectedOutput
         ]
+
+
+testEntryMembershipsFrom : Test
+testEntryMembershipsFrom =
+    describe "Entry.entryMembershipsFrom"
+        [ test "four-by-four Grid" <|
+            \_ ->
+                let
+                    expectedOutput =
+                        Ok
+                            [ ( ( 0, 0 ), [ 1, 1 ] )
+                            , ( ( 0, 1 ), [ 5, 1 ] )
+                            , ( ( 0, 2 ), [ 7, 1 ] )
+                            , ( ( 0, 3 ), [] )
+                            , ( ( 1, 0 ), [ 1, 2 ] )
+                            , ( ( 1, 1 ), [ 5, 2 ] )
+                            , ( ( 1, 2 ), [] )
+                            , ( ( 1, 3 ), [ 9, 9 ] )
+                            , ( ( 2, 0 ), [ 1, 3 ] )
+                            , ( ( 2, 1 ), [] )
+                            , ( ( 2, 2 ), [ 8, 8 ] )
+                            , ( ( 2, 3 ), [ 9, 8 ] )
+                            , ( ( 3, 0 ), [ 1, 4 ] )
+                            , ( ( 3, 1 ), [ 6, 4 ] )
+                            , ( ( 3, 2 ), [ 8, 4 ] )
+                            , ( ( 3, 3 ), [ 9, 4 ] )
+                            ]
+
+                    grid =
+                        Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
+
+                    entryListings =
+                        Result.map Entry.allFromGrid grid
+
+                    input =
+                        Result.map2 Entry.entryMembershipsFromEntryListings grid entryListings
+                            |> Result.map Entry.flattenEntryMemberships
+                in
+                    Expect.equal input expectedOutput
+        ]
