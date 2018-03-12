@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Views
-import Puzzle exposing (Puzzle, SelectionPermit(..))
+import Puzzle exposing (Puzzle, Direction(..), SelectionPermit(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry exposing (EntryListings)
@@ -69,7 +69,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedSquare coordinate ->
-            ( { model | puzzle = Puzzle.setSelection coordinate CanSelectOnlyLetterSquares model.puzzle }
+            ( { model | puzzle = Puzzle.setSelection ( coordinate, Across ) CanSelectOnlyLetterSquares model.puzzle }
             , Cmd.none
             )
 
@@ -98,6 +98,8 @@ updateWithNewPressedKeys newPressedKeys model =
                 Puzzle.moveSelectionUp CanSelectOnlyLetterSquares model.puzzle
             else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
                 Puzzle.moveSelectionDown CanSelectOnlyLetterSquares model.puzzle
+            else if (List.member Keyboard.Extra.Space changedKeys) then
+                Puzzle.switchSelectionDirection model.puzzle
             else
                 model.puzzle
     in

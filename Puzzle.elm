@@ -1,8 +1,13 @@
 module Puzzle
     exposing
         ( Puzzle
+        , Selection
+        , Direction(..)
         , SelectionPermit(..)
         , fromString
+        , selection
+        , selectionCoordinate
+        , switchSelectionDirection
         , setSelection
         , moveSelectionLeft
         , moveSelectionRight
@@ -16,8 +21,17 @@ import Coordinate exposing (Coordinate)
 
 type alias Puzzle =
     { grid : Result String Grid
-    , currentSelection : Maybe Coordinate
+    , currentSelection : Maybe Selection
     }
+
+
+type alias Selection =
+    ( Coordinate, Direction )
+
+
+type Direction
+    = Across
+    | Down
 
 
 type SelectionPermit
@@ -30,6 +44,40 @@ fromString gridWidth gridHeight string =
     { grid = Grid.fromString gridWidth gridHeight string
     , currentSelection = Nothing
     }
+
+
+selection : Puzzle -> Maybe Selection
+selection puzzle =
+    puzzle.currentSelection
+
+
+selectionMapToCoordinate : (Coordinate -> Coordinate) -> Selection -> Selection
+selectionMapToCoordinate function ( coord, direction ) =
+    ( function coord, direction )
+
+
+selectionCoordinate : Selection -> Coordinate
+selectionCoordinate ( coord, direction ) =
+    coord
+
+
+switchSelectionDirection : Puzzle -> Puzzle
+switchSelectionDirection puzzle =
+    let
+        updatedSelection =
+            case puzzle.currentSelection of
+                Just ( coord, direction ) ->
+                    case direction of
+                        Across ->
+                            Just ( coord, Down )
+
+                        Down ->
+                            Just ( coord, Across )
+
+                Nothing ->
+                    Nothing
+    in
+        { puzzle | currentSelection = updatedSelection }
 
 
 moveSelectionLeft : SelectionPermit -> Puzzle -> Puzzle
@@ -52,13 +100,13 @@ moveSelectionDown permit puzzle =
     moveSelection puzzle.currentSelection Coordinate.below permit puzzle
 
 
-moveSelection : Maybe Coordinate -> (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
+moveSelection : Maybe Selection -> (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
 moveSelection startingSelection newCoordFn permit puzzle =
     case puzzle.currentSelection of
-        Just coordinate ->
+        Just selection ->
             let
-                newCoordToTry =
-                    newCoordFn coordinate
+                ( newCoordToTry, direction ) =
+                    selectionMapToCoordinate newCoordFn selection
 
                 newCoordIsInBounds grid =
                     Grid.coordIsInBounds grid newCoordToTry
@@ -71,7 +119,7 @@ moveSelection startingSelection newCoordFn permit puzzle =
                     Ok True ->
                         case (Result.map newSquareIsPermitted puzzle.grid) of
                             Ok True ->
-                                setSelection newCoordToTry permit puzzle
+                                setSelection ( newCoordToTry, direction ) permit puzzle
 
                             Ok False ->
                                 moveSelection
@@ -80,7 +128,7 @@ moveSelection startingSelection newCoordFn permit puzzle =
                                     permit
                                     { puzzle
                                         | currentSelection =
-                                            Maybe.map (\s -> newCoordFn s)
+                                            Maybe.map (\s -> selectionMapToCoordinate newCoordFn s)
                                                 puzzle.currentSelection
                                     }
 
@@ -97,8 +145,8 @@ moveSelection startingSelection newCoordFn permit puzzle =
             puzzle
 
 
-setSelection : Coordinate -> SelectionPermit -> Puzzle -> Puzzle
-setSelection (( x, y ) as coordinate) permit puzzle =
+setSelection : Selection -> SelectionPermit -> Puzzle -> Puzzle
+setSelection ( ( x, y ) as coordinate, direction ) permit puzzle =
     case puzzle.grid of
         Ok grid ->
             let
@@ -113,7 +161,17 @@ setSelection (( x, y ) as coordinate) permit puzzle =
                         || (permit == CanSelectAllSquares)
             in
                 if (isInXBounds x && isInYBounds y && squareIsPermitted) then
-                    { puzzle | currentSelection = Just coordinate }
+                    case puzzle.currentSelection of
+                        Just selection ->
+                            { puzzle
+                                | currentSelection =
+                                    Maybe.map
+                                        (selectionMapToCoordinate (\_ -> coordinate))
+                                        puzzle.currentSelection
+                            }
+
+                        Nothing ->
+                            { puzzle | currentSelection = Just ( coordinate, Across ) }
                 else
                     puzzle
 

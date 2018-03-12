@@ -1,5 +1,6 @@
 module Views exposing (..)
 
+import Puzzle exposing (Selection)
 import Grid exposing (Grid, Square(..))
 import Entry exposing (EntryListings)
 import Coordinate exposing (Coordinate)
@@ -8,7 +9,7 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
 
-gridView : Grid -> Maybe Coordinate -> EntryListings -> (Coordinate -> msg) -> Html msg
+gridView : Grid -> Maybe Selection -> EntryListings -> (Coordinate -> msg) -> Html msg
 gridView grid currentSelection entryListings clickMsg =
     let
         drawRow : List ( Coordinate, Square ) -> Html msg
@@ -33,14 +34,14 @@ gridView grid currentSelection entryListings clickMsg =
             )
 
 
-squareView : Grid -> Maybe Coordinate -> EntryListings -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
+squareView : Grid -> Maybe Selection -> EntryListings -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
 squareView grid currentSelection entryListings clickMsg (( x, y ) as coordinate) square =
     case square of
         LetterSquare letter ->
             let
                 highlightStyle =
                     case currentSelection of
-                        Just selectionCoordinate ->
+                        Just ( selectionCoordinate, direction ) ->
                             if coordinate == selectionCoordinate then
                                 [ ( "background-color", "yellow" ) ]
                             else

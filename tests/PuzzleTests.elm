@@ -1,6 +1,6 @@
 module PuzzleTests exposing (..)
 
-import Puzzle exposing (SelectionPermit(..))
+import Puzzle exposing (Direction(..), SelectionPermit(..))
 import Grid exposing (Square(..))
 import Test exposing (Test, describe, test, skip)
 import Expect
@@ -75,17 +75,19 @@ testSetSelection =
             [ test "sets a valid selection" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelectionCoordinate =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelectionCoordinate <| Just ( 0, 1 )
             , test "doesn't set an invalid selection" <|
                 \_ ->
                     let
                         newPuzzle =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 6 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 6 ), Across ) CanSelectAllSquares
                     in
                         Expect.equal newPuzzle.currentSelection Nothing
             ]
@@ -95,10 +97,28 @@ testSetSelection =
                     let
                         newPuzzle =
                             Puzzle.fromString 2 2 "AB*D"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectOnlyLetterSquares
                     in
                         Expect.equal newPuzzle.currentSelection <| Nothing
             ]
+        ]
+
+
+testSwitchSelectionDirection : Test
+testSwitchSelectionDirection =
+    describe "Puzzle.switchSelectionDirection"
+        [ test "Switches from across to down" <|
+            \_ ->
+                let
+                    newPuzzle =
+                        Puzzle.fromString 2 2 "ABCD"
+                            |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectAllSquares
+
+                    input =
+                        Puzzle.switchSelectionDirection newPuzzle
+                            |> .currentSelection
+                in
+                    Expect.equal input (Just <| ( ( 0, 1 ), Down ))
         ]
 
 
@@ -109,32 +129,38 @@ testMoveSelectionLeft =
             [ test "moves left if there is a square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 1, 0 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
             , test "doesn't move left if there is no square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 2, 1 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 2, 1 ), Across ) CanSelectOnlyLetterSquares
                                 |> Puzzle.moveSelectionLeft CanSelectOnlyLetterSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
             ]
         ]
 
@@ -146,32 +172,38 @@ testMoveSelectionRight =
             [ test "moves right if there is a square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 0 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionRight CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
             , test "doesn't move right if there is no square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 1, 1 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 1, 1 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionRight CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 1, 1 )
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectOnlyLetterSquares
                                 |> Puzzle.moveSelectionRight CanSelectOnlyLetterSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 2, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 2, 1 )
             ]
         ]
 
@@ -183,32 +215,38 @@ testMoveSelectionUp =
             [ test "moves up if there is a square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionUp CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
             , test "doesn't move up if there is no square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 0 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionUp CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 1, 2 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 1, 2 ), Across ) CanSelectOnlyLetterSquares
                                 |> Puzzle.moveSelectionUp CanSelectOnlyLetterSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
             ]
         ]
 
@@ -220,40 +258,48 @@ testMoveSelectionDown =
             [ test "moves down if there is a square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 0 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionDown CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
             , test "doesn't move down if there is no square in bounds" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                                |> Puzzle.setSelection ( ( 0, 1 ), Across ) CanSelectAllSquares
                                 |> Puzzle.moveSelectionDown CanSelectAllSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 1, 0 ), Across ) CanSelectOnlyLetterSquares
                                 |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 2 )
+                        Expect.equal newPuzzleSelection <| Just ( 1, 2 )
             , test "doesn't move if there are no valid squares left in the column" <|
                 \_ ->
                     let
-                        newPuzzle =
+                        newPuzzleSelection =
                             Puzzle.fromString 3 3 "ABCD*FG*I"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
+                                |> Puzzle.setSelection ( ( 1, 0 ), Across ) CanSelectOnlyLetterSquares
                                 |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                                |> Puzzle.selection
+                                |> Maybe.map Puzzle.selectionCoordinate
                     in
-                        Expect.equal newPuzzle.currentSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
             ]
         ]
