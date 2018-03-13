@@ -102,124 +102,6 @@ updateWithNewPressedKeys newPressedKeys model =
                 (\k -> not (List.member k model.pressedKeys))
                 newPressedKeys
 
-        letterKeys =
-            [ Keyboard.Extra.CharA
-            , Keyboard.Extra.CharB
-            , Keyboard.Extra.CharC
-            , Keyboard.Extra.CharD
-            , Keyboard.Extra.CharE
-            , Keyboard.Extra.CharF
-            , Keyboard.Extra.CharG
-            , Keyboard.Extra.CharH
-            , Keyboard.Extra.CharI
-            , Keyboard.Extra.CharJ
-            , Keyboard.Extra.CharK
-            , Keyboard.Extra.CharL
-            , Keyboard.Extra.CharM
-            , Keyboard.Extra.CharN
-            , Keyboard.Extra.CharO
-            , Keyboard.Extra.CharP
-            , Keyboard.Extra.CharQ
-            , Keyboard.Extra.CharR
-            , Keyboard.Extra.CharS
-            , Keyboard.Extra.CharT
-            , Keyboard.Extra.CharU
-            , Keyboard.Extra.CharV
-            , Keyboard.Extra.CharW
-            , Keyboard.Extra.CharX
-            , Keyboard.Extra.CharY
-            , Keyboard.Extra.CharZ
-            ]
-
-        containsLetterKeys keyList =
-            List.any (\k -> List.member k letterKeys) keyList
-
-        filterLetterKeys keyList =
-            List.filter (\k -> List.member k letterKeys) keyList
-
-        toLetterChar k =
-            case k of
-                Keyboard.Extra.CharA ->
-                    'A'
-
-                Keyboard.Extra.CharB ->
-                    'B'
-
-                Keyboard.Extra.CharC ->
-                    'C'
-
-                Keyboard.Extra.CharD ->
-                    'D'
-
-                Keyboard.Extra.CharE ->
-                    'E'
-
-                Keyboard.Extra.CharF ->
-                    'F'
-
-                Keyboard.Extra.CharG ->
-                    'G'
-
-                Keyboard.Extra.CharH ->
-                    'H'
-
-                Keyboard.Extra.CharI ->
-                    'I'
-
-                Keyboard.Extra.CharJ ->
-                    'J'
-
-                Keyboard.Extra.CharK ->
-                    'K'
-
-                Keyboard.Extra.CharL ->
-                    'L'
-
-                Keyboard.Extra.CharM ->
-                    'M'
-
-                Keyboard.Extra.CharN ->
-                    'N'
-
-                Keyboard.Extra.CharO ->
-                    'O'
-
-                Keyboard.Extra.CharP ->
-                    'P'
-
-                Keyboard.Extra.CharQ ->
-                    'Q'
-
-                Keyboard.Extra.CharR ->
-                    'R'
-
-                Keyboard.Extra.CharS ->
-                    'S'
-
-                Keyboard.Extra.CharT ->
-                    'T'
-
-                Keyboard.Extra.CharU ->
-                    'U'
-
-                Keyboard.Extra.CharV ->
-                    'V'
-
-                Keyboard.Extra.CharW ->
-                    'W'
-
-                Keyboard.Extra.CharX ->
-                    'X'
-
-                Keyboard.Extra.CharY ->
-                    'Y'
-
-                Keyboard.Extra.CharZ ->
-                    'Z'
-
-                _ ->
-                    ' '
-
         updatedPuzzle =
             if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
                 Puzzle.moveSelectionLeft CanSelectOnlyLetterSquares model.puzzle
@@ -231,8 +113,10 @@ updateWithNewPressedKeys newPressedKeys model =
                 Puzzle.moveSelectionDown CanSelectOnlyLetterSquares model.puzzle
             else if (List.member Keyboard.Extra.Space changedKeys) then
                 Puzzle.switchSelectionDirection model.puzzle
-            else if (containsLetterKeys changedKeys) then
-                List.foldl (\k -> Puzzle.typeLetter (toLetterChar k) CanSelectOnlyLetterSquares) model.puzzle (filterLetterKeys changedKeys)
+            else if (Puzzle.containsLetterKeys changedKeys) then
+                Puzzle.typeLetters changedKeys CanSelectOnlyLetterSquares model.puzzle
+            else if (List.member Keyboard.Extra.BackSpace changedKeys) then
+                Puzzle.deleteLetter CanSelectOnlyLetterSquares model.puzzle
             else
                 model.puzzle
     in
@@ -254,6 +138,8 @@ view model =
                     model.puzzle.entryStarts
                     model.puzzle.entryMemberships
                     ClickedSquare
+                , Views.entriesView
+                    model.puzzle.entryStarts
                 ]
 
         Err string ->

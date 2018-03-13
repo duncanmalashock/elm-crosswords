@@ -49,9 +49,9 @@ squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y
                                             Entry.acrossEntryMembership selectionCoordinate entryMemberships
                                     in
                                         if coordinate == selectionCoordinate then
-                                            [ ( "background-color", "red" ) ]
+                                            [ ( "background-color", "#FADA4A" ) ]
                                         else if (Entry.acrossEntryMembership coordinate entryMemberships == selectionEntry) then
-                                            [ ( "background-color", "yellow" ) ]
+                                            [ ( "background-color", "#B0D8FB" ) ]
                                         else
                                             []
 
@@ -61,9 +61,9 @@ squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y
                                             Entry.downEntryMembership selectionCoordinate entryMemberships
                                     in
                                         if coordinate == selectionCoordinate then
-                                            [ ( "background-color", "red" ) ]
+                                            [ ( "background-color", "#FADA4A" ) ]
                                         else if (Entry.downEntryMembership coordinate entryMemberships == selectionEntry) then
-                                            [ ( "background-color", "yellow" ) ]
+                                            [ ( "background-color", "#B0D8FB" ) ]
                                         else
                                             []
 
@@ -145,6 +145,8 @@ entriesView entryListings =
                 , ( "vertical-align", "top" )
                 , ( "margin-left", "10px" )
                 , ( "font-family", "Helvetica, Arial, sans-serif" )
+                , ( "height", "481px" )
+                , ( "overflow", "auto" )
                 ]
             ]
             [ div
