@@ -2,20 +2,20 @@ module Views exposing (..)
 
 import Puzzle exposing (Selection, Direction(..))
 import Grid exposing (Grid, Square(..))
-import Entry exposing (EntryListings, EntryMemberships)
+import Entry exposing (EntryStartDict, EntryMembershipDict)
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
 
-gridView : Grid -> Maybe Selection -> EntryListings -> EntryMemberships -> (Coordinate -> msg) -> Html msg
-gridView grid currentSelection entryListings entryMemberships clickMsg =
+gridView : Grid -> Maybe Selection -> EntryStartDict -> EntryMembershipDict -> (Coordinate -> msg) -> Html msg
+gridView grid currentSelection entryListings entryMembershipDict clickMsg =
     let
         drawRow : List ( Coordinate, Square ) -> Html msg
         drawRow coordsWithSquares =
             div []
-                (List.map (\( coord, sq ) -> squareView grid currentSelection entryListings entryMemberships clickMsg coord sq)
+                (List.map (\( coord, sq ) -> squareView grid currentSelection entryListings entryMembershipDict clickMsg coord sq)
                     coordsWithSquares
                 )
     in
@@ -34,8 +34,8 @@ gridView grid currentSelection entryListings entryMemberships clickMsg =
             )
 
 
-squareView : Grid -> Maybe Selection -> EntryListings -> EntryMemberships -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
-squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y ) as coordinate) square =
+squareView : Grid -> Maybe Selection -> EntryStartDict -> EntryMembershipDict -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
+squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x, y ) as coordinate) square =
     case square of
         LetterSquare letter ->
             let
@@ -46,11 +46,11 @@ squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y
                                 Across ->
                                     let
                                         selectionEntry =
-                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
+                                            Entry.acrossEntryMembership selectionCoordinate entryMembershipDict
                                     in
                                         if coordinate == selectionCoordinate then
                                             [ ( "background-color", "#FADA4A" ) ]
-                                        else if (Entry.acrossEntryMembership coordinate entryMemberships == selectionEntry) then
+                                        else if (Entry.acrossEntryMembership coordinate entryMembershipDict == selectionEntry) then
                                             [ ( "background-color", "#B0D8FB" ) ]
                                         else
                                             []
@@ -58,11 +58,11 @@ squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y
                                 Down ->
                                     let
                                         selectionEntry =
-                                            Entry.downEntryMembership selectionCoordinate entryMemberships
+                                            Entry.downEntryMembership selectionCoordinate entryMembershipDict
                                     in
                                         if coordinate == selectionCoordinate then
                                             [ ( "background-color", "#FADA4A" ) ]
-                                        else if (Entry.downEntryMembership coordinate entryMemberships == selectionEntry) then
+                                        else if (Entry.downEntryMembership coordinate entryMembershipDict == selectionEntry) then
                                             [ ( "background-color", "#B0D8FB" ) ]
                                         else
                                             []
@@ -126,7 +126,7 @@ squareView grid currentSelection entryListings entryMemberships clickMsg (( x, y
                 []
 
 
-entriesView : EntryListings -> Html msg
+entriesView : EntryStartDict -> Html msg
 entriesView entryListings =
     let
         acrossEntries =

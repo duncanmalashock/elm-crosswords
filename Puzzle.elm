@@ -27,8 +27,8 @@ import Keyboard.Extra exposing (Key(..))
 type alias Puzzle =
     { grid : Result String Grid
     , currentSelection : Maybe Selection
-    , entryStarts : Entry.EntryListings
-    , entryMemberships : Entry.EntryMemberships
+    , entryStartDict : Entry.EntryStartDict
+    , entryMembershipDict : Entry.EntryMembershipDict
     }
 
 
@@ -55,16 +55,16 @@ fromString gridWidth gridHeight string =
         gridDefault =
             Result.withDefault (Grid.blank 1 1) gridResult
 
-        entryStarts =
-            Entry.allFromGrid gridDefault
+        entryStartDict =
+            Entry.entryStartDictFromGrid gridDefault
 
-        entryMemberships =
-            Entry.entryMembershipsFromEntryListings gridDefault entryStarts
+        entryMembershipDict =
+            Entry.entryMembershipDictFromEntryStartDict gridDefault entryStartDict
     in
         { grid = gridResult
         , currentSelection = Nothing
-        , entryStarts = entryStarts
-        , entryMemberships = entryMemberships
+        , entryStartDict = entryStartDict
+        , entryMembershipDict = entryMembershipDict
         }
 
 

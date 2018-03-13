@@ -8,7 +8,7 @@ import Expect
 
 flattenResult =
     Result.map
-        (Entry.allFromGrid
+        (Entry.entryStartDictFromGrid
             >> (\l -> (Entry.acrossList l) ++ (Entry.downList l))
         )
 
@@ -21,7 +21,7 @@ testEntryNumberAt =
                 let
                     entryListings =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                            |> Result.map Entry.allFromGrid
+                            |> Result.map Entry.entryStartDictFromGrid
 
                     input =
                         Result.map
@@ -34,7 +34,7 @@ testEntryNumberAt =
                 let
                     entryListings =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                            |> Result.map Entry.allFromGrid
+                            |> Result.map Entry.entryStartDictFromGrid
 
                     input =
                         Result.map
@@ -48,7 +48,7 @@ testEntryNumberAt =
                 let
                     entryListings =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                            |> Result.map Entry.allFromGrid
+                            |> Result.map Entry.entryStartDictFromGrid
 
                     input =
                         Result.map
@@ -61,7 +61,7 @@ testEntryNumberAt =
                 let
                     entryListings =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
-                            |> Result.map Entry.allFromGrid
+                            |> Result.map Entry.entryStartDictFromGrid
 
                     input =
                         Result.map
@@ -72,9 +72,9 @@ testEntryNumberAt =
         ]
 
 
-testAllFromGrid : Test
-testAllFromGrid =
-    describe "Entry.allFromGrid"
+testentryStartDictFromGrid : Test
+testentryStartDictFromGrid =
+    describe "Entry.entryStartDictFromGrid"
         [ test "one-squared Grid" <|
             \_ ->
                 let
@@ -161,9 +161,9 @@ testAllFromGrid =
         ]
 
 
-testEntryMembershipsFrom : Test
-testEntryMembershipsFrom =
-    describe "Entry.entryMembershipsFrom"
+testEntryMembershipDictFrom : Test
+testEntryMembershipDictFrom =
+    describe "Entry.EntryMembershipDictFrom"
         [ test "four-by-four Grid" <|
             \_ ->
                 let
@@ -191,11 +191,11 @@ testEntryMembershipsFrom =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"
 
                     entryListings =
-                        Result.map Entry.allFromGrid grid
+                        Result.map Entry.entryStartDictFromGrid grid
 
                     input =
-                        Result.map2 Entry.entryMembershipsFromEntryListings grid entryListings
-                            |> Result.map Entry.flattenEntryMemberships
+                        Result.map2 Entry.entryMembershipDictFromEntryStartDict grid entryListings
+                            |> Result.map Entry.flattenEntryMembershipDict
                 in
                     Expect.equal input expectedOutput
         ]

@@ -4,7 +4,7 @@ import Views
 import Puzzle exposing (Puzzle, Direction(..), SelectionPermit(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
-import Entry exposing (EntryListings)
+import Entry
 import Dict
 import Keyboard.Extra exposing (Key(..))
 import Html exposing (Html, div, text)
@@ -135,11 +135,11 @@ view model =
             div []
                 [ Views.gridView grid
                     model.puzzle.currentSelection
-                    model.puzzle.entryStarts
-                    model.puzzle.entryMemberships
+                    model.puzzle.entryStartDict
+                    model.puzzle.entryMembershipDict
                     ClickedSquare
                 , Views.entriesView
-                    model.puzzle.entryStarts
+                    model.puzzle.entryStartDict
                 ]
 
         Err string ->

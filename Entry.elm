@@ -1,14 +1,14 @@
 module Entry
     exposing
-        ( EntryListings
+        ( EntryStartDict
         , EntryStart(..)
-        , EntryMemberships
-        , allFromGrid
+        , EntryMembershipDict
+        , entryStartDictFromGrid
         , entryNumberAt
-        , entryMembershipsFromEntryListings
+        , entryMembershipDictFromEntryStartDict
         , acrossEntryMembership
         , downEntryMembership
-        , flattenEntryMemberships
+        , flattenEntryMembershipDict
         , acrossList
         , downList
         )
@@ -32,7 +32,7 @@ type EntryStart
     | AcrossAndDown Int String String
 
 
-type alias EntryListings =
+type alias EntryStartDict =
     Dict Coordinate EntryStart
 
 
@@ -41,11 +41,11 @@ type EntryMembership
     | BelongsToEntries { across : Int, down : Int }
 
 
-type alias EntryMemberships =
+type alias EntryMembershipDict =
     Dict Coordinate EntryMembership
 
 
-entryNumberAt : EntryListings -> Coordinate -> Maybe Int
+entryNumberAt : EntryStartDict -> Coordinate -> Maybe Int
 entryNumberAt entryListings coordinate =
     let
         getEntryNumber entryStart =
@@ -63,7 +63,7 @@ entryNumberAt entryListings coordinate =
             |> Maybe.map getEntryNumber
 
 
-acrossList : EntryListings -> List Entry
+acrossList : EntryStartDict -> List Entry
 acrossList entryListings =
     entryListings
         |> Dict.values
@@ -73,7 +73,7 @@ acrossList entryListings =
         |> sortEntries
 
 
-downList : EntryListings -> List Entry
+downList : EntryStartDict -> List Entry
 downList entryListings =
     entryListings
         |> Dict.values
@@ -124,15 +124,15 @@ downFromEntryStart entryStart =
             Just ( int, downEntry )
 
 
-allFromGrid : Grid -> EntryListings
-allFromGrid grid =
+entryStartDictFromGrid : Grid -> EntryStartDict
+entryStartDictFromGrid grid =
     grid
         |> Matrix.toIndexedArray
         |> Array.foldl (updateFromCoordinate grid) ( 1, Dict.empty )
         |> Tuple.second
 
 
-updateFromCoordinate : Grid -> ( ( Int, Int ), Square ) -> ( Int, EntryListings ) -> ( Int, EntryListings )
+updateFromCoordinate : Grid -> ( ( Int, Int ), Square ) -> ( Int, EntryStartDict ) -> ( Int, EntryStartDict )
 updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar ) =
     case square of
         LetterSquare _ ->
@@ -170,15 +170,15 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
             ( currentEntryNumber, entriesSoFar )
 
 
-entryMembershipsFromEntryListings : Grid -> EntryListings -> EntryMemberships
-entryMembershipsFromEntryListings grid entryListings =
+entryMembershipDictFromEntryStartDict : Grid -> EntryStartDict -> EntryMembershipDict
+entryMembershipDictFromEntryStartDict grid entryListings =
     grid
         |> Matrix.toIndexedArray
         |> Array.foldl (setEntryMembership grid entryListings) Dict.empty
 
 
-setEntryMembership : Grid -> EntryListings -> ( Coordinate, Square ) -> EntryMemberships -> EntryMemberships
-setEntryMembership grid entryListings ( coord, square ) entryMemberships =
+setEntryMembership : Grid -> EntryStartDict -> ( Coordinate, Square ) -> EntryMembershipDict -> EntryMembershipDict
+setEntryMembership grid entryListings ( coord, square ) entryMembershipDict =
     let
         membership =
             case square of
@@ -191,10 +191,10 @@ setEntryMembership grid entryListings ( coord, square ) entryMemberships =
                 BlockSquare ->
                     BelongsToNoEntries
     in
-        Dict.insert coord membership entryMemberships
+        Dict.insert coord membership entryMembershipDict
 
 
-findAcrossEntryMembership : Grid -> EntryListings -> Coordinate -> Int
+findAcrossEntryMembership : Grid -> EntryStartDict -> Coordinate -> Int
 findAcrossEntryMembership grid entryListings coordinate =
     case Grid.isAcrossEntryStart grid coordinate of
         True ->
@@ -205,7 +205,7 @@ findAcrossEntryMembership grid entryListings coordinate =
             findAcrossEntryMembership grid entryListings (Coordinate.atLeft coordinate)
 
 
-findDownEntryMembership : Grid -> EntryListings -> Coordinate -> Int
+findDownEntryMembership : Grid -> EntryStartDict -> Coordinate -> Int
 findDownEntryMembership grid entryListings coordinate =
     case Grid.isDownEntryStart grid coordinate of
         True ->
@@ -216,9 +216,9 @@ findDownEntryMembership grid entryListings coordinate =
             findDownEntryMembership grid entryListings (Coordinate.above coordinate)
 
 
-flattenEntryMemberships : EntryMemberships -> List ( Coordinate, List Int )
-flattenEntryMemberships entryMemberships =
-    Dict.map (\m -> membershipToIntList) entryMemberships
+flattenEntryMembershipDict : EntryMembershipDict -> List ( Coordinate, List Int )
+flattenEntryMembershipDict entryMembershipDict =
+    Dict.map (\m -> membershipToIntList) entryMembershipDict
         |> Dict.toList
 
 
@@ -232,11 +232,11 @@ membershipToIntList entryMembership =
             [ across, down ]
 
 
-acrossEntryMembership : Coordinate -> EntryMemberships -> Maybe Int
-acrossEntryMembership coordinate entryMemberships =
+acrossEntryMembership : Coordinate -> EntryMembershipDict -> Maybe Int
+acrossEntryMembership coordinate entryMembershipDict =
     let
         entryMembership =
-            Dict.get coordinate entryMemberships
+            Dict.get coordinate entryMembershipDict
     in
         case entryMembership of
             Just BelongsToNoEntries ->
@@ -249,11 +249,11 @@ acrossEntryMembership coordinate entryMemberships =
                 Nothing
 
 
-downEntryMembership : Coordinate -> EntryMemberships -> Maybe Int
-downEntryMembership coordinate entryMemberships =
+downEntryMembership : Coordinate -> EntryMembershipDict -> Maybe Int
+downEntryMembership coordinate entryMembershipDict =
     let
         entryMembership =
-            Dict.get coordinate entryMemberships
+            Dict.get coordinate entryMembershipDict
     in
         case entryMembership of
             Just BelongsToNoEntries ->
