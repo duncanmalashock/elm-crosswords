@@ -7,6 +7,7 @@ import Grid exposing (Grid)
 import Entry
 import Dict
 import Keyboard.Extra exposing (Key(..))
+import KeyboardUtils
 import Html exposing (Html, div, text)
 
 
@@ -113,7 +114,7 @@ updateWithNewPressedKeys newPressedKeys model =
                 Puzzle.moveSelectionDown CanSelectOnlyLetterSquares model.puzzle
             else if (List.member Keyboard.Extra.Space changedKeys) then
                 Puzzle.switchSelectionDirection model.puzzle
-            else if (Puzzle.containsLetterKeys changedKeys) then
+            else if (KeyboardUtils.containsLetterKeys changedKeys) then
                 Puzzle.typeLetters changedKeys CanSelectOnlyLetterSquares model.puzzle
             else if (List.member Keyboard.Extra.BackSpace changedKeys) then
                 Puzzle.deleteLetter CanSelectOnlyLetterSquares model.puzzle
