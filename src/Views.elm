@@ -1,9 +1,11 @@
 module Views exposing (..)
 
-import Puzzle exposing (Selection, Direction(..))
+import Puzzle exposing (Selection)
 import Grid exposing (Grid, Square(..))
+import Clue exposing (ClueDict, Clue)
 import Entry exposing (EntryStartDict, EntryMembershipDict)
 import Coordinate exposing (Coordinate)
+import Direction exposing (Direction(..))
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -49,9 +51,9 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                                             Entry.acrossEntryMembership selectionCoordinate entryMembershipDict
                                     in
                                         if coordinate == selectionCoordinate then
-                                            [ ( "background-color", "#FADA4A" ) ]
+                                            [ ( "background-color", "#009dff" ) ]
                                         else if (Entry.acrossEntryMembership coordinate entryMembershipDict == selectionEntry) then
-                                            [ ( "background-color", "#B0D8FB" ) ]
+                                            [ ( "background-color", "#e5f5ff" ) ]
                                         else
                                             []
 
@@ -61,9 +63,9 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                                             Entry.downEntryMembership selectionCoordinate entryMembershipDict
                                     in
                                         if coordinate == selectionCoordinate then
-                                            [ ( "background-color", "#FADA4A" ) ]
+                                            [ ( "background-color", "#009dff" ) ]
                                         else if (Entry.downEntryMembership coordinate entryMembershipDict == selectionEntry) then
-                                            [ ( "background-color", "#B0D8FB" ) ]
+                                            [ ( "background-color", "#e5f5ff" ) ]
                                         else
                                             []
 
@@ -126,18 +128,18 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                 []
 
 
-entriesView : EntryStartDict -> Html msg
-entriesView entryListings =
+cluesView : ClueDict -> Html msg
+cluesView clues =
     let
-        acrossEntries =
-            entryListings
-                |> Entry.acrossList
-                |> List.map entryView
+        acrossClues =
+            clues
+                |> Clue.across
+                |> List.map clueView
 
-        downEntries =
-            entryListings
-                |> Entry.downList
-                |> List.map entryView
+        downClues =
+            clues
+                |> Clue.down
+                |> List.map clueView
     in
         div
             [ style
@@ -157,7 +159,7 @@ entriesView entryListings =
                     ]
                 ]
                 ((div [] [ text "Across" ])
-                    :: acrossEntries
+                    :: acrossClues
                 )
             , div
                 [ style
@@ -167,12 +169,12 @@ entriesView entryListings =
                     ]
                 ]
                 ((div [] [ text "Down" ])
-                    :: downEntries
+                    :: downClues
                 )
             ]
 
 
-entryView : ( Int, String ) -> Html msg
-entryView ( int, entry ) =
+clueView : Clue -> Html msg
+clueView clue =
     div []
-        [ text <| (toString int) ++ ": " ++ entry ]
+        [ text <| (toString clue.index) ++ ": " ++ clue.clue ]

@@ -27,9 +27,9 @@ type alias Entry =
 
 
 type EntryStart
-    = AcrossOnly Int String
-    | DownOnly Int String
-    | AcrossAndDown Int String String
+    = AcrossOnlyStart Int String
+    | DownOnlyStart Int String
+    | AcrossAndDownStarts Int String String
 
 
 type alias EntryStartDict =
@@ -50,13 +50,13 @@ entryNumberAt entryListings coordinate =
     let
         getEntryNumber entryStart =
             case entryStart of
-                AcrossOnly i _ ->
+                AcrossOnlyStart i _ ->
                     i
 
-                DownOnly i _ ->
+                DownOnlyStart i _ ->
                     i
 
-                AcrossAndDown i _ _ ->
+                AcrossAndDownStarts i _ _ ->
                     i
     in
         Dict.get coordinate entryListings
@@ -101,26 +101,26 @@ isJust maybe =
 acrossFromEntryStart : EntryStart -> Maybe Entry
 acrossFromEntryStart entryStart =
     case entryStart of
-        AcrossOnly int acrossEntry ->
+        AcrossOnlyStart int acrossEntry ->
             Just ( int, acrossEntry )
 
-        DownOnly int downEntry ->
+        DownOnlyStart int downEntry ->
             Nothing
 
-        AcrossAndDown int acrossEntry downEntry ->
+        AcrossAndDownStarts int acrossEntry downEntry ->
             Just ( int, acrossEntry )
 
 
 downFromEntryStart : EntryStart -> Maybe Entry
 downFromEntryStart entryStart =
     case entryStart of
-        AcrossOnly int acrossEntry ->
+        AcrossOnlyStart int acrossEntry ->
             Nothing
 
-        DownOnly int downEntry ->
+        DownOnlyStart int downEntry ->
             Just ( int, downEntry )
 
-        AcrossAndDown int acrossEntry downEntry ->
+        AcrossAndDownStarts int acrossEntry downEntry ->
             Just ( int, downEntry )
 
 
@@ -152,14 +152,14 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
                         newEntryStart =
                             if Grid.isAcrossEntryStart grid coord then
                                 if Grid.isDownEntryStart grid coord then
-                                    AcrossAndDown currentEntryNumber
+                                    AcrossAndDownStarts currentEntryNumber
                                         (acrossEntry grid coord)
                                         (downEntry grid coord)
                                 else
-                                    AcrossOnly currentEntryNumber
+                                    AcrossOnlyStart currentEntryNumber
                                         (acrossEntry grid coord)
                             else
-                                DownOnly currentEntryNumber
+                                DownOnlyStart currentEntryNumber
                                     (downEntry grid coord)
                     in
                         ( nextEntryNumber, Dict.insert coord newEntryStart entriesSoFar )

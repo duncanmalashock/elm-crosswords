@@ -1,14 +1,15 @@
 module Main exposing (main)
 
 import Views
-import Puzzle exposing (Puzzle, Direction(..), SelectionPermit(..))
+import Puzzle exposing (Puzzle, SelectionPermit(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry
 import Dict
 import Keyboard.Extra exposing (Key(..))
 import KeyboardUtils
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, input, label)
+import Html.Attributes exposing (type_, id, name, for, value, checked, style)
 
 
 main : Program Never Model Msg
@@ -139,9 +140,44 @@ view model =
                     model.puzzle.entryStartDict
                     model.puzzle.entryMembershipDict
                     ClickedSquare
-                , Views.entriesView
-                    model.puzzle.entryStartDict
+                , Views.cluesView
+                    model.puzzle.cluesDict
+                , toggleEditorView model
                 ]
 
         Err string ->
             div [] [ text "couldn't load!" ]
+
+
+toggleEditorView : Model -> Html Msg
+toggleEditorView model =
+    div
+        [ style
+            [ ( "margin-top", "20px" )
+            ]
+        ]
+        [ input
+            [ type_ "radio"
+            , id "playing"
+            , name "mode"
+            , value "playing"
+            , checked True
+            ]
+            []
+        , label
+            [ for "playing" ]
+            [ text "Playing" ]
+        , input
+            [ type_ "radio"
+            , id "editing"
+            , name "mode"
+            , value "editing"
+            , style
+                [ ( "margin-left", "10px" )
+                ]
+            ]
+            []
+        , label
+            [ for "editing" ]
+            [ text "Editing" ]
+        ]

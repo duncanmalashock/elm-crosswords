@@ -1,7 +1,8 @@
 module PuzzleTests exposing (..)
 
-import Puzzle exposing (Direction(..), SelectionPermit(..))
+import Puzzle exposing (SelectionPermit(..))
 import Grid exposing (Square(..))
+import Direction exposing (Direction(..))
 import Test exposing (Test, describe, test, skip)
 import Expect
 

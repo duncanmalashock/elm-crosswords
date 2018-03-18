@@ -2,7 +2,6 @@ module Puzzle
     exposing
         ( Puzzle
         , Selection
-        , Direction(..)
         , SelectionPermit(..)
         , fromString
         , selection
@@ -19,9 +18,12 @@ module Puzzle
 
 import Grid exposing (Grid)
 import Entry
+import Direction exposing (Direction(..))
+import Clue exposing (ClueDict)
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
 import Keyboard.Extra exposing (Key(..))
+import Dict
 
 
 type alias Puzzle =
@@ -29,16 +31,12 @@ type alias Puzzle =
     , currentSelection : Maybe Selection
     , entryStartDict : Entry.EntryStartDict
     , entryMembershipDict : Entry.EntryMembershipDict
+    , cluesDict : ClueDict
     }
 
 
 type alias Selection =
     ( Coordinate, Direction )
-
-
-type Direction
-    = Across
-    | Down
 
 
 type SelectionPermit
@@ -60,11 +58,15 @@ fromString gridWidth gridHeight string =
 
         entryMembershipDict =
             Entry.entryMembershipDictFromEntryStartDict gridDefault entryStartDict
+
+        cluesDict =
+            Clue.clueDictfromEntryStartDict entryStartDict
     in
         { grid = gridResult
         , currentSelection = Nothing
         , entryStartDict = entryStartDict
         , entryMembershipDict = entryMembershipDict
+        , cluesDict = cluesDict
         }
 
 
