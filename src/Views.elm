@@ -2,13 +2,12 @@ module Views exposing (..)
 
 import Puzzle exposing (Selection)
 import Grid exposing (Grid, Square(..))
-import Clue exposing (ClueDict, Clue)
-import Entry exposing (EntryStartDict, EntryMembershipDict)
+import Entry exposing (Entry, EntryStartDict, EntryMembershipDict)
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, textarea)
 import Html.Attributes exposing (class, style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 
 
 gridView : Grid -> Maybe Selection -> EntryStartDict -> EntryMembershipDict -> (Coordinate -> msg) -> Html msg
@@ -128,18 +127,18 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                 []
 
 
-cluesView : ClueDict -> Html msg
-cluesView clues =
+cluesView : EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
+cluesView entries clueEditedMsg clueEditClickedMsg =
     let
         acrossClues =
-            clues
-                |> Clue.across
-                |> List.map clueView
+            entries
+                |> Entry.acrossList
+                |> List.map (clueEditView clueEditedMsg clueEditClickedMsg)
 
         downClues =
-            clues
-                |> Clue.down
-                |> List.map clueView
+            entries
+                |> Entry.downList
+                |> List.map (clueEditView clueEditedMsg clueEditClickedMsg)
     in
         div
             [ style
@@ -174,7 +173,19 @@ cluesView clues =
             ]
 
 
-clueView : Clue -> Html msg
-clueView clue =
+clueView : Entry -> Html msg
+clueView entry =
     div []
-        [ text <| (toString clue.index) ++ ": " ++ clue.clue ]
+        [ text <| (toString entry.index) ++ ": " ++ entry.clue ]
+
+
+clueEditView : (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
+clueEditView clueEditedMsg clueEditClickedMsg ( coordinate, entry ) =
+    div []
+        [ text <| (toString entry.index) ++ "(" ++ entry.text ++ ")"
+        , textarea
+            [ onInput (clueEditedMsg coordinate entry)
+            , onClick clueEditClickedMsg
+            ]
+            [ text entry.clue ]
+        ]

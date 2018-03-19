@@ -8,18 +8,19 @@ module Puzzle
         , selectionCoordinate
         , switchSelectionDirection
         , setSelection
+        , clearSelection
         , moveSelectionLeft
         , moveSelectionRight
         , moveSelectionUp
         , moveSelectionDown
         , typeLetters
         , deleteLetter
+        , updateEntry
         )
 
 import Grid exposing (Grid)
-import Entry
+import Entry exposing (Entry)
 import Direction exposing (Direction(..))
-import Clue exposing (ClueDict)
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
 import Keyboard.Extra exposing (Key(..))
@@ -31,7 +32,6 @@ type alias Puzzle =
     , currentSelection : Maybe Selection
     , entryStartDict : Entry.EntryStartDict
     , entryMembershipDict : Entry.EntryMembershipDict
-    , cluesDict : ClueDict
     }
 
 
@@ -58,15 +58,11 @@ fromString gridWidth gridHeight string =
 
         entryMembershipDict =
             Entry.entryMembershipDictFromEntryStartDict gridDefault entryStartDict
-
-        cluesDict =
-            Clue.clueDictfromEntryStartDict entryStartDict
     in
-        { grid = gridResult
+        { grid = Result.map Grid.clear gridResult
         , currentSelection = Nothing
         , entryStartDict = entryStartDict
         , entryMembershipDict = entryMembershipDict
-        , cluesDict = cluesDict
         }
 
 
@@ -242,3 +238,13 @@ setSelection (( x, y ) as coordinate) permit puzzle =
 
         Err _ ->
             { puzzle | currentSelection = Nothing }
+
+
+clearSelection : Puzzle -> Puzzle
+clearSelection puzzle =
+    { puzzle | currentSelection = Nothing }
+
+
+updateEntry : Puzzle -> Coordinate -> Entry -> Puzzle
+updateEntry puzzle coordinate newClue =
+    { puzzle | entryStartDict = Entry.updateEntry puzzle.entryStartDict coordinate newClue }

@@ -1,8 +1,10 @@
 module Entry
     exposing
-        ( EntryStartDict
+        ( Entry
+        , EntryStartDict
         , EntryStart(..)
         , EntryMembershipDict
+        , updateEntry
         , entryStartDictFromGrid
         , entryNumberAt
         , entryMembershipDictFromEntryStartDict
@@ -13,23 +15,38 @@ module Entry
         , downList
         )
 
+import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid, Square(..))
 import Matrix exposing (Matrix)
 import Array.Hamt as Array exposing (Array)
 import Dict exposing (Dict)
+import Maybe.Extra as Maybe
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 
 
 type alias Entry =
-    ( Int, String )
+    { index : Int
+    , direction : Direction
+    , text : String
+    , clue : String
+    }
+
+
+entry : Int -> Direction -> String -> String -> Entry
+entry index direction text clue =
+    { index = index
+    , direction = direction
+    , text = text
+    , clue = clue
+    }
 
 
 type EntryStart
-    = AcrossOnlyStart Int String
-    | DownOnlyStart Int String
-    | AcrossAndDownStarts Int String String
+    = AcrossOnlyStart Entry
+    | DownOnlyStart Entry
+    | AcrossAndDownStarts Entry Entry
 
 
 type alias EntryStartDict =
@@ -50,78 +67,106 @@ entryNumberAt entryListings coordinate =
     let
         getEntryNumber entryStart =
             case entryStart of
-                AcrossOnlyStart i _ ->
-                    i
+                AcrossOnlyStart a ->
+                    a.index
 
-                DownOnlyStart i _ ->
-                    i
+                DownOnlyStart d ->
+                    d.index
 
-                AcrossAndDownStarts i _ _ ->
-                    i
+                AcrossAndDownStarts a d ->
+                    a.index
     in
         Dict.get coordinate entryListings
             |> Maybe.map getEntryNumber
 
 
-acrossList : EntryStartDict -> List Entry
+updateEntry : EntryStartDict -> Coordinate -> Entry -> EntryStartDict
+updateEntry entryStartDict coordinate newEntry =
+    let
+        updateMaybeEntryStart =
+            Maybe.map
+                (\es ->
+                    case es of
+                        AcrossOnlyStart acrossEntry ->
+                            AcrossOnlyStart newEntry
+
+                        DownOnlyStart downEntry ->
+                            DownOnlyStart newEntry
+
+                        AcrossAndDownStarts acrossEntry downEntry ->
+                            case newEntry.direction of
+                                Across ->
+                                    AcrossAndDownStarts newEntry downEntry
+
+                                Down ->
+                                    AcrossAndDownStarts acrossEntry newEntry
+                )
+    in
+        Dict.update coordinate updateMaybeEntryStart entryStartDict
+
+
+keepOnlyJusts : List ( Coordinate, Maybe Entry ) -> List ( Coordinate, Entry )
+keepOnlyJusts entryMaybeCoordinateList =
+    let
+        processMaybeEntry ( c, maybeEntry ) =
+            case maybeEntry of
+                Just entry ->
+                    [ ( c, entry ) ]
+
+                Nothing ->
+                    []
+    in
+        List.map processMaybeEntry entryMaybeCoordinateList
+            |> List.concat
+
+
+acrossList : EntryStartDict -> List ( Coordinate, Entry )
 acrossList entryListings =
     entryListings
-        |> Dict.values
-        |> List.map acrossFromEntryStart
-        |> List.filter isJust
-        |> List.map (Maybe.withDefault ( -1, "" ))
+        |> Dict.toList
+        |> List.map (\( k, v ) -> ( k, acrossFromEntryStart v ))
+        |> keepOnlyJusts
         |> sortEntries
 
 
-downList : EntryStartDict -> List Entry
+downList : EntryStartDict -> List ( Coordinate, Entry )
 downList entryListings =
     entryListings
-        |> Dict.values
-        |> List.map downFromEntryStart
-        |> List.filter isJust
-        |> List.map (Maybe.withDefault ( -1, "" ))
+        |> Dict.toList
+        |> List.map (\( k, v ) -> ( k, downFromEntryStart v ))
+        |> keepOnlyJusts
         |> sortEntries
 
 
-sortEntries : List Entry -> List Entry
+sortEntries : List ( Coordinate, Entry ) -> List ( Coordinate, Entry )
 sortEntries =
-    List.sortBy (\( i, e ) -> i)
-
-
-isJust : Maybe a -> Bool
-isJust maybe =
-    case maybe of
-        Just _ ->
-            True
-
-        Nothing ->
-            False
+    List.sortBy (\( c, e ) -> e.index)
 
 
 acrossFromEntryStart : EntryStart -> Maybe Entry
 acrossFromEntryStart entryStart =
     case entryStart of
-        AcrossOnlyStart int acrossEntry ->
-            Just ( int, acrossEntry )
+        AcrossOnlyStart acrossEntry ->
+            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text ""
 
-        DownOnlyStart int downEntry ->
+        DownOnlyStart downEntry ->
             Nothing
 
-        AcrossAndDownStarts int acrossEntry downEntry ->
-            Just ( int, acrossEntry )
+        AcrossAndDownStarts acrossEntry _ ->
+            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text ""
 
 
 downFromEntryStart : EntryStart -> Maybe Entry
 downFromEntryStart entryStart =
     case entryStart of
-        AcrossOnlyStart int acrossEntry ->
+        AcrossOnlyStart _ ->
             Nothing
 
-        DownOnlyStart int downEntry ->
-            Just ( int, downEntry )
+        DownOnlyStart downEntry ->
+            Just <| entry downEntry.index downEntry.direction downEntry.text ""
 
-        AcrossAndDownStarts int acrossEntry downEntry ->
-            Just ( int, downEntry )
+        AcrossAndDownStarts _ downEntry ->
+            Just <| entry downEntry.index downEntry.direction downEntry.text ""
 
 
 entryStartDictFromGrid : Grid -> EntryStartDict
@@ -152,15 +197,15 @@ updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar )
                         newEntryStart =
                             if Grid.isAcrossEntryStart grid coord then
                                 if Grid.isDownEntryStart grid coord then
-                                    AcrossAndDownStarts currentEntryNumber
-                                        (acrossEntry grid coord)
-                                        (downEntry grid coord)
+                                    AcrossAndDownStarts
+                                        (entry currentEntryNumber Across (acrossEntry grid coord) "")
+                                        (entry currentEntryNumber Down (downEntry grid coord) "")
                                 else
-                                    AcrossOnlyStart currentEntryNumber
-                                        (acrossEntry grid coord)
+                                    AcrossOnlyStart
+                                        (entry currentEntryNumber Across (acrossEntry grid coord) "")
                             else
-                                DownOnlyStart currentEntryNumber
-                                    (downEntry grid coord)
+                                DownOnlyStart
+                                    (entry currentEntryNumber Down (downEntry grid coord) "")
                     in
                         ( nextEntryNumber, Dict.insert coord newEntryStart entriesSoFar )
                 else

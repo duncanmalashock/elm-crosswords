@@ -8,6 +8,7 @@ module Grid
         , blank
         , fromString
         , toRows
+        , clear
         , isAcrossEntryStart
         , isDownEntryStart
         , coordIsInBounds
@@ -109,6 +110,20 @@ charToSquare char =
 updateLetterSquare : Coordinate -> Char -> Grid -> Grid
 updateLetterSquare ( x, y ) char grid =
     Matrix.set x y (letterSquare (Char.toUpper char)) grid
+
+
+clear : Grid -> Grid
+clear grid =
+    Matrix.map
+        (\s ->
+            case s of
+                LetterSquare _ ->
+                    blankSquare
+
+                BlockSquare ->
+                    blockSquare
+        )
+        grid
 
 
 toRows : Grid -> List (List ( Coordinate, Square ))

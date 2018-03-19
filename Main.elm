@@ -4,7 +4,7 @@ import Views
 import Puzzle exposing (Puzzle, SelectionPermit(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
-import Entry
+import Entry exposing (Entry)
 import Dict
 import Keyboard.Extra exposing (Key(..))
 import KeyboardUtils
@@ -30,6 +30,8 @@ type alias Model =
 
 type Msg
     = ClickedSquare Coordinate
+    | ClueEditedMsg Coordinate Entry String
+    | ClueEditClickedMsg
     | KeyboardMsg Keyboard.Extra.Msg
 
 
@@ -83,10 +85,26 @@ update msg model =
                         Nothing ->
                             identity
             in
-                ( { model | puzzle = Puzzle.setSelection coordinate CanSelectOnlyLetterSquares model.puzzle }
+                ( { model
+                    | puzzle =
+                        Puzzle.setSelection coordinate CanSelectOnlyLetterSquares model.puzzle
+                  }
                     |> updateSelectionDirectionFn
                 , Cmd.none
                 )
+
+        ClueEditedMsg coordinate entry newClue ->
+            ( { model
+                | puzzle =
+                    Puzzle.updateEntry model.puzzle
+                        coordinate
+                        { entry | clue = newClue }
+              }
+            , Cmd.none
+            )
+
+        ClueEditClickedMsg ->
+            ( { model | puzzle = Puzzle.clearSelection model.puzzle }, Cmd.none )
 
         KeyboardMsg keyMsg ->
             let
@@ -140,8 +158,9 @@ view model =
                     model.puzzle.entryStartDict
                     model.puzzle.entryMembershipDict
                     ClickedSquare
-                , Views.cluesView
-                    model.puzzle.cluesDict
+                , Views.cluesView model.puzzle.entryStartDict
+                    ClueEditedMsg
+                    ClueEditClickedMsg
                 , toggleEditorView model
                 ]
 
