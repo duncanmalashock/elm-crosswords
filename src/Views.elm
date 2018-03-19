@@ -7,7 +7,7 @@ import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
 import Html exposing (Html, div, text, textarea)
 import Html.Attributes exposing (class, style)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, onFocus, onMouseDown)
 
 
 gridView : Grid -> Maybe Selection -> EntryStartDict -> EntryMembershipDict -> (Coordinate -> msg) -> Html msg
@@ -26,6 +26,7 @@ gridView grid currentSelection entryListings entryMembershipDict clickMsg =
                 , ( "border-left", "1px solid gray" )
                 , ( "border-top", "1px solid gray" )
                 , ( "font-family", "Helvetica, Arial, sans-serif" )
+                , ( "user-select", "none" )
                 ]
             ]
         )
@@ -90,7 +91,7 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
             in
                 div
                     [ class "square--open"
-                    , onClick <| clickMsg ( x, y )
+                    , onMouseDown <| clickMsg ( x, y )
                     , style <|
                         [ ( "width", "32px" )
                         , ( "height", "32px" )
@@ -114,7 +115,7 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
         BlockSquare ->
             div
                 [ class "square--filled"
-                , onClick <| clickMsg ( x, y )
+                , onMouseDown <| clickMsg ( x, y )
                 , style
                     [ ( "width", "32px" )
                     , ( "height", "32px" )
@@ -128,17 +129,17 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
 
 
 cluesView : EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
-cluesView entries clueEditedMsg clueEditClickedMsg =
+cluesView entries clueEditedMsg clueEditFocusedMsg =
     let
         acrossClues =
             entries
                 |> Entry.acrossList
-                |> List.map (clueEditView clueEditedMsg clueEditClickedMsg)
+                |> List.map (clueEditView clueEditedMsg clueEditFocusedMsg)
 
         downClues =
             entries
                 |> Entry.downList
-                |> List.map (clueEditView clueEditedMsg clueEditClickedMsg)
+                |> List.map (clueEditView clueEditedMsg clueEditFocusedMsg)
     in
         div
             [ style
@@ -180,12 +181,12 @@ clueView entry =
 
 
 clueEditView : (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
-clueEditView clueEditedMsg clueEditClickedMsg ( coordinate, entry ) =
+clueEditView clueEditedMsg clueEditFocusedMsg ( coordinate, entry ) =
     div []
         [ text <| (toString entry.index) ++ "(" ++ entry.text ++ ")"
         , textarea
             [ onInput (clueEditedMsg coordinate entry)
-            , onClick clueEditClickedMsg
+            , onFocus clueEditFocusedMsg
             ]
             [ text entry.clue ]
         ]

@@ -31,7 +31,7 @@ type alias Model =
 type Msg
     = ClickedSquare Coordinate
     | ClueEditedMsg Coordinate Entry String
-    | ClueEditClickedMsg
+    | ClueEditFocusedMsg
     | KeyboardMsg Keyboard.Extra.Msg
 
 
@@ -103,7 +103,7 @@ update msg model =
             , Cmd.none
             )
 
-        ClueEditClickedMsg ->
+        ClueEditFocusedMsg ->
             ( { model | puzzle = Puzzle.clearSelection model.puzzle }, Cmd.none )
 
         KeyboardMsg keyMsg ->
@@ -160,7 +160,7 @@ view model =
                     ClickedSquare
                 , Views.cluesView model.puzzle.entryStartDict
                     ClueEditedMsg
-                    ClueEditClickedMsg
+                    ClueEditFocusedMsg
                 , toggleEditorView model
                 ]
 
