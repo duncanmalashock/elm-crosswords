@@ -147,13 +147,13 @@ acrossFromEntryStart : EntryStart -> Maybe Entry
 acrossFromEntryStart entryStart =
     case entryStart of
         AcrossOnlyStart acrossEntry ->
-            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text ""
+            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text acrossEntry.clue
 
         DownOnlyStart downEntry ->
             Nothing
 
         AcrossAndDownStarts acrossEntry _ ->
-            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text ""
+            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text acrossEntry.clue
 
 
 downFromEntryStart : EntryStart -> Maybe Entry
@@ -163,10 +163,10 @@ downFromEntryStart entryStart =
             Nothing
 
         DownOnlyStart downEntry ->
-            Just <| entry downEntry.index downEntry.direction downEntry.text ""
+            Just <| entry downEntry.index downEntry.direction downEntry.text downEntry.clue
 
         AcrossAndDownStarts _ downEntry ->
-            Just <| entry downEntry.index downEntry.direction downEntry.text ""
+            Just <| entry downEntry.index downEntry.direction downEntry.text downEntry.clue
 
 
 entryStartDictFromGrid : Grid -> EntryStartDict

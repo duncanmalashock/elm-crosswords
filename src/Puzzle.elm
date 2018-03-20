@@ -2,6 +2,7 @@ module Puzzle
     exposing
         ( Puzzle
         , Selection
+        , EditMode(..)
         , SelectionPermit(..)
         , fromString
         , selection
@@ -15,6 +16,7 @@ module Puzzle
         , moveSelectionDown
         , typeLetters
         , deleteLetter
+        , setEditMode
         , updateEntry
         )
 
@@ -32,6 +34,7 @@ type alias Puzzle =
     , currentSelection : Maybe Selection
     , entryStartDict : Entry.EntryStartDict
     , entryMembershipDict : Entry.EntryMembershipDict
+    , editMode : EditMode
     }
 
 
@@ -44,8 +47,13 @@ type SelectionPermit
     | CanSelectOnlyLetterSquares
 
 
-fromString : Int -> Int -> String -> Puzzle
-fromString gridWidth gridHeight string =
+type EditMode
+    = Solving
+    | Editing
+
+
+fromString : Int -> Int -> String -> EditMode -> Puzzle
+fromString gridWidth gridHeight string editMode =
     let
         gridResult =
             Grid.fromString gridWidth gridHeight string
@@ -58,11 +66,20 @@ fromString gridWidth gridHeight string =
 
         entryMembershipDict =
             Entry.entryMembershipDictFromEntryStartDict gridDefault entryStartDict
+
+        gridForDisplay =
+            case editMode of
+                Editing ->
+                    gridResult
+
+                Solving ->
+                    Result.map Grid.clear gridResult
     in
-        { grid = Result.map Grid.clear gridResult
+        { grid = gridForDisplay
         , currentSelection = Nothing
         , entryStartDict = entryStartDict
         , entryMembershipDict = entryMembershipDict
+        , editMode = editMode
         }
 
 
@@ -243,6 +260,11 @@ setSelection (( x, y ) as coordinate) permit puzzle =
 clearSelection : Puzzle -> Puzzle
 clearSelection puzzle =
     { puzzle | currentSelection = Nothing }
+
+
+setEditMode : EditMode -> Puzzle -> Puzzle
+setEditMode editMode puzzle =
+    { puzzle | editMode = editMode }
 
 
 updateEntry : Puzzle -> Coordinate -> Entry -> Puzzle

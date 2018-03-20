@@ -6,7 +6,7 @@ import Entry exposing (Entry, EntryStartDict, EntryMembershipDict)
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
 import Html exposing (Html, div, text, textarea)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, value)
 import Html.Events exposing (onClick, onInput, onFocus, onMouseDown)
 
 
@@ -128,8 +128,54 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                 []
 
 
-cluesView : EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
-cluesView entries clueEditedMsg clueEditFocusedMsg =
+cluesView : EntryStartDict -> Html msg
+cluesView entries =
+    let
+        acrossClues =
+            entries
+                |> Entry.acrossList
+                |> List.map clueView
+
+        downClues =
+            entries
+                |> Entry.downList
+                |> List.map clueView
+    in
+        div
+            [ style
+                [ ( "display", "inline-block" )
+                , ( "vertical-align", "top" )
+                , ( "margin-left", "10px" )
+                , ( "font-family", "Helvetica, Arial, sans-serif" )
+                , ( "height", "481px" )
+                , ( "overflow", "auto" )
+                ]
+            ]
+            [ div
+                [ style
+                    [ ( "display", "inline-block" )
+                    , ( "vertical-align", "top" )
+                    , ( "margin-left", "10px" )
+                    ]
+                ]
+                ((div [] [ text "Across" ])
+                    :: acrossClues
+                )
+            , div
+                [ style
+                    [ ( "display", "inline-block" )
+                    , ( "vertical-align", "top" )
+                    , ( "margin-left", "10px" )
+                    ]
+                ]
+                ((div [] [ text "Down" ])
+                    :: downClues
+                )
+            ]
+
+
+cluesEditView : EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
+cluesEditView entries clueEditedMsg clueEditFocusedMsg =
     let
         acrossClues =
             entries
@@ -174,8 +220,8 @@ cluesView entries clueEditedMsg clueEditFocusedMsg =
             ]
 
 
-clueView : Entry -> Html msg
-clueView entry =
+clueView : ( Coordinate, Entry ) -> Html msg
+clueView ( coordinate, entry ) =
     div []
         [ text <| (toString entry.index) ++ ": " ++ entry.clue ]
 
@@ -183,10 +229,15 @@ clueView entry =
 clueEditView : (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
 clueEditView clueEditedMsg clueEditFocusedMsg ( coordinate, entry ) =
     div []
-        [ text <| (toString entry.index) ++ "(" ++ entry.text ++ ")"
-        , textarea
-            [ onInput (clueEditedMsg coordinate entry)
-            , onFocus clueEditFocusedMsg
+        [ div []
+            [ text <| (toString entry.index) ++ ": (" ++ entry.text ++ ")" ]
+        , div
+            []
+            [ textarea
+                [ onInput (clueEditedMsg coordinate entry)
+                , onFocus clueEditFocusedMsg
+                , value entry.clue
+                ]
+                []
             ]
-            [ text entry.clue ]
         ]

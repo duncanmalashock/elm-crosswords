@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Views
-import Puzzle exposing (Puzzle, SelectionPermit(..))
+import Puzzle exposing (Puzzle, EditMode(..), SelectionPermit(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry exposing (Entry)
@@ -10,6 +10,7 @@ import Keyboard.Extra exposing (Key(..))
 import KeyboardUtils
 import Html exposing (Html, div, text, input, label)
 import Html.Attributes exposing (type_, id, name, for, value, checked, style)
+import Html.Events exposing (onClick)
 
 
 main : Program Never Model Msg
@@ -32,6 +33,7 @@ type Msg
     = ClickedSquare Coordinate
     | ClueEditedMsg Coordinate Entry String
     | ClueEditFocusedMsg
+    | EditModeClicked EditMode
     | KeyboardMsg Keyboard.Extra.Msg
 
 
@@ -62,7 +64,7 @@ init =
             ]
                 |> String.concat
     in
-        ( { puzzle = Puzzle.fromString 15 15 stringInput
+        ( { puzzle = Puzzle.fromString 15 15 stringInput Editing
           , pressedKeys = []
           }
         , Cmd.none
@@ -105,6 +107,9 @@ update msg model =
 
         ClueEditFocusedMsg ->
             ( { model | puzzle = Puzzle.clearSelection model.puzzle }, Cmd.none )
+
+        EditModeClicked editMode ->
+            ( { model | puzzle = Puzzle.setEditMode editMode model.puzzle }, Cmd.none )
 
         KeyboardMsg keyMsg ->
             let
@@ -152,17 +157,26 @@ view : Model -> Html Msg
 view model =
     case model.puzzle.grid of
         Ok grid ->
-            div []
-                [ Views.gridView grid
-                    model.puzzle.currentSelection
-                    model.puzzle.entryStartDict
-                    model.puzzle.entryMembershipDict
-                    ClickedSquare
-                , Views.cluesView model.puzzle.entryStartDict
-                    ClueEditedMsg
-                    ClueEditFocusedMsg
-                , toggleEditorView model
-                ]
+            let
+                clues =
+                    case model.puzzle.editMode of
+                        Solving ->
+                            Views.cluesView model.puzzle.entryStartDict
+
+                        Editing ->
+                            Views.cluesEditView model.puzzle.entryStartDict
+                                ClueEditedMsg
+                                ClueEditFocusedMsg
+            in
+                div []
+                    [ Views.gridView grid
+                        model.puzzle.currentSelection
+                        model.puzzle.entryStartDict
+                        model.puzzle.entryMembershipDict
+                        ClickedSquare
+                    , clues
+                    , toggleEditorView model
+                    ]
 
         Err string ->
             div [] [ text "couldn't load!" ]
@@ -177,20 +191,23 @@ toggleEditorView model =
         ]
         [ input
             [ type_ "radio"
-            , id "playing"
+            , id "solving"
             , name "mode"
-            , value "playing"
-            , checked True
+            , value "solving"
+            , checked (model.puzzle.editMode == Solving)
+            , onClick (EditModeClicked Solving)
             ]
             []
         , label
-            [ for "playing" ]
-            [ text "Playing" ]
+            [ for "solving" ]
+            [ text "Solving" ]
         , input
             [ type_ "radio"
             , id "editing"
             , name "mode"
             , value "editing"
+            , checked (model.puzzle.editMode == Editing)
+            , onClick (EditModeClicked Editing)
             , style
                 [ ( "margin-left", "10px" )
                 ]
