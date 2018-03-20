@@ -161,10 +161,16 @@ view model =
                 clues =
                     case model.puzzle.editMode of
                         Solving ->
-                            Views.cluesView model.puzzle.entryStartDict
+                            Views.cluesView
+                                model.puzzle.currentSelection
+                                model.puzzle.entryMembershipDict
+                                model.puzzle.entryStartDict
 
                         Editing ->
-                            Views.cluesEditView model.puzzle.entryStartDict
+                            Views.cluesEditView
+                                model.puzzle.currentSelection
+                                model.puzzle.entryMembershipDict
+                                model.puzzle.entryStartDict
                                 ClueEditedMsg
                                 ClueEditFocusedMsg
             in

@@ -128,18 +128,18 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                 []
 
 
-cluesView : EntryStartDict -> Html msg
-cluesView entries =
+cluesView : Maybe Selection -> EntryMembershipDict -> EntryStartDict -> Html msg
+cluesView currentSelection entryMemberships entryStarts =
     let
         acrossClues =
-            entries
+            entryStarts
                 |> Entry.acrossList
-                |> List.map clueView
+                |> List.map (clueView currentSelection entryMemberships)
 
         downClues =
-            entries
+            entryStarts
                 |> Entry.downList
-                |> List.map clueView
+                |> List.map (clueView currentSelection entryMemberships)
     in
         div
             [ style
@@ -174,18 +174,18 @@ cluesView entries =
             ]
 
 
-cluesEditView : EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
-cluesEditView entries clueEditedMsg clueEditFocusedMsg =
+cluesEditView : Maybe Selection -> EntryMembershipDict -> EntryStartDict -> (Coordinate -> Entry -> String -> msg) -> msg -> Html msg
+cluesEditView currentSelection entryMemberships entryStarts clueEditedMsg clueEditFocusedMsg =
     let
         acrossClues =
-            entries
+            entryStarts
                 |> Entry.acrossList
-                |> List.map (clueEditView clueEditedMsg clueEditFocusedMsg)
+                |> List.map (clueEditView currentSelection clueEditedMsg clueEditFocusedMsg)
 
         downClues =
-            entries
+            entryStarts
                 |> Entry.downList
-                |> List.map (clueEditView clueEditedMsg clueEditFocusedMsg)
+                |> List.map (clueEditView currentSelection clueEditedMsg clueEditFocusedMsg)
     in
         div
             [ style
@@ -220,14 +220,37 @@ cluesEditView entries clueEditedMsg clueEditFocusedMsg =
             ]
 
 
-clueView : ( Coordinate, Entry ) -> Html msg
-clueView ( coordinate, entry ) =
-    div []
-        [ text <| (toString entry.index) ++ ": " ++ entry.clue ]
+clueView : Maybe Selection -> EntryMembershipDict -> ( Coordinate, Entry ) -> Html msg
+clueView currentSelection entryMemberships ( coordinate, entry ) =
+    let
+        highlight =
+            case currentSelection of
+                Just ( selectionCoordinate, selectionDirection ) ->
+                    let
+                        indexToMatch =
+                            case selectionDirection of
+                                Across ->
+                                    Entry.acrossEntryMembership selectionCoordinate entryMemberships
+                                        |> Maybe.withDefault -1
+
+                                Down ->
+                                    Entry.downEntryMembership selectionCoordinate entryMemberships
+                                        |> Maybe.withDefault -1
+                    in
+                        if (indexToMatch == entry.index && selectionDirection == entry.direction) then
+                            "*"
+                        else
+                            ""
+
+                Nothing ->
+                    ""
+    in
+        div []
+            [ text <| highlight ++ (toString entry.index) ++ ": " ++ entry.clue ]
 
 
-clueEditView : (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
-clueEditView clueEditedMsg clueEditFocusedMsg ( coordinate, entry ) =
+clueEditView : Maybe Selection -> (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
+clueEditView currentSelection clueEditedMsg clueEditFocusedMsg ( coordinate, entry ) =
     div []
         [ div []
             [ text <| (toString entry.index) ++ ": (" ++ entry.text ++ ")" ]
