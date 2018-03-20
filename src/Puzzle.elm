@@ -3,7 +3,6 @@ module Puzzle
         ( Puzzle
         , Selection
         , EditMode(..)
-        , SelectionPermit(..)
         , fromString
         , selection
         , selectionCoordinate
@@ -42,11 +41,6 @@ type alias Selection =
     ( Coordinate, Direction )
 
 
-type SelectionPermit
-    = CanSelectAllSquares
-    | CanSelectOnlyLetterSquares
-
-
 type EditMode
     = Solving
     | Editing
@@ -83,42 +77,42 @@ fromString gridWidth gridHeight string editMode =
         }
 
 
-typeLetters : List Key -> SelectionPermit -> Puzzle -> Puzzle
-typeLetters keyList selectionPermit puzzle =
-    List.foldl (\k -> typeLetter (KeyboardUtils.toLetterChar k) selectionPermit)
+typeLetters : List Key -> Puzzle -> Puzzle
+typeLetters keyList puzzle =
+    List.foldl (\k -> typeLetter (KeyboardUtils.toLetterChar k))
         puzzle
         (KeyboardUtils.filterOnlyLetterKeys keyList)
 
 
-typeLetter : Char -> SelectionPermit -> Puzzle -> Puzzle
-typeLetter char permit puzzle =
+typeLetter : Char -> Puzzle -> Puzzle
+typeLetter char puzzle =
     case puzzle.currentSelection of
         Just ( coord, direction ) ->
             case direction of
                 Across ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
-                        |> moveSelectionRight permit
+                        |> moveSelectionRight
 
                 Down ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
-                        |> moveSelectionDown permit
+                        |> moveSelectionDown
 
         Nothing ->
             puzzle
 
 
-deleteLetter : SelectionPermit -> Puzzle -> Puzzle
-deleteLetter permit puzzle =
+deleteLetter : Puzzle -> Puzzle
+deleteLetter puzzle =
     case puzzle.currentSelection of
         Just ( coord, direction ) ->
             case direction of
                 Across ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord ' ') puzzle.grid }
-                        |> moveSelectionLeft permit
+                        |> moveSelectionLeft
 
                 Down ->
                     { puzzle | grid = Result.map (Grid.updateLetterSquare coord ' ') puzzle.grid }
-                        |> moveSelectionUp permit
+                        |> moveSelectionUp
 
         Nothing ->
             puzzle
@@ -158,28 +152,28 @@ switchSelectionDirection puzzle =
         { puzzle | currentSelection = updatedSelection }
 
 
-moveSelectionLeft : SelectionPermit -> Puzzle -> Puzzle
-moveSelectionLeft permit puzzle =
-    moveSelection puzzle.currentSelection Coordinate.atLeft permit puzzle
+moveSelectionLeft : Puzzle -> Puzzle
+moveSelectionLeft puzzle =
+    moveSelection puzzle.currentSelection Coordinate.atLeft puzzle
 
 
-moveSelectionRight : SelectionPermit -> Puzzle -> Puzzle
-moveSelectionRight permit puzzle =
-    moveSelection puzzle.currentSelection Coordinate.atRight permit puzzle
+moveSelectionRight : Puzzle -> Puzzle
+moveSelectionRight puzzle =
+    moveSelection puzzle.currentSelection Coordinate.atRight puzzle
 
 
-moveSelectionUp : SelectionPermit -> Puzzle -> Puzzle
-moveSelectionUp permit puzzle =
-    moveSelection puzzle.currentSelection Coordinate.above permit puzzle
+moveSelectionUp : Puzzle -> Puzzle
+moveSelectionUp puzzle =
+    moveSelection puzzle.currentSelection Coordinate.above puzzle
 
 
-moveSelectionDown : SelectionPermit -> Puzzle -> Puzzle
-moveSelectionDown permit puzzle =
-    moveSelection puzzle.currentSelection Coordinate.below permit puzzle
+moveSelectionDown : Puzzle -> Puzzle
+moveSelectionDown puzzle =
+    moveSelection puzzle.currentSelection Coordinate.below puzzle
 
 
-moveSelection : Maybe Selection -> (Coordinate -> Coordinate) -> SelectionPermit -> Puzzle -> Puzzle
-moveSelection startingSelection newCoordFn permit puzzle =
+moveSelection : Maybe Selection -> (Coordinate -> Coordinate) -> Puzzle -> Puzzle
+moveSelection startingSelection newCoordFn puzzle =
     case puzzle.currentSelection of
         Just selection ->
             let
@@ -191,19 +185,18 @@ moveSelection startingSelection newCoordFn permit puzzle =
 
                 newSquareIsPermitted grid =
                     (Grid.hasLetterSquareAt grid newCoordToTry)
-                        || (permit == CanSelectAllSquares)
+                        || (puzzle.editMode == Editing)
             in
                 case (Result.map newCoordIsInBounds puzzle.grid) of
                     Ok True ->
                         case (Result.map newSquareIsPermitted puzzle.grid) of
                             Ok True ->
-                                setSelection newCoordToTry permit puzzle
+                                setSelection newCoordToTry puzzle
 
                             Ok False ->
                                 moveSelection
                                     startingSelection
                                     newCoordFn
-                                    permit
                                     { puzzle
                                         | currentSelection =
                                             Maybe.map (\s -> selectionMapToCoordinate newCoordFn s)
@@ -223,8 +216,8 @@ moveSelection startingSelection newCoordFn permit puzzle =
             puzzle
 
 
-setSelection : Coordinate -> SelectionPermit -> Puzzle -> Puzzle
-setSelection (( x, y ) as coordinate) permit puzzle =
+setSelection : Coordinate -> Puzzle -> Puzzle
+setSelection (( x, y ) as coordinate) puzzle =
     case puzzle.grid of
         Ok grid ->
             let
@@ -236,7 +229,7 @@ setSelection (( x, y ) as coordinate) permit puzzle =
 
                 squareIsPermitted =
                     (Grid.hasLetterSquareAt grid coordinate)
-                        || (permit == CanSelectAllSquares)
+                        || (puzzle.editMode == Editing)
             in
                 if (isInXBounds x && isInYBounds y && squareIsPermitted) then
                     case puzzle.currentSelection of

@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Views
-import Puzzle exposing (Puzzle, EditMode(..), SelectionPermit(..))
+import Puzzle exposing (Puzzle, EditMode(..))
 import Coordinate exposing (Coordinate)
 import Grid exposing (Grid)
 import Entry exposing (Entry)
@@ -89,7 +89,7 @@ update msg model =
             in
                 ( { model
                     | puzzle =
-                        Puzzle.setSelection coordinate CanSelectOnlyLetterSquares model.puzzle
+                        Puzzle.setSelection coordinate model.puzzle
                   }
                     |> updateSelectionDirectionFn
                 , Cmd.none
@@ -129,19 +129,19 @@ updateWithNewPressedKeys newPressedKeys model =
 
         updatedPuzzle =
             if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
-                Puzzle.moveSelectionLeft CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.moveSelectionLeft model.puzzle
             else if (List.member Keyboard.Extra.ArrowRight changedKeys) then
-                Puzzle.moveSelectionRight CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.moveSelectionRight model.puzzle
             else if (List.member Keyboard.Extra.ArrowUp changedKeys) then
-                Puzzle.moveSelectionUp CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.moveSelectionUp model.puzzle
             else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
-                Puzzle.moveSelectionDown CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.moveSelectionDown model.puzzle
             else if (List.member Keyboard.Extra.Space changedKeys) then
                 Puzzle.switchSelectionDirection model.puzzle
             else if (KeyboardUtils.containsLetterKeys changedKeys) then
-                Puzzle.typeLetters changedKeys CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.typeLetters changedKeys model.puzzle
             else if (List.member Keyboard.Extra.BackSpace changedKeys) then
-                Puzzle.deleteLetter CanSelectOnlyLetterSquares model.puzzle
+                Puzzle.deleteLetter model.puzzle
             else
                 model.puzzle
     in
