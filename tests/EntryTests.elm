@@ -1,6 +1,7 @@
 module EntryTests exposing (..)
 
 import Entry exposing (EntryStart(..))
+import Direction exposing (Direction(..))
 import Grid
 import Test exposing (Test, describe, test, skip)
 import Expect
@@ -80,8 +81,8 @@ testentryStartDictFromGrid =
                 let
                     expectedOutput =
                         Ok
-                            [ ( 1, "A" )
-                            , ( 1, "A" )
+                            [ ( ( 0, 0 ), Entry.entry 1 Across "A" "" )
+                            , ( ( 0, 0 ), Entry.entry 1 Down "A" "" )
                             ]
 
                     input =
@@ -94,9 +95,9 @@ testentryStartDictFromGrid =
                 let
                     expectedOutput =
                         Ok
-                            [ ( 1, "AB" )
-                            , ( 1, "A" )
-                            , ( 2, "B" )
+                            [ ( ( 0, 0 ), Entry.entry 1 Across "AB" "" )
+                            , ( ( 0, 0 ), Entry.entry 1 Down "A" "" )
+                            , ( ( 1, 0 ), Entry.entry 2 Down "B" "" )
                             ]
 
                     input =
@@ -109,8 +110,8 @@ testentryStartDictFromGrid =
                 let
                     expectedOutput =
                         Ok
-                            [ ( 1, "C" )
-                            , ( 1, "C" )
+                            [ ( ( 0, 0 ), Entry.entry 1 Across "C" "" )
+                            , ( ( 0, 0 ), Entry.entry 1 Down "C" "" )
                             ]
 
                     input =
@@ -123,10 +124,10 @@ testentryStartDictFromGrid =
                 let
                     expectedOutput =
                         Ok
-                            [ ( 1, "DO" )
-                            , ( 3, "AH" )
-                            , ( 1, "DA" )
-                            , ( 2, "OH" )
+                            [ ( ( 0, 0 ), Entry.entry 1 Across "DO" "" )
+                            , ( ( 0, 1 ), Entry.entry 3 Across "AH" "" )
+                            , ( ( 0, 0 ), Entry.entry 1 Down "DA" "" )
+                            , ( ( 1, 0 ), Entry.entry 2 Down "OH" "" )
                             ]
 
                     input =
@@ -139,19 +140,20 @@ testentryStartDictFromGrid =
                 let
                     expectedOutput =
                         Ok
-                            [ ( 1, "ABCD" )
-                            , ( 5, "EF" )
-                            , ( 6, "G" )
-                            , ( 7, "H" )
-                            , ( 8, "IJ" )
-                            , ( 9, "KLM" )
-                            , ( 1, "AEH" )
-                            , ( 2, "BF" )
-                            , ( 3, "C" )
-                            , ( 4, "DGJM" )
-                            , ( 8, "IL" )
-                            , ( 9, "K" )
-                            ]
+                            ([ ( ( 0, 0 ), Entry.entry 1 Across "ABCD" "" )
+                             , ( ( 0, 1 ), Entry.entry 5 Across "EF" "" )
+                             , ( ( 3, 1 ), Entry.entry 6 Across "G" "" )
+                             , ( ( 0, 2 ), Entry.entry 7 Across "H" "" )
+                             , ( ( 2, 2 ), Entry.entry 8 Across "IJ" "" )
+                             , ( ( 1, 3 ), Entry.entry 9 Across "KLM" "" )
+                             , ( ( 0, 0 ), Entry.entry 1 Down "AEH" "" )
+                             , ( ( 1, 0 ), Entry.entry 2 Down "BF" "" )
+                             , ( ( 2, 0 ), Entry.entry 3 Down "C" "" )
+                             , ( ( 3, 0 ), Entry.entry 4 Down "DGJM" "" )
+                             , ( ( 2, 2 ), Entry.entry 8 Down "IL" "" )
+                             , ( ( 1, 3 ), Entry.entry 9 Down "K" "" )
+                             ]
+                            )
 
                     input =
                         Grid.fromString 4 4 "ABCDEF*GH*IJ*KLM"

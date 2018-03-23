@@ -1,6 +1,6 @@
 module PuzzleTests exposing (..)
 
-import Puzzle exposing (SelectionPermit(..))
+import Puzzle exposing (EditMode(..))
 import Grid exposing (Square(..))
 import Direction exposing (Direction(..))
 import Test exposing (Test, describe, test, skip)
@@ -17,7 +17,7 @@ testFromString =
                         "ABCD"
 
                     newPuzzle =
-                        Puzzle.fromString 2 2 stringInput
+                        Puzzle.fromString 2 2 stringInput Editing
                 in
                     Expect.equal
                         (newPuzzle.grid
@@ -37,7 +37,7 @@ testFromString =
                         "AB$D"
 
                     newPuzzle =
-                        Puzzle.fromString 2 2 stringInput
+                        Puzzle.fromString 2 2 stringInput Editing
                 in
                     Expect.equal
                         newPuzzle.grid
@@ -49,7 +49,7 @@ testFromString =
                         "A"
 
                     newPuzzle =
-                        Puzzle.fromString 2 2 stringInput
+                        Puzzle.fromString 2 2 stringInput Editing
                 in
                     Expect.equal
                         newPuzzle.grid
@@ -61,7 +61,7 @@ testFromString =
                         "ABCD"
 
                     newPuzzle =
-                        Puzzle.fromString 1 1 stringInput
+                        Puzzle.fromString 1 1 stringInput Editing
                 in
                     Expect.equal
                         newPuzzle.grid
@@ -77,8 +77,8 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzleSelectionCoordinate =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 1 )
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -87,8 +87,8 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 6 ) CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 6 )
                     in
                         Expect.equal newPuzzle.currentSelection Nothing
             ]
@@ -97,8 +97,8 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "AB*D"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
+                            Puzzle.fromString 2 2 "AB*D" Solving
+                                |> Puzzle.setSelection ( 0, 1 )
                     in
                         Expect.equal newPuzzle.currentSelection <| Nothing
             ]
@@ -112,8 +112,8 @@ testSwitchSelectionDirection =
             \_ ->
                 let
                     newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD"
-                            |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
+                        Puzzle.fromString 2 2 "ABCD" Solving
+                            |> Puzzle.setSelection ( 0, 1 )
 
                     input =
                         Puzzle.switchSelectionDirection newPuzzle
@@ -131,9 +131,9 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 1, 0 )
+                                |> Puzzle.moveSelectionLeft
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -142,9 +142,9 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionLeft CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 1 )
+                                |> Puzzle.moveSelectionLeft
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -155,9 +155,9 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 2, 1 ) CanSelectOnlyLetterSquares
-                                |> Puzzle.moveSelectionLeft CanSelectOnlyLetterSquares
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
+                                |> Puzzle.setSelection ( 2, 1 )
+                                |> Puzzle.moveSelectionLeft
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -174,9 +174,9 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionRight CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 0 )
+                                |> Puzzle.moveSelectionRight
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -185,9 +185,9 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 1, 1 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionRight CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 1, 1 )
+                                |> Puzzle.moveSelectionRight
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -198,9 +198,9 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectOnlyLetterSquares
-                                |> Puzzle.moveSelectionRight CanSelectOnlyLetterSquares
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
+                                |> Puzzle.setSelection ( 0, 1 )
+                                |> Puzzle.moveSelectionRight
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -217,9 +217,9 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionUp CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 1 )
+                                |> Puzzle.moveSelectionUp
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -228,9 +228,9 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionUp CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 0 )
+                                |> Puzzle.moveSelectionUp
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -241,9 +241,9 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 1, 2 ) CanSelectOnlyLetterSquares
-                                |> Puzzle.moveSelectionUp CanSelectOnlyLetterSquares
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
+                                |> Puzzle.setSelection ( 1, 2 )
+                                |> Puzzle.moveSelectionUp
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -260,9 +260,9 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 0 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionDown CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 0 )
+                                |> Puzzle.moveSelectionDown
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -271,9 +271,9 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD"
-                                |> Puzzle.setSelection ( 0, 1 ) CanSelectAllSquares
-                                |> Puzzle.moveSelectionDown CanSelectAllSquares
+                            Puzzle.fromString 2 2 "ABCD" Editing
+                                |> Puzzle.setSelection ( 0, 1 )
+                                |> Puzzle.moveSelectionDown
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -284,9 +284,9 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
-                                |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
+                                |> Puzzle.setSelection ( 1, 0 )
+                                |> Puzzle.moveSelectionDown
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in
@@ -295,9 +295,9 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FG*I"
-                                |> Puzzle.setSelection ( 1, 0 ) CanSelectOnlyLetterSquares
-                                |> Puzzle.moveSelectionDown CanSelectOnlyLetterSquares
+                            Puzzle.fromString 3 3 "ABCD*FG*I" Solving
+                                |> Puzzle.setSelection ( 1, 0 )
+                                |> Puzzle.moveSelectionDown
                                 |> Puzzle.selection
                                 |> Maybe.map Puzzle.selectionCoordinate
                     in

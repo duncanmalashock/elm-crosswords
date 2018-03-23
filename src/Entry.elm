@@ -1,6 +1,7 @@
 module Entry
     exposing
         ( Entry
+        , entry
         , EntryStartDict
         , EntryStart(..)
         , EntryMembershipDict

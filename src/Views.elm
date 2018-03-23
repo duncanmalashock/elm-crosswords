@@ -233,27 +233,25 @@ clueView currentSelection entryMemberships ( coordinate, entry ) =
                                     case selectionDirection of
                                         Across ->
                                             Entry.acrossEntryMembership selectionCoordinate entryMemberships
-                                                |> Maybe.withDefault -1
 
                                         Down ->
                                             Entry.downEntryMembership selectionCoordinate entryMemberships
-                                                |> Maybe.withDefault -1
                             in
-                                indexToMatch == entry.index && selectionDirection == entry.direction
+                                (indexToMatch == Just entry.index)
+                                    && (selectionDirection == entry.direction)
 
                         matchesSelectionCrossingClue =
                             let
                                 indexToMatch =
                                     case selectionDirection of
-                                        Down ->
-                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
-                                                |> Maybe.withDefault -1
-
                                         Across ->
                                             Entry.downEntryMembership selectionCoordinate entryMemberships
-                                                |> Maybe.withDefault -1
+
+                                        Down ->
+                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
                             in
-                                indexToMatch == entry.index && selectionDirection /= entry.direction
+                                (indexToMatch == Just entry.index)
+                                    && (selectionDirection /= entry.direction)
                     in
                         if matchesSelectionClue then
                             "*"
