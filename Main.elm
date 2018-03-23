@@ -31,8 +31,8 @@ type alias Model =
 
 type Msg
     = ClickedSquare Coordinate
-    | ClueEditedMsg Coordinate Entry String
-    | ClueEditFocusedMsg
+    | ClueEdited Coordinate Entry String
+    | ClueEditFocused
     | EditModeClicked EditMode
     | KeyboardMsg Keyboard.Extra.Msg
 
@@ -64,7 +64,7 @@ init =
             ]
                 |> String.concat
     in
-        ( { puzzle = Puzzle.fromString 15 15 stringInput Editing
+        ( { puzzle = Puzzle.fromString 15 15 stringInput Solving
           , pressedKeys = []
           }
         , Cmd.none
@@ -95,7 +95,7 @@ update msg model =
                 , Cmd.none
                 )
 
-        ClueEditedMsg coordinate entry newClue ->
+        ClueEdited coordinate entry newClue ->
             ( { model
                 | puzzle =
                     Puzzle.updateEntry model.puzzle
@@ -105,7 +105,7 @@ update msg model =
             , Cmd.none
             )
 
-        ClueEditFocusedMsg ->
+        ClueEditFocused ->
             ( { model | puzzle = Puzzle.clearSelection model.puzzle }, Cmd.none )
 
         EditModeClicked editMode ->
@@ -171,8 +171,8 @@ view model =
                                 model.puzzle.currentSelection
                                 model.puzzle.entryMembershipDict
                                 model.puzzle.entryStartDict
-                                ClueEditedMsg
-                                ClueEditFocusedMsg
+                                ClueEdited
+                                ClueEditFocused
             in
                 div []
                     [ Views.gridView grid

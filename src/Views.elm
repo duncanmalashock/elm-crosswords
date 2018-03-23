@@ -227,18 +227,38 @@ clueView currentSelection entryMemberships ( coordinate, entry ) =
             case currentSelection of
                 Just ( selectionCoordinate, selectionDirection ) ->
                     let
-                        indexToMatch =
-                            case selectionDirection of
-                                Across ->
-                                    Entry.acrossEntryMembership selectionCoordinate entryMemberships
-                                        |> Maybe.withDefault -1
+                        matchesSelectionClue =
+                            let
+                                indexToMatch =
+                                    case selectionDirection of
+                                        Across ->
+                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
+                                                |> Maybe.withDefault -1
 
-                                Down ->
-                                    Entry.downEntryMembership selectionCoordinate entryMemberships
-                                        |> Maybe.withDefault -1
+                                        Down ->
+                                            Entry.downEntryMembership selectionCoordinate entryMemberships
+                                                |> Maybe.withDefault -1
+                            in
+                                indexToMatch == entry.index && selectionDirection == entry.direction
+
+                        matchesSelectionCrossingClue =
+                            let
+                                indexToMatch =
+                                    case selectionDirection of
+                                        Down ->
+                                            Entry.acrossEntryMembership selectionCoordinate entryMemberships
+                                                |> Maybe.withDefault -1
+
+                                        Across ->
+                                            Entry.downEntryMembership selectionCoordinate entryMemberships
+                                                |> Maybe.withDefault -1
+                            in
+                                indexToMatch == entry.index && selectionDirection /= entry.direction
                     in
-                        if (indexToMatch == entry.index && selectionDirection == entry.direction) then
+                        if matchesSelectionClue then
                             "*"
+                        else if matchesSelectionCrossingClue then
+                            "+"
                         else
                             ""
 
@@ -259,8 +279,7 @@ clueEditView currentSelection clueEditedMsg clueEditFocusedMsg ( coordinate, ent
             [ textarea
                 [ onInput (clueEditedMsg coordinate entry)
                 , onFocus clueEditFocusedMsg
-                , value entry.clue
                 ]
-                []
+                [ text entry.clue ]
             ]
         ]
