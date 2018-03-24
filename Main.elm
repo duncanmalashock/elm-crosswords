@@ -3,6 +3,7 @@ module Main exposing (main)
 import Views
 import Puzzle exposing (Puzzle, EditMode(..))
 import Coordinate exposing (Coordinate)
+import Direction exposing (Direction(..))
 import Grid exposing (Grid)
 import Entry exposing (Entry)
 import Dict
@@ -31,6 +32,7 @@ type alias Model =
 
 type Msg
     = ClickedSquare Coordinate
+    | ClueClicked Coordinate Direction
     | ClueEdited Coordinate Entry String
     | ClueEditFocused
     | EditModeClicked EditMode
@@ -94,6 +96,15 @@ update msg model =
                     |> updateSelectionDirectionFn
                 , Cmd.none
                 )
+
+        ClueClicked coordinate direction ->
+            let
+                updatedPuzzle =
+                    model.puzzle
+                        |> Puzzle.setSelection coordinate
+                        |> Puzzle.setSelectionDirection direction
+            in
+                ( { model | puzzle = updatedPuzzle }, Cmd.none )
 
         ClueEdited coordinate entry newClue ->
             ( { model
@@ -165,6 +176,7 @@ view model =
                                 model.puzzle.currentSelection
                                 model.puzzle.entryMembershipDict
                                 model.puzzle.entryStartDict
+                                ClueClicked
 
                         Editing ->
                             Views.cluesEditView

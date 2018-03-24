@@ -128,18 +128,18 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                 []
 
 
-cluesView : Maybe Selection -> EntryMembershipDict -> EntryStartDict -> Html msg
-cluesView currentSelection entryMemberships entryStarts =
+cluesView : Maybe Selection -> EntryMembershipDict -> EntryStartDict -> (Coordinate -> Direction -> msg) -> Html msg
+cluesView currentSelection entryMemberships entryStarts clickMsg =
     let
         acrossClues =
             entryStarts
                 |> Entry.acrossList
-                |> List.map (clueView currentSelection entryMemberships)
+                |> List.map (clueView currentSelection entryMemberships clickMsg)
 
         downClues =
             entryStarts
                 |> Entry.downList
-                |> List.map (clueView currentSelection entryMemberships)
+                |> List.map (clueView currentSelection entryMemberships clickMsg)
     in
         div
             [ style
@@ -220,8 +220,8 @@ cluesEditView currentSelection entryMemberships entryStarts clueEditedMsg clueEd
             ]
 
 
-clueView : Maybe Selection -> EntryMembershipDict -> ( Coordinate, Entry ) -> Html msg
-clueView currentSelection entryMemberships ( coordinate, entry ) =
+clueView : Maybe Selection -> EntryMembershipDict -> (Coordinate -> Direction -> msg) -> ( Coordinate, Entry ) -> Html msg
+clueView currentSelection entryMemberships clickMsg ( coordinate, entry ) =
     let
         highlight =
             case currentSelection of
@@ -263,7 +263,7 @@ clueView currentSelection entryMemberships ( coordinate, entry ) =
                 Nothing ->
                     ""
     in
-        div []
+        div [ onClick <| clickMsg coordinate entry.direction ]
             [ text <| highlight ++ (toString entry.index) ++ ": " ++ entry.clue ]
 
 
