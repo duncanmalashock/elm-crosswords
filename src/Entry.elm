@@ -28,7 +28,7 @@ import Html.Attributes exposing (style)
 
 
 type alias Entry =
-    { index : Int
+    { number : Int
     , direction : Direction
     , text : String
     , clue : String
@@ -36,8 +36,8 @@ type alias Entry =
 
 
 entry : Int -> Direction -> String -> String -> Entry
-entry index direction text clue =
-    { index = index
+entry number direction text clue =
+    { number = number
     , direction = direction
     , text = text
     , clue = clue
@@ -69,13 +69,13 @@ entryNumberAt entryListings coordinate =
         getEntryNumber entryStart =
             case entryStart of
                 AcrossOnlyStart a ->
-                    a.index
+                    a.number
 
                 DownOnlyStart d ->
-                    d.index
+                    d.number
 
                 AcrossAndDownStarts a d ->
-                    a.index
+                    a.number
     in
         Dict.get coordinate entryListings
             |> Maybe.map getEntryNumber
@@ -141,20 +141,20 @@ downList entryListings =
 
 sortEntries : List ( Coordinate, Entry ) -> List ( Coordinate, Entry )
 sortEntries =
-    List.sortBy (\( c, e ) -> e.index)
+    List.sortBy (\( c, e ) -> e.number)
 
 
 acrossFromEntryStart : EntryStart -> Maybe Entry
 acrossFromEntryStart entryStart =
     case entryStart of
         AcrossOnlyStart acrossEntry ->
-            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text acrossEntry.clue
+            Just <| entry acrossEntry.number acrossEntry.direction acrossEntry.text acrossEntry.clue
 
         DownOnlyStart downEntry ->
             Nothing
 
         AcrossAndDownStarts acrossEntry _ ->
-            Just <| entry acrossEntry.index acrossEntry.direction acrossEntry.text acrossEntry.clue
+            Just <| entry acrossEntry.number acrossEntry.direction acrossEntry.text acrossEntry.clue
 
 
 downFromEntryStart : EntryStart -> Maybe Entry
@@ -164,10 +164,10 @@ downFromEntryStart entryStart =
             Nothing
 
         DownOnlyStart downEntry ->
-            Just <| entry downEntry.index downEntry.direction downEntry.text downEntry.clue
+            Just <| entry downEntry.number downEntry.direction downEntry.text downEntry.clue
 
         AcrossAndDownStarts _ downEntry ->
-            Just <| entry downEntry.index downEntry.direction downEntry.text downEntry.clue
+            Just <| entry downEntry.number downEntry.direction downEntry.text downEntry.clue
 
 
 entryStartDictFromGrid : Grid -> EntryStartDict

@@ -229,7 +229,7 @@ clueView currentSelection entryMemberships clickMsg ( coordinate, entry ) =
                     let
                         matchesSelectionClue =
                             let
-                                indexToMatch =
+                                numberToMatch =
                                     case selectionDirection of
                                         Across ->
                                             Entry.acrossEntryMembership selectionCoordinate entryMemberships
@@ -237,12 +237,12 @@ clueView currentSelection entryMemberships clickMsg ( coordinate, entry ) =
                                         Down ->
                                             Entry.downEntryMembership selectionCoordinate entryMemberships
                             in
-                                (indexToMatch == Just entry.index)
+                                (numberToMatch == Just entry.number)
                                     && (selectionDirection == entry.direction)
 
                         matchesSelectionCrossingClue =
                             let
-                                indexToMatch =
+                                numberToMatch =
                                     case selectionDirection of
                                         Across ->
                                             Entry.downEntryMembership selectionCoordinate entryMemberships
@@ -250,7 +250,7 @@ clueView currentSelection entryMemberships clickMsg ( coordinate, entry ) =
                                         Down ->
                                             Entry.acrossEntryMembership selectionCoordinate entryMemberships
                             in
-                                (indexToMatch == Just entry.index)
+                                (numberToMatch == Just entry.number)
                                     && (selectionDirection /= entry.direction)
                     in
                         if matchesSelectionClue then
@@ -264,14 +264,14 @@ clueView currentSelection entryMemberships clickMsg ( coordinate, entry ) =
                     ""
     in
         div [ onClick <| clickMsg coordinate entry.direction ]
-            [ text <| highlight ++ (toString entry.index) ++ ": " ++ entry.clue ]
+            [ text <| highlight ++ (toString entry.number) ++ ": " ++ entry.clue ]
 
 
 clueEditView : Maybe Selection -> (Coordinate -> Entry -> String -> msg) -> msg -> ( Coordinate, Entry ) -> Html msg
 clueEditView currentSelection clueEditedMsg clueEditFocusedMsg ( coordinate, entry ) =
     div []
         [ div []
-            [ text <| (toString entry.index) ++ ": (" ++ entry.text ++ ")" ]
+            [ text <| (toString entry.number) ++ ": (" ++ entry.text ++ ")" ]
         , div
             []
             [ textarea

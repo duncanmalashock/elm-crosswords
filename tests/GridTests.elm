@@ -225,7 +225,7 @@ testWidth =
 testHeight : Test
 testHeight =
     describe "Grid.height"
-        [ test "returns the number of columns for a valid grid" <|
+        [ test "returns the number of rows for a valid grid" <|
             \_ ->
                 let
                     grid =

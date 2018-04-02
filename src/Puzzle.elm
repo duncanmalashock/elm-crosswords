@@ -29,6 +29,9 @@ import Keyboard.Extra exposing (Key(..))
 import Dict
 
 
+-- TODO: puzzle should be the thing that's wrapped (in a result), not the grid
+
+
 type alias Puzzle =
     { grid : Result String Grid
     , currentSelection : Maybe Selection
