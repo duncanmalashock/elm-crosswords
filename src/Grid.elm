@@ -18,6 +18,7 @@ module Grid
         )
 
 import Char
+import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, style)
@@ -30,9 +31,47 @@ type alias Grid =
     Matrix Square
 
 
+type alias Entry =
+    { number : Int
+    , direction : Direction
+    }
+
+
+type StartsEntries
+    = StartsAcross
+    | StartsDown
+    | StartsAcrossAndDown
+    | NoStart
+
+
+type alias EntryData =
+    { startsEntries : StartsEntries
+    , inAcrossEntry : Entry
+    , inDownEntry : Entry
+    }
+
+
 type Square
-    = LetterSquare Char
+    = LetterSquare Char EntryData
     | BlockSquare
+
+
+blankEntryData =
+    let
+        acrossEntry =
+            { number = 0
+            , direction = Across
+            }
+
+        downEntry =
+            { number = 0
+            , direction = Down
+            }
+    in
+        { startsEntries = NoStart
+        , inAcrossEntry = acrossEntry
+        , inDownEntry = downEntry
+        }
 
 
 width : Grid -> Int
@@ -53,7 +92,7 @@ flatten grid =
 
 blank : Int -> Int -> Grid
 blank gridWidth gridHeight =
-    Matrix.repeat gridWidth gridHeight blankSquare
+    Matrix.repeat gridWidth gridHeight (blankSquare blankEntryData)
 
 
 fromString : Int -> Int -> String -> Result String Grid
@@ -65,7 +104,7 @@ fromString gridWidth gridHeight string =
                 |> checkLength ( gridWidth, gridHeight )
 
         startingGrid =
-            Matrix.repeat gridWidth gridHeight blankSquare
+            Matrix.repeat gridWidth gridHeight (blankSquare blankEntryData)
                 |> Ok
     in
         case input of
@@ -98,9 +137,9 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
 charToSquare : Char -> Result String Square
 charToSquare char =
     if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
-        Ok <| letterSquare (Char.toUpper char)
+        Ok <| letterSquare (Char.toUpper char) blankEntryData
     else if char == '.' then
-        Ok blankSquare
+        Ok (blankSquare blankEntryData)
     else if char == '*' then
         Ok blockSquare
     else
@@ -109,7 +148,7 @@ charToSquare char =
 
 updateLetterSquare : Coordinate -> Char -> Grid -> Grid
 updateLetterSquare ( x, y ) char grid =
-    Matrix.set x y (letterSquare (Char.toUpper char)) grid
+    Matrix.set x y (letterSquare (Char.toUpper char) blankEntryData) grid
 
 
 clear : Grid -> Grid
@@ -117,8 +156,8 @@ clear grid =
     Matrix.map
         (\s ->
             case s of
-                LetterSquare _ ->
-                    blankSquare
+                LetterSquare _ _ ->
+                    blankSquare blankEntryData
 
                 BlockSquare ->
                     blockSquare
@@ -192,14 +231,14 @@ isDownEntryStart grid coordinate =
     (not <| hasLetterSquareAbove grid coordinate)
 
 
-letterSquare : Char -> Square
-letterSquare char =
-    LetterSquare char
+letterSquare : Char -> EntryData -> Square
+letterSquare char entryData =
+    LetterSquare char entryData
 
 
-blankSquare : Square
-blankSquare =
-    LetterSquare ' '
+blankSquare : EntryData -> Square
+blankSquare entryData =
+    LetterSquare ' ' entryData
 
 
 blockSquare : Square
@@ -227,7 +266,7 @@ squareAtCoordinate grid ( x, y ) =
 squareIsLetterSquare : Square -> Bool
 squareIsLetterSquare square =
     case square of
-        LetterSquare _ ->
+        LetterSquare _ _ ->
             True
 
         BlockSquare ->
