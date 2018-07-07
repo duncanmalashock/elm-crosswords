@@ -120,10 +120,15 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gri
                         entryNumberSoFar + 1
                     else
                         entryNumberSoFar
+
+                newGrid : Result String Grid
+                newGrid =
+                    Result.map2
+                        (Matrix.set newX newY)
+                        (charToSquare head ( newX, newY ) newEntryNumber gridSoFar)
+                        gridSoFar
             in
-                Result.map2 (Matrix.set newX newY)
-                    (charToSquare head ( newX, newY ) newEntryNumber gridSoFar)
-                    (fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber gridSoFar)
+                fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber newGrid
 
 
 getEntryData : Grid -> Coordinate -> Int -> EntryData
