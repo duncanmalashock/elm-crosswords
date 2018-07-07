@@ -32,7 +32,6 @@ testToRows =
                     blankGrid =
                         Grid.blank 2 2
 
-testSquareAtCoordinate : Test
                     expectedOutput =
                         Ok
                             [ [ ( ( 0, 0 )
