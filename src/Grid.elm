@@ -2,13 +2,14 @@ module Grid
     exposing
         ( Grid
         , Square(..)
+        , StartsEntries(..)
         , width
         , height
-        , flatten
         , blank
         , fromString
         , toRows
         , clear
+        , toString
         , isAcrossEntryStart
         , isDownEntryStart
         , coordIsInBounds
@@ -18,6 +19,7 @@ module Grid
         )
 
 import Char
+import Maybe.Extra as Maybe
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import Html exposing (Html, div, text)
@@ -31,12 +33,6 @@ type alias Grid =
     Matrix Square
 
 
-type alias Entry =
-    { number : Int
-    , direction : Direction
-    }
-
-
 type StartsEntries
     = StartsAcross
     | StartsDown
@@ -46,32 +42,21 @@ type StartsEntries
 
 type alias EntryData =
     { startsEntries : StartsEntries
-    , inAcrossEntry : Entry
-    , inDownEntry : Entry
+    , inAcrossEntry : Int
+    , inDownEntry : Int
     }
 
 
 type Square
-    = LetterSquare Char EntryData
-    | BlockSquare
+    = LetterSquare Coordinate Char EntryData
+    | BlockSquare Coordinate
 
 
 blankEntryData =
-    let
-        acrossEntry =
-            { number = 0
-            , direction = Across
-            }
-
-        downEntry =
-            { number = 0
-            , direction = Down
-            }
-    in
-        { startsEntries = NoStart
-        , inAcrossEntry = acrossEntry
-        , inDownEntry = downEntry
-        }
+    { startsEntries = NoStart
+    , inAcrossEntry = 1
+    , inDownEntry = 1
+    }
 
 
 width : Grid -> Int
@@ -84,15 +69,13 @@ height grid =
     Matrix.height grid
 
 
-flatten : Grid -> List Square
-flatten grid =
-    grid.data
-        |> Array.toList
-
-
-blank : Int -> Int -> Grid
+blank : Int -> Int -> Result String Grid
 blank gridWidth gridHeight =
-    Matrix.repeat gridWidth gridHeight (blankSquare blankEntryData)
+    let
+        initString =
+            String.repeat (gridWidth * gridHeight) "."
+    in
+        fromString gridWidth gridHeight initString
 
 
 fromString : Int -> Int -> String -> Result String Grid
@@ -104,19 +87,19 @@ fromString gridWidth gridHeight string =
                 |> checkLength ( gridWidth, gridHeight )
 
         startingGrid =
-            Matrix.repeat gridWidth gridHeight (blankSquare blankEntryData)
+            Matrix.repeat gridWidth gridHeight (blankSquare ( 0, 0 ) blankEntryData)
                 |> Ok
     in
         case input of
             Ok charList ->
-                fromStringHelp gridWidth gridHeight ( 0, 0 ) charList startingGrid
+                fromStringHelp gridWidth gridHeight ( 0, 0 ) charList 0 startingGrid
 
             Err error ->
                 Err error
 
 
-fromStringHelp : Int -> Int -> Coordinate -> List Char -> Result String (Matrix Square) -> Result String (Matrix Square)
-fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
+fromStringHelp : Int -> Int -> Coordinate -> List Char -> Int -> Result String Grid -> Result String Grid
+fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gridSoFar =
     case charList of
         [] ->
             gridSoFar
@@ -128,27 +111,157 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList gridSoFar =
                         ( 0, curY + 1 )
                     else
                         ( curX, curY )
+
+                newEntryNumber =
+                    if
+                        resultToBool (Result.map (isAcrossEntryStart ( newX, newY )) gridSoFar)
+                            || resultToBool (Result.map (isDownEntryStart ( newX, newY )) gridSoFar)
+                    then
+                        entryNumberSoFar + 1
+                    else
+                        entryNumberSoFar
             in
                 Result.map2 (Matrix.set newX newY)
-                    (charToSquare head)
-                    (fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail gridSoFar)
+                    (charToSquare head ( newX, newY ) newEntryNumber gridSoFar)
+                    (fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber gridSoFar)
 
 
-charToSquare : Char -> Result String Square
-charToSquare char =
-    if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
-        Ok <| letterSquare (Char.toUpper char) blankEntryData
-    else if char == '.' then
-        Ok (blankSquare blankEntryData)
-    else if char == '*' then
-        Ok blockSquare
-    else
-        Err "Invalid character"
+getEntryData : Grid -> Coordinate -> Int -> EntryData
+getEntryData grid ( x, y ) newEntryNumber =
+    let
+        acrossEntryNumber =
+            if isAcrossEntryStart ( x, y ) grid then
+                newEntryNumber
+            else
+                findAcrossEntryStartNumber grid ( x, y )
+                    |> Maybe.withDefault -1
+
+        downEntryNumber =
+            if isDownEntryStart ( x, y ) grid then
+                newEntryNumber
+            else
+                findDownEntryStartNumber grid ( x, y )
+                    |> Maybe.withDefault -1
+
+        startsEntriesValue =
+            if (isAcrossEntryStart ( x, y ) grid) && (isDownEntryStart ( x, y ) grid) then
+                StartsAcrossAndDown
+            else if (isAcrossEntryStart ( x, y ) grid) then
+                StartsAcross
+            else if (isDownEntryStart ( x, y ) grid) then
+                StartsDown
+            else
+                NoStart
+    in
+        { startsEntries = startsEntriesValue
+        , inAcrossEntry = acrossEntryNumber
+        , inDownEntry = downEntryNumber
+        }
+
+
+toString : Grid -> String
+toString grid =
+    toRows grid
+        |> toStringHelp
+
+
+toStringHelp : List (List ( Coordinate, Square )) -> String
+toStringHelp rows =
+    List.map rowToString rows
+        |> String.join "\n"
+
+
+resultToBool : Result String Bool -> Bool
+resultToBool result =
+    Result.withDefault False result
+
+
+rowToString : List ( Coordinate, Square ) -> String
+rowToString row =
+    let
+        squares =
+            List.map (\( _, s ) -> s) row
+    in
+        List.map squareToString squares
+            |> String.join ""
+
+
+squareToString : Square -> String
+squareToString s =
+    case s of
+        LetterSquare _ c _ ->
+            String.fromChar c
+
+        BlockSquare _ ->
+            "*"
+
+
+charToSquare : Char -> Coordinate -> Int -> Result String Grid -> Result String Square
+charToSquare char ( x, y ) entryNumber gridResult =
+    case gridResult of
+        Ok grid ->
+            if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
+                Ok <|
+                    letterSquare ( x, y ) (Char.toUpper char) (getEntryData grid ( x, y ) entryNumber)
+            else if char == '.' then
+                Ok <|
+                    blankSquare ( x, y ) (getEntryData grid ( x, y ) entryNumber)
+            else if char == '*' then
+                Ok (blockSquare ( x, y ))
+            else
+                Err <| "Invalid character: " ++ (String.fromChar char)
+
+        Err _ ->
+            Err "Invalid grid"
+
+
+findAcrossEntryStartNumber : Grid -> Coordinate -> Maybe Int
+findAcrossEntryStartNumber grid ( x, y ) =
+    case isAcrossEntryStart ( x, y ) grid of
+        True ->
+            squareAtCoordinate grid ( x, y )
+                |> Maybe.map acrossEntryNumber
+                |> Maybe.join
+
+        False ->
+            findAcrossEntryStartNumber grid (Coordinate.atLeft ( x, y ))
+
+
+findDownEntryStartNumber : Grid -> Coordinate -> Maybe Int
+findDownEntryStartNumber grid ( x, y ) =
+    case isDownEntryStart ( x, y ) grid of
+        True ->
+            squareAtCoordinate grid ( x, y )
+                |> Maybe.map downEntryNumber
+                |> Maybe.join
+
+        False ->
+            findDownEntryStartNumber grid (Coordinate.above ( x, y ))
+
+
+acrossEntryNumber : Square -> Maybe Int
+acrossEntryNumber square =
+    case square of
+        LetterSquare _ _ entryData ->
+            Just entryData.inAcrossEntry
+
+        BlockSquare _ ->
+            Nothing
+
+
+downEntryNumber : Square -> Maybe Int
+downEntryNumber square =
+    case square of
+        LetterSquare _ _ entryData ->
+            Just entryData.inDownEntry
+
+        BlockSquare _ ->
+            Nothing
 
 
 updateLetterSquare : Coordinate -> Char -> Grid -> Grid
 updateLetterSquare ( x, y ) char grid =
-    Matrix.set x y (letterSquare (Char.toUpper char) blankEntryData) grid
+    Matrix.set x y (letterSquare ( x, y ) (Char.toUpper char) blankEntryData) grid
 
 
 clear : Grid -> Grid
@@ -156,11 +269,11 @@ clear grid =
     Matrix.map
         (\s ->
             case s of
-                LetterSquare _ _ ->
-                    blankSquare blankEntryData
+                LetterSquare _ _ _ ->
+                    blankSquare ( 0, 0 ) blankEntryData
 
-                BlockSquare ->
-                    blockSquare
+                BlockSquare _ ->
+                    blockSquare ( 0, 0 )
         )
         grid
 
@@ -169,7 +282,7 @@ toRows : Grid -> List (List ( Coordinate, Square ))
 toRows grid =
     let
         gridYIndices =
-            (List.range 0 (Matrix.height grid))
+            (List.range 0 (Matrix.height grid - 1))
 
         getIndexedWithYIndexBefore y =
             ( y, Array.toIndexedList (getRow grid y) )
@@ -193,13 +306,13 @@ getRow grid index =
 lengthMismatchError : Int -> String -> ( Int, Int ) -> String
 lengthMismatchError length fewOrMany ( width, height ) =
     String.concat
-        [ (toString length)
+        [ (Basics.toString length)
         , " is too "
         , fewOrMany
         , " characters for a "
-        , (toString width)
+        , (Basics.toString width)
         , "x"
-        , (toString height)
+        , (Basics.toString height)
         , " Grid"
         ]
 
@@ -221,29 +334,29 @@ checkLength ( gridWidth, gridHeight ) charList =
             Err <| lengthMismatchError actualLength "many" ( gridWidth, gridHeight )
 
 
-isAcrossEntryStart : Grid -> Coordinate -> Bool
-isAcrossEntryStart grid coordinate =
+isAcrossEntryStart : Coordinate -> Grid -> Bool
+isAcrossEntryStart coordinate grid =
     (not <| hasLetterSquareAtLeft grid coordinate)
 
 
-isDownEntryStart : Grid -> Coordinate -> Bool
-isDownEntryStart grid coordinate =
+isDownEntryStart : Coordinate -> Grid -> Bool
+isDownEntryStart coordinate grid =
     (not <| hasLetterSquareAbove grid coordinate)
 
 
-letterSquare : Char -> EntryData -> Square
-letterSquare char entryData =
-    LetterSquare char entryData
+letterSquare : Coordinate -> Char -> EntryData -> Square
+letterSquare coord char entryData =
+    LetterSquare coord char entryData
 
 
-blankSquare : EntryData -> Square
-blankSquare entryData =
-    LetterSquare ' ' entryData
+blankSquare : Coordinate -> EntryData -> Square
+blankSquare coord entryData =
+    LetterSquare coord ' ' entryData
 
 
-blockSquare : Square
-blockSquare =
-    BlockSquare
+blockSquare : Coordinate -> Square
+blockSquare coord =
+    BlockSquare coord
 
 
 coordIsInBounds : Grid -> Coordinate -> Bool
@@ -266,10 +379,10 @@ squareAtCoordinate grid ( x, y ) =
 squareIsLetterSquare : Square -> Bool
 squareIsLetterSquare square =
     case square of
-        LetterSquare _ _ ->
+        LetterSquare _ _ _ ->
             True
 
-        BlockSquare ->
+        BlockSquare _ ->
             False
 
 
