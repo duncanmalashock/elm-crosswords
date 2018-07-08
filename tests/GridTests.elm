@@ -1,6 +1,7 @@
 module GridTests exposing (..)
 
-import Grid exposing (Square(..), StartsEntries(..))
+import Grid
+import Square exposing (Square(..), StartsEntries(..))
 import Direction exposing (Direction(..))
 import Test exposing (Test, describe, test, skip)
 import Expect

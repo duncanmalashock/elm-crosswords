@@ -1,7 +1,7 @@
 module PuzzleTests exposing (..)
 
 import Puzzle exposing (EditMode(..))
-import Grid exposing (Square(..))
+import Square exposing (Square(..))
 import Direction exposing (Direction(..))
 import Test exposing (Test, describe, test, skip)
 import Expect

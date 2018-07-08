@@ -6,19 +6,15 @@ module Entry
         , EntryStart(..)
         , EntryMembershipDict
         , updateEntry
-        , entryStartDictFromGrid
         , entryNumberAt
-        , entryMembershipDictFromEntryStartDict
-        , acrossEntryMembership
-        , downEntryMembership
-        , flattenEntryMembershipDict
         , acrossList
         , downList
         )
 
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
-import Grid exposing (Grid, Square(..))
+import Grid exposing (Grid)
+import Square exposing (Square(..))
 import Matrix exposing (Matrix)
 import Array.Hamt as Array exposing (Array)
 import Dict exposing (Dict)
@@ -170,148 +166,6 @@ downFromEntryStart entryStart =
             Just <| entry downEntry.number downEntry.direction downEntry.text downEntry.clue
 
 
-entryStartDictFromGrid : Grid -> EntryStartDict
-entryStartDictFromGrid grid =
-    grid
-        |> Matrix.toIndexedArray
-        |> Array.foldl (updateFromCoordinate grid) ( 1, Dict.empty )
-        |> Tuple.second
-
-
-updateFromCoordinate : Grid -> ( ( Int, Int ), Square ) -> ( Int, EntryStartDict ) -> ( Int, EntryStartDict )
-updateFromCoordinate grid ( coord, square ) ( currentEntryNumber, entriesSoFar ) =
-    case square of
-        LetterSquare _ ->
-            let
-                createNewEntryStart =
-                    Grid.isAcrossEntryStart grid coord
-                        || Grid.isDownEntryStart grid coord
-
-                nextEntryNumber =
-                    if createNewEntryStart then
-                        currentEntryNumber + 1
-                    else
-                        currentEntryNumber
-            in
-                if createNewEntryStart then
-                    let
-                        newEntryStart =
-                            if Grid.isAcrossEntryStart grid coord then
-                                if Grid.isDownEntryStart grid coord then
-                                    AcrossAndDownStarts
-                                        (entry currentEntryNumber Across (acrossEntry grid coord) "")
-                                        (entry currentEntryNumber Down (downEntry grid coord) "")
-                                else
-                                    AcrossOnlyStart
-                                        (entry currentEntryNumber Across (acrossEntry grid coord) "")
-                            else
-                                DownOnlyStart
-                                    (entry currentEntryNumber Down (downEntry grid coord) "")
-                    in
-                        ( nextEntryNumber, Dict.insert coord newEntryStart entriesSoFar )
-                else
-                    ( currentEntryNumber, entriesSoFar )
-
-        BlockSquare ->
-            ( currentEntryNumber, entriesSoFar )
-
-
-entryMembershipDictFromEntryStartDict : Grid -> EntryStartDict -> EntryMembershipDict
-entryMembershipDictFromEntryStartDict grid entryListings =
-    grid
-        |> Matrix.toIndexedArray
-        |> Array.foldl (setEntryMembership grid entryListings) Dict.empty
-
-
-setEntryMembership : Grid -> EntryStartDict -> ( Coordinate, Square ) -> EntryMembershipDict -> EntryMembershipDict
-setEntryMembership grid entryListings ( coord, square ) entryMembershipDict =
-    let
-        membership =
-            case square of
-                LetterSquare _ ->
-                    BelongsToEntries
-                        { across = findAcrossEntryMembership grid entryListings coord
-                        , down = findDownEntryMembership grid entryListings coord
-                        }
-
-                BlockSquare ->
-                    BelongsToNoEntries
-    in
-        Dict.insert coord membership entryMembershipDict
-
-
-findAcrossEntryMembership : Grid -> EntryStartDict -> Coordinate -> Int
-findAcrossEntryMembership grid entryListings coordinate =
-    case Grid.isAcrossEntryStart grid coordinate of
-        True ->
-            entryNumberAt entryListings coordinate
-                |> Maybe.withDefault 0
-
-        False ->
-            findAcrossEntryMembership grid entryListings (Coordinate.atLeft coordinate)
-
-
-findDownEntryMembership : Grid -> EntryStartDict -> Coordinate -> Int
-findDownEntryMembership grid entryListings coordinate =
-    case Grid.isDownEntryStart grid coordinate of
-        True ->
-            entryNumberAt entryListings coordinate
-                |> Maybe.withDefault 0
-
-        False ->
-            findDownEntryMembership grid entryListings (Coordinate.above coordinate)
-
-
-flattenEntryMembershipDict : EntryMembershipDict -> List ( Coordinate, List Int )
-flattenEntryMembershipDict entryMembershipDict =
-    Dict.map (\m -> membershipToIntList) entryMembershipDict
-        |> Dict.toList
-
-
-membershipToIntList : EntryMembership -> List Int
-membershipToIntList entryMembership =
-    case entryMembership of
-        BelongsToNoEntries ->
-            []
-
-        BelongsToEntries { across, down } ->
-            [ across, down ]
-
-
-acrossEntryMembership : Coordinate -> EntryMembershipDict -> Maybe Int
-acrossEntryMembership coordinate entryMembershipDict =
-    let
-        entryMembership =
-            Dict.get coordinate entryMembershipDict
-    in
-        case entryMembership of
-            Just BelongsToNoEntries ->
-                Nothing
-
-            Just (BelongsToEntries { across, down }) ->
-                Just across
-
-            Nothing ->
-                Nothing
-
-
-downEntryMembership : Coordinate -> EntryMembershipDict -> Maybe Int
-downEntryMembership coordinate entryMembershipDict =
-    let
-        entryMembership =
-            Dict.get coordinate entryMembershipDict
-    in
-        case entryMembership of
-            Just BelongsToNoEntries ->
-                Nothing
-
-            Just (BelongsToEntries { across, down }) ->
-                Just down
-
-            Nothing ->
-                Nothing
-
-
 acrossEntry : Grid -> Coordinate -> String
 acrossEntry grid coordinate =
     acrossEntryHelp grid coordinate ""
@@ -321,7 +175,7 @@ acrossEntry grid coordinate =
 acrossEntryHelp : Grid -> Coordinate -> String -> String
 acrossEntryHelp grid coordinate entrySoFar =
     case Grid.squareAtCoordinate grid coordinate of
-        Just (LetterSquare char) ->
+        Just (LetterSquare _ char _) ->
             acrossEntryHelp grid
                 (Coordinate.atRight coordinate)
                 (String.cons char entrySoFar)
@@ -339,7 +193,7 @@ downEntry grid coordinate =
 downEntryHelp : Grid -> Coordinate -> String -> String
 downEntryHelp grid coordinate entrySoFar =
     case Grid.squareAtCoordinate grid coordinate of
-        Just (LetterSquare char) ->
+        Just (LetterSquare _ char _) ->
             downEntryHelp grid
                 (Coordinate.below coordinate)
                 (String.cons char entrySoFar)
