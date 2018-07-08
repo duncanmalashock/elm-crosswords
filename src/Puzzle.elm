@@ -21,7 +21,6 @@ module Puzzle
         )
 
 import Grid exposing (Grid)
-import Entry exposing (Entry)
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
@@ -257,6 +256,6 @@ setEditMode editMode puzzle =
     { puzzle | editMode = editMode }
 
 
-updateEntry : Puzzle -> Coordinate -> Entry -> Puzzle
-updateEntry puzzle coordinate newClue =
+updateEntry : Puzzle -> Coordinate -> Puzzle
+updateEntry puzzle coordinate =
     puzzle

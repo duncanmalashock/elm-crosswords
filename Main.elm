@@ -5,7 +5,6 @@ import Puzzle exposing (Puzzle, EditMode(..))
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
 import Grid exposing (Grid)
-import Entry exposing (Entry)
 import Dict
 import Keyboard.Extra exposing (Key(..))
 import KeyboardUtils
@@ -32,9 +31,6 @@ type alias Model =
 
 type Msg
     = ClickedSquare Coordinate
-    | ClueClicked Coordinate Direction
-    | ClueEdited Coordinate Entry String
-    | ClueEditFocused
     | EditModeClicked EditMode
     | KeyboardMsg Keyboard.Extra.Msg
 
@@ -97,28 +93,6 @@ update msg model =
                 , Cmd.none
                 )
 
-        ClueClicked coordinate direction ->
-            let
-                updatedPuzzle =
-                    model.puzzle
-                        |> Puzzle.setSelection coordinate
-                        |> Puzzle.setSelectionDirection direction
-            in
-                ( { model | puzzle = updatedPuzzle }, Cmd.none )
-
-        ClueEdited coordinate entry newClue ->
-            ( { model
-                | puzzle =
-                    Puzzle.updateEntry model.puzzle
-                        coordinate
-                        { entry | clue = newClue }
-              }
-            , Cmd.none
-            )
-
-        ClueEditFocused ->
-            ( { model | puzzle = Puzzle.clearSelection model.puzzle }, Cmd.none )
-
         EditModeClicked editMode ->
             ( { model | puzzle = Puzzle.setEditMode editMode model.puzzle }, Cmd.none )
 
@@ -168,33 +142,12 @@ view : Model -> Html Msg
 view model =
     case model.puzzle.grid of
         Ok grid ->
-            let
-                clues =
-                    case model.puzzle.editMode of
-                        Solving ->
-                            Views.cluesView
-                                model.puzzle.currentSelection
-                                model.puzzle.entryMembershipDict
-                                model.puzzle.entryStartDict
-                                ClueClicked
-
-                        Editing ->
-                            Views.cluesEditView
-                                model.puzzle.currentSelection
-                                model.puzzle.entryMembershipDict
-                                model.puzzle.entryStartDict
-                                ClueEdited
-                                ClueEditFocused
-            in
-                div []
-                    [ Views.gridView grid
-                        model.puzzle.currentSelection
-                        model.puzzle.entryStartDict
-                        model.puzzle.entryMembershipDict
-                        ClickedSquare
-                    , clues
-                    , toggleEditorView model
-                    ]
+            div []
+                [ Views.gridView grid
+                    model.puzzle.currentSelection
+                    ClickedSquare
+                , toggleEditorView model
+                ]
 
         Err string ->
             div [] [ text "couldn't load!" ]
