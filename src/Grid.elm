@@ -114,8 +114,10 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gri
 
                 newEntryNumber =
                     if
-                        resultToBool (Result.map (isAcrossEntryStart ( newX, newY )) gridSoFar)
+                        (resultToBool (Result.map (isAcrossEntryStart ( newX, newY )) gridSoFar)
                             || resultToBool (Result.map (isDownEntryStart ( newX, newY )) gridSoFar)
+                        )
+                            && isLetterChar head
                     then
                         entryNumberSoFar + 1
                     else
@@ -129,6 +131,11 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gri
                         gridSoFar
             in
                 fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber newGrid
+
+
+isLetterChar : Char -> Bool
+isLetterChar char =
+    List.member (Char.toUpper char) (String.toList ".ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 getEntryData : Grid -> Coordinate -> Int -> EntryData
@@ -205,19 +212,19 @@ charToSquare : Char -> Coordinate -> Int -> Result String Grid -> Result String 
 charToSquare char ( x, y ) entryNumber gridResult =
     case gridResult of
         Ok grid ->
-            if List.member (Char.toUpper char) (String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZ") then
-                Ok <|
-                    letterSquare ( x, y ) (Char.toUpper char) (getEntryData grid ( x, y ) entryNumber)
-            else if char == '.' then
+            if char == '.' then
                 Ok <|
                     blankSquare ( x, y ) (getEntryData grid ( x, y ) entryNumber)
+            else if isLetterChar char then
+                Ok <|
+                    letterSquare ( x, y ) (Char.toUpper char) (getEntryData grid ( x, y ) entryNumber)
             else if char == '*' then
                 Ok (blockSquare ( x, y ))
             else
                 Err <| "Invalid character: " ++ (String.fromChar char)
 
-        Err _ ->
-            Err "Invalid grid"
+        Err message ->
+            Err message
 
 
 findAcrossEntryStartNumber : Grid -> Coordinate -> Maybe Int
