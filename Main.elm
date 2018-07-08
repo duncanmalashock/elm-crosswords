@@ -31,7 +31,6 @@ type alias Model =
 
 type Msg
     = ClickedSquare Coordinate
-    | EditModeClicked EditMode
     | KeyboardMsg Keyboard.Extra.Msg
 
 
@@ -93,9 +92,6 @@ update msg model =
                 , Cmd.none
                 )
 
-        EditModeClicked editMode ->
-            ( { model | puzzle = Puzzle.setEditMode editMode model.puzzle }, Cmd.none )
-
         KeyboardMsg keyMsg ->
             let
                 newPressedKeys =
@@ -146,45 +142,7 @@ view model =
                 [ Views.gridView grid
                     model.puzzle.currentSelection
                     ClickedSquare
-                , toggleEditorView model
                 ]
 
         Err string ->
             div [] [ text "couldn't load!" ]
-
-
-toggleEditorView : Model -> Html Msg
-toggleEditorView model =
-    div
-        [ style
-            [ ( "margin-top", "20px" )
-            ]
-        ]
-        [ input
-            [ type_ "radio"
-            , id "solving"
-            , name "mode"
-            , value "solving"
-            , checked (model.puzzle.editMode == Solving)
-            , onClick (EditModeClicked Solving)
-            ]
-            []
-        , label
-            [ for "solving" ]
-            [ text "Solving" ]
-        , input
-            [ type_ "radio"
-            , id "editing"
-            , name "mode"
-            , value "editing"
-            , checked (model.puzzle.editMode == Editing)
-            , onClick (EditModeClicked Editing)
-            , style
-                [ ( "margin-left", "10px" )
-                ]
-            ]
-            []
-        , label
-            [ for "editing" ]
-            [ text "Editing" ]
-        ]
