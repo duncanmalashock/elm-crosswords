@@ -12,6 +12,7 @@ module Grid
         , coordIsInBounds
         , squareAtCoordinate
         , hasLetterSquareAt
+        , updateLetterSquare
         )
 
 import Char
@@ -362,3 +363,8 @@ hasLetterSquareAtLeft grid coordinate =
     squareAtLeft grid coordinate
         |> Maybe.map Square.isLetterSquare
         |> Maybe.withDefault False
+
+
+updateLetterSquare : Coordinate -> Char -> Grid -> Grid
+updateLetterSquare ( x, y ) char grid =
+    grid

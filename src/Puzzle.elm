@@ -35,8 +35,6 @@ import Dict
 type alias Puzzle =
     { grid : Result String Grid
     , currentSelection : Maybe Selection
-    , entryStartDict : Entry.EntryStartDict
-    , entryMembershipDict : Entry.EntryMembershipDict
     , editMode : EditMode
     }
 
@@ -55,28 +53,9 @@ fromString gridWidth gridHeight string editMode =
     let
         gridResult =
             Grid.fromString gridWidth gridHeight string
-
-        gridDefault =
-            Result.withDefault (Grid.blank 1 1) gridResult
-
-        entryStartDict =
-            Entry.entryStartDictFromGrid gridDefault
-
-        entryMembershipDict =
-            Entry.entryMembershipDictFromEntryStartDict gridDefault entryStartDict
-
-        gridForDisplay =
-            case editMode of
-                Editing ->
-                    gridResult
-
-                Solving ->
-                    Result.map Grid.clear gridResult
     in
-        { grid = gridForDisplay
+        { grid = gridResult
         , currentSelection = Nothing
-        , entryStartDict = entryStartDict
-        , entryMembershipDict = entryMembershipDict
         , editMode = editMode
         }
 
@@ -280,4 +259,4 @@ setEditMode editMode puzzle =
 
 updateEntry : Puzzle -> Coordinate -> Entry -> Puzzle
 updateEntry puzzle coordinate newClue =
-    { puzzle | entryStartDict = Entry.updateEntry puzzle.entryStartDict coordinate newClue }
+    puzzle

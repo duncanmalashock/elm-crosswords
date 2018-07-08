@@ -7,66 +7,66 @@ import Test exposing (Test, describe, test, skip)
 import Expect
 
 
-testFromString : Test
-testFromString =
-    describe "Puzzle.fromString"
-        [ test "valid grid string" <|
-            \_ ->
-                let
-                    stringInput =
-                        "ABCD"
-
-                    newPuzzle =
-                        Puzzle.fromString 2 2 stringInput Editing
-                in
-                    Expect.equal
-                        (newPuzzle.grid
-                            |> Result.map (Grid.flatten)
-                        )
-                        (Ok
-                            [ LetterSquare 'A'
-                            , LetterSquare 'B'
-                            , LetterSquare 'C'
-                            , LetterSquare 'D'
-                            ]
-                        )
-        , test "invalid grid string" <|
-            \_ ->
-                let
-                    stringInput =
-                        "AB$D"
-
-                    newPuzzle =
-                        Puzzle.fromString 2 2 stringInput Editing
-                in
-                    Expect.equal
-                        newPuzzle.grid
-                        (Err "Invalid character")
-        , test "grid size mismatch (too few characters)" <|
-            \_ ->
-                let
-                    stringInput =
-                        "A"
-
-                    newPuzzle =
-                        Puzzle.fromString 2 2 stringInput Editing
-                in
-                    Expect.equal
-                        newPuzzle.grid
-                        (Err "1 is too few characters for a 2x2 Grid")
-        , test "grid size mismatch (too many characters)" <|
-            \_ ->
-                let
-                    stringInput =
-                        "ABCD"
-
-                    newPuzzle =
-                        Puzzle.fromString 1 1 stringInput Editing
-                in
-                    Expect.equal
-                        newPuzzle.grid
-                        (Err "4 is too many characters for a 1x1 Grid")
-        ]
+-- testFromString : Test
+-- testFromString =
+--     describe "Puzzle.fromString"
+--         [ test "valid grid string" <|
+--             \_ ->
+--                 let
+--                     stringInput =
+--                         "ABCD"
+--
+--                     newPuzzle =
+--                         Puzzle.fromString 2 2 stringInput Editing
+--                 in
+--                     Expect.equal
+--                         (newPuzzle.grid
+--                             |> Result.map (Grid.flatten)
+--                         )
+--                         (Ok
+--                             [ LetterSquare 'A'
+--                             , LetterSquare 'B'
+--                             , LetterSquare 'C'
+--                             , LetterSquare 'D'
+--                             ]
+--                         )
+--         , test "invalid grid string" <|
+--             \_ ->
+--                 let
+--                     stringInput =
+--                         "AB$D"
+--
+--                     newPuzzle =
+--                         Puzzle.fromString 2 2 stringInput Editing
+--                 in
+--                     Expect.equal
+--                         newPuzzle.grid
+--                         (Err "Invalid character")
+--         , test "grid size mismatch (too few characters)" <|
+--             \_ ->
+--                 let
+--                     stringInput =
+--                         "A"
+--
+--                     newPuzzle =
+--                         Puzzle.fromString 2 2 stringInput Editing
+--                 in
+--                     Expect.equal
+--                         newPuzzle.grid
+--                         (Err "1 is too few characters for a 2x2 Grid")
+--         , test "grid size mismatch (too many characters)" <|
+--             \_ ->
+--                 let
+--                     stringInput =
+--                         "ABCD"
+--
+--                     newPuzzle =
+--                         Puzzle.fromString 1 1 stringInput Editing
+--                 in
+--                     Expect.equal
+--                         newPuzzle.grid
+--                         (Err "4 is too many characters for a 1x1 Grid")
+--         ]
 
 
 testSetSelection : Test

@@ -1,7 +1,8 @@
 module Views exposing (..)
 
 import Puzzle exposing (Selection)
-import Grid exposing (Grid, Square(..))
+import Grid exposing (Grid)
+import Square exposing (Square(..))
 import Entry exposing (Entry, EntryStartDict, EntryMembershipDict)
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
@@ -39,7 +40,7 @@ gridView grid currentSelection entryListings entryMembershipDict clickMsg =
 squareView : Grid -> Maybe Selection -> EntryStartDict -> EntryMembershipDict -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
 squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x, y ) as coordinate) square =
     case square of
-        LetterSquare letter ->
+        LetterSquare _ letter _ ->
             let
                 highlightStyle =
                     case currentSelection of
@@ -112,7 +113,7 @@ squareView grid currentSelection entryListings entryMembershipDict clickMsg (( x
                         ++ entryStartView
                     )
 
-        BlockSquare ->
+        BlockSquare _ ->
             div
                 [ class "square--filled"
                 , onMouseDown <| clickMsg ( x, y )
