@@ -39,7 +39,7 @@ gridView grid currentSelection clickMsg =
 squareView : Grid -> Maybe Selection -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg
 squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
     case square of
-        LetterSquare _ letter _ ->
+        LetterSquare _ letterData _ ->
             let
                 highlightStyle =
                     case currentSelection of
@@ -95,7 +95,7 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                         ]
                             ++ highlightStyle
                     ]
-                    ([ text (String.fromChar letter)
+                    ([ text (String.fromChar letterData.solution)
                      ]
                         ++ entryNumberView
                     )

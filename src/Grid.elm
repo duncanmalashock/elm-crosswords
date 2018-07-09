@@ -304,12 +304,22 @@ isDownEntryStart coordinate grid =
 
 letterSquare : Coordinate -> Char -> EntryData -> Square
 letterSquare coord char entryData =
-    LetterSquare coord char entryData
+    LetterSquare
+        coord
+        { solution = char
+        , guess = ' '
+        }
+        entryData
 
 
 blankSquare : Coordinate -> EntryData -> Square
 blankSquare coord entryData =
-    LetterSquare coord ' ' entryData
+    LetterSquare
+        coord
+        { solution = ' '
+        , guess = ' '
+        }
+        entryData
 
 
 blockSquare : Coordinate -> Square

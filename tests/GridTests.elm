@@ -37,7 +37,9 @@ testToRows =
                         Ok
                             [ [ ( ( 0, 0 )
                                 , LetterSquare ( 0, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcrossAndDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
@@ -45,7 +47,9 @@ testToRows =
                                 )
                               , ( ( 1, 0 )
                                 , LetterSquare ( 1, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 2
@@ -54,7 +58,9 @@ testToRows =
                               ]
                             , [ ( ( 0, 1 )
                                 , LetterSquare ( 0, 1 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcross
                                     , inAcrossEntry = 3
                                     , inDownEntry = 1
@@ -62,7 +68,9 @@ testToRows =
                                 )
                               , ( ( 1, 1 )
                                 , LetterSquare ( 1, 1 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = NoStart
                                     , inAcrossEntry = 3
                                     , inDownEntry = 2
@@ -181,7 +189,9 @@ testSquareAtCoordinate =
                         Ok
                             (Just <|
                                 LetterSquare ( 1, 0 )
-                                    'B'
+                                    { solution = 'B'
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 2
@@ -245,7 +255,9 @@ testFromString =
                         Ok
                             [ [ ( ( 0, 0 )
                                 , LetterSquare ( 0, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcrossAndDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
@@ -269,7 +281,9 @@ testFromString =
                         Ok
                             [ [ ( ( 0, 0 )
                                 , LetterSquare ( 0, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcrossAndDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
@@ -277,7 +291,9 @@ testFromString =
                                 )
                               , ( ( 1, 0 )
                                 , LetterSquare ( 1, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 2
@@ -301,7 +317,9 @@ testFromString =
                         Ok
                             [ [ ( ( 0, 0 )
                                 , LetterSquare ( 0, 0 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcrossAndDown
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
@@ -312,7 +330,9 @@ testFromString =
                             , [ ( ( 0, 1 ), BlockSquare ( 0, 1 ) )
                               , ( ( 1, 1 )
                                 , LetterSquare ( 1, 1 )
-                                    ' '
+                                    { solution = ' '
+                                    , guess = ' '
+                                    }
                                     { startsEntries = StartsAcrossAndDown
                                     , inAcrossEntry = 2
                                     , inDownEntry = 2

@@ -5,8 +5,14 @@ import Char
 
 
 type Square
-    = LetterSquare Coordinate Char EntryData
+    = LetterSquare Coordinate LetterData EntryData
     | BlockSquare Coordinate
+
+
+type alias LetterData =
+    { solution : Char
+    , guess : Char
+    }
 
 
 type alias EntryData =
@@ -77,8 +83,8 @@ entryNumber square =
 toString : Square -> String
 toString s =
     case s of
-        LetterSquare _ c _ ->
-            String.fromChar c
+        LetterSquare _ letterData _ ->
+            String.fromChar letterData.solution
 
         BlockSquare _ ->
             "*"
