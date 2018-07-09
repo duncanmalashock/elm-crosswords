@@ -53,6 +53,27 @@ isLetterSquare square =
             False
 
 
+entryNumber : Square -> Maybe Int
+entryNumber square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case entryData.startsEntries of
+                StartsAcross ->
+                    Just entryData.inAcrossEntry
+
+                StartsDown ->
+                    Just entryData.inDownEntry
+
+                StartsAcrossAndDown ->
+                    Just entryData.inAcrossEntry
+
+                NoStart ->
+                    Nothing
+
+        BlockSquare _ ->
+            Nothing
+
+
 toString : Square -> String
 toString s =
     case s of

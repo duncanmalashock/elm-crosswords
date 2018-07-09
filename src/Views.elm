@@ -59,6 +59,23 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
 
                         Nothing ->
                             []
+
+                entryNumberView =
+                    case Square.entryNumber square of
+                        Just i ->
+                            [ div
+                                [ style
+                                    [ ( "position", "absolute" )
+                                    , ( "top", "0px" )
+                                    , ( "left", "2px" )
+                                    , ( "font-size", "10px" )
+                                    ]
+                                ]
+                                [ text <| toString i ]
+                            ]
+
+                        Nothing ->
+                            []
             in
                 div
                     [ class "square--open"
@@ -80,6 +97,7 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                     ]
                     ([ text (String.fromChar letter)
                      ]
+                        ++ entryNumberView
                     )
 
         BlockSquare _ ->
