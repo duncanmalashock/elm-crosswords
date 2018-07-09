@@ -128,7 +128,9 @@ updateWithNewPressedKeys newPressedKeys model =
     in
         ( { model
             | pressedKeys = newPressedKeys
-            , puzzle = updatedPuzzle
+            , puzzle =
+                updatedPuzzle
+                    |> Puzzle.updateCompletionState
           }
         , Cmd.none
         )
@@ -145,12 +147,13 @@ view model =
     case model.puzzle.grid of
         Ok grid ->
             div [] <|
-                [ Views.gridView grid
+                [ Views.completedView model.puzzle
+                , Views.gridView grid
                     model.puzzle.currentSelection
                     ClickedSquare
                 ]
-                    ++ List.map clueView (Grid.acrossClues grid)
-                    ++ List.map clueView (Grid.downClues grid)
 
+        -- ++ List.map clueView (Grid.acrossClues grid)
+        -- ++ List.map clueView (Grid.downClues grid)
         Err string ->
             div [] [ text "couldn't load!" ]

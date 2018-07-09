@@ -1,6 +1,6 @@
 module Views exposing (..)
 
-import Puzzle exposing (Selection)
+import Puzzle exposing (Puzzle, Selection)
 import Grid exposing (Grid)
 import Square exposing (Square(..))
 import Coordinate exposing (Coordinate)
@@ -35,6 +35,22 @@ gridView grid currentSelection clickMsg =
                 |> Grid.toRows
                 |> List.map (drawRow)
             )
+
+
+completedView : Puzzle -> Html msg
+completedView puzzle =
+    case puzzle.completed of
+        Ok (Grid.CompletedSuccessfully) ->
+            div [] [ text "You finished it!" ]
+
+        Ok (Grid.CompletedWithMistakes mistakes) ->
+            div [] [ text <| "You still have " ++ toString mistakes ++ " mistakes." ]
+
+        Ok (Grid.NotCompleted) ->
+            text ""
+
+        Err _ ->
+            text ""
 
 
 squareView : Grid -> Maybe Selection -> (Coordinate -> msg) -> Coordinate -> Square -> Html msg

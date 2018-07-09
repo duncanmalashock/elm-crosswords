@@ -18,9 +18,10 @@ module Puzzle
         , deleteLetter
         , setEditMode
         , setGuess
+        , updateCompletionState
         )
 
-import Grid exposing (Grid)
+import Grid exposing (Grid, CompletionState(..))
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
@@ -35,6 +36,7 @@ type alias Puzzle =
     { grid : Result String Grid
     , currentSelection : Maybe Selection
     , editMode : EditMode
+    , completed : Result String CompletionState
     }
 
 
@@ -56,6 +58,7 @@ fromString gridWidth gridHeight string editMode =
         { grid = gridResult
         , currentSelection = Nothing
         , editMode = editMode
+        , completed = Ok NotCompleted
         }
 
 
@@ -259,3 +262,8 @@ setEditMode editMode puzzle =
 setGuess : Puzzle -> Coordinate -> Char -> Puzzle
 setGuess puzzle coordinate char =
     { puzzle | grid = Result.map (Grid.setGuess coordinate char) puzzle.grid }
+
+
+updateCompletionState : Puzzle -> Puzzle
+updateCompletionState puzzle =
+    { puzzle | completed = Result.map Grid.completionState puzzle.grid }

@@ -163,6 +163,26 @@ downEntryNumber square =
             Nothing
 
 
+isGuessed : Square -> Bool
+isGuessed square =
+    case square of
+        LetterSquare _ letterData _ ->
+            letterData.guess /= ' '
+
+        BlockSquare _ ->
+            False
+
+
+hasCorrectGuess : Square -> Bool
+hasCorrectGuess square =
+    case square of
+        LetterSquare _ letterData _ ->
+            letterData.guess == letterData.solution
+
+        BlockSquare _ ->
+            True
+
+
 toString : Square -> String
 toString s =
     case s of

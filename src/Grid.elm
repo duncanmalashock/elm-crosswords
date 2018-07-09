@@ -1,6 +1,7 @@
 module Grid
     exposing
         ( Grid
+        , CompletionState(..)
         , width
         , height
         , blank
@@ -15,6 +16,7 @@ module Grid
         , setGuess
         , acrossClues
         , downClues
+        , completionState
         )
 
 import Char
@@ -31,6 +33,12 @@ import Array.Hamt as Array exposing (Array)
 
 type alias Grid =
     Matrix Square
+
+
+type CompletionState
+    = CompletedSuccessfully
+    | CompletedWithMistakes Int
+    | NotCompleted
 
 
 blankEntryData =
@@ -437,3 +445,27 @@ downClues grid =
             |> Array.toList
             |> List.map (\( ( i, j ), c ) -> c)
             |> maybesToList
+
+
+completionState : Grid -> CompletionState
+completionState grid =
+    let
+        unguessed =
+            Matrix.filter (Square.isGuessed >> not) grid
+                |> Array.length
+
+        mistakes =
+            Matrix.filter (Square.hasCorrectGuess >> not) grid
+                |> Array.length
+    in
+        case unguessed of
+            0 ->
+                case mistakes of
+                    0 ->
+                        CompletedSuccessfully
+
+                    m ->
+                        CompletedWithMistakes m
+
+            _ ->
+                NotCompleted
