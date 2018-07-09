@@ -22,10 +22,15 @@ type alias EntryData =
     }
 
 
+type alias ClueData =
+    { clue : String
+    }
+
+
 type StartsEntries
-    = StartsAcross
-    | StartsDown
-    | StartsAcrossAndDown
+    = StartsAcross ClueData
+    | StartsDown ClueData
+    | StartsAcrossAndDown ClueData ClueData
     | NoStart
 
 
@@ -64,14 +69,56 @@ entryNumber square =
     case square of
         LetterSquare _ _ entryData ->
             case entryData.startsEntries of
-                StartsAcross ->
+                StartsAcross _ ->
                     Just entryData.inAcrossEntry
 
-                StartsDown ->
+                StartsDown _ ->
                     Just entryData.inDownEntry
 
-                StartsAcrossAndDown ->
+                StartsAcrossAndDown _ _ ->
                     Just entryData.inAcrossEntry
+
+                NoStart ->
+                    Nothing
+
+        BlockSquare _ ->
+            Nothing
+
+
+acrossClue : Square -> Maybe String
+acrossClue square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case entryData.startsEntries of
+                StartsAcross clueData ->
+                    Just clueData.clue
+
+                StartsDown _ ->
+                    Nothing
+
+                StartsAcrossAndDown clueDataAcross _ ->
+                    Just clueDataAcross.clue
+
+                NoStart ->
+                    Nothing
+
+        BlockSquare _ ->
+            Nothing
+
+
+downClue : Square -> Maybe String
+downClue square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case entryData.startsEntries of
+                StartsAcross _ ->
+                    Nothing
+
+                StartsDown clueData ->
+                    Just clueData.clue
+
+                StartsAcrossAndDown _ clueDataDown ->
+                    Just clueDataDown.clue
 
                 NoStart ->
                     Nothing

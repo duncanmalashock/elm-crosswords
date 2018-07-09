@@ -13,6 +13,8 @@ module Grid
         , squareAtCoordinate
         , hasLetterSquareAt
         , setGuess
+        , acrossClues
+        , downClues
         )
 
 import Char
@@ -132,11 +134,11 @@ getEntryData grid ( x, y ) newEntryNumber =
 
         startsEntriesValue =
             if (isAcrossEntryStart ( x, y ) grid) && (isDownEntryStart ( x, y ) grid) then
-                StartsAcrossAndDown
+                StartsAcrossAndDown { clue = "" } { clue = "" }
             else if (isAcrossEntryStart ( x, y ) grid) then
-                StartsAcross
+                StartsAcross { clue = "" }
             else if (isDownEntryStart ( x, y ) grid) then
-                StartsDown
+                StartsDown { clue = "" }
             else
                 NoStart
     in
@@ -389,3 +391,49 @@ setGuess ( x, y ) newGuess grid =
             )
     in
         Matrix.update x y updateGuess grid
+
+
+acrossClues : Grid -> List String
+acrossClues grid =
+    let
+        maybesToList maybes =
+            List.map
+                (\m ->
+                    case m of
+                        Just x ->
+                            [ x ]
+
+                        Nothing ->
+                            []
+                )
+                maybes
+                |> List.concat
+    in
+        Matrix.map Square.acrossClue grid
+            |> Matrix.toIndexedArray
+            |> Array.toList
+            |> List.map (\( ( i, j ), c ) -> c)
+            |> maybesToList
+
+
+downClues : Grid -> List String
+downClues grid =
+    let
+        maybesToList maybes =
+            List.map
+                (\m ->
+                    case m of
+                        Just x ->
+                            [ x ]
+
+                        Nothing ->
+                            []
+                )
+                maybes
+                |> List.concat
+    in
+        Matrix.map Square.downClue grid
+            |> Matrix.toIndexedArray
+            |> Array.toList
+            |> List.map (\( ( i, j ), c ) -> c)
+            |> maybesToList

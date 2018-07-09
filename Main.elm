@@ -134,15 +134,23 @@ updateWithNewPressedKeys newPressedKeys model =
         )
 
 
+clueView : String -> Html Msg
+clueView clueString =
+    div []
+        [ text <| "Clue: " ++ clueString ]
+
+
 view : Model -> Html Msg
 view model =
     case model.puzzle.grid of
         Ok grid ->
-            div []
+            div [] <|
                 [ Views.gridView grid
                     model.puzzle.currentSelection
                     ClickedSquare
                 ]
+                    ++ List.map clueView (Grid.acrossClues grid)
+                    ++ List.map clueView (Grid.downClues grid)
 
         Err string ->
             div [] [ text "couldn't load!" ]

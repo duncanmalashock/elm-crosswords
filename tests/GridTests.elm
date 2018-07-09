@@ -34,52 +34,11 @@ testToRows =
                         Grid.blank 2 2
 
                     expectedOutput =
-                        Ok
-                            [ [ ( ( 0, 0 )
-                                , LetterSquare ( 0, 0 )
-                                    { solution = ' '
-                                    , guess = ' '
-                                    }
-                                    { startsEntries = StartsAcrossAndDown
-                                    , inAcrossEntry = 1
-                                    , inDownEntry = 1
-                                    }
-                                )
-                              , ( ( 1, 0 )
-                                , LetterSquare ( 1, 0 )
-                                    { solution = ' '
-                                    , guess = ' '
-                                    }
-                                    { startsEntries = StartsDown
-                                    , inAcrossEntry = 1
-                                    , inDownEntry = 2
-                                    }
-                                )
-                              ]
-                            , [ ( ( 0, 1 )
-                                , LetterSquare ( 0, 1 )
-                                    { solution = ' '
-                                    , guess = ' '
-                                    }
-                                    { startsEntries = StartsAcross
-                                    , inAcrossEntry = 3
-                                    , inDownEntry = 1
-                                    }
-                                )
-                              , ( ( 1, 1 )
-                                , LetterSquare ( 1, 1 )
-                                    { solution = ' '
-                                    , guess = ' '
-                                    }
-                                    { startsEntries = NoStart
-                                    , inAcrossEntry = 3
-                                    , inDownEntry = 2
-                                    }
-                                )
-                              ]
-                            ]
+                        (Ok [ 2, 2 ])
                 in
-                    Expect.equal (Result.map Grid.toRows blankGrid) expectedOutput
+                    Expect.equal
+                        (Result.map (Grid.toRows >> List.map List.length) blankGrid)
+                        expectedOutput
         ]
 
 
@@ -186,34 +145,30 @@ testSquareAtCoordinate =
             \_ ->
                 let
                     expectedOutput =
-                        Ok
-                            (Just <|
-                                LetterSquare ( 1, 0 )
-                                    { solution = 'B'
-                                    , guess = ' '
-                                    }
-                                    { startsEntries = StartsDown
-                                    , inAcrossEntry = 1
-                                    , inDownEntry = 2
-                                    }
-                            )
+                        Ok (Just "B")
 
                     input =
                         Grid.fromString 2 2 "ABCD"
                             |> Result.map
-                                (\g -> Grid.squareAtCoordinate g ( 1, 0 ))
+                                (\g ->
+                                    Grid.squareAtCoordinate g ( 1, 0 )
+                                        |> Maybe.map Square.toString
+                                )
                 in
                     Expect.equal input expectedOutput
         , test "returns a block square at matching coordinate" <|
             \_ ->
                 let
                     expectedOutput =
-                        Ok (Just <| BlockSquare ( 1, 1 ))
+                        Ok (Just "*")
 
                     input =
                         Grid.fromString 2 2 "ABC*"
                             |> Result.map
-                                (\g -> Grid.squareAtCoordinate g ( 1, 1 ))
+                                (\g ->
+                                    Grid.squareAtCoordinate g ( 1, 1 )
+                                        |> Maybe.map Square.toString
+                                )
                 in
                     Expect.equal input expectedOutput
         ]
@@ -258,7 +213,7 @@ testFromString =
                                     { solution = ' '
                                     , guess = ' '
                                     }
-                                    { startsEntries = StartsAcrossAndDown
+                                    { startsEntries = StartsAcrossAndDown { clue = "" } { clue = "" }
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
                                     }
@@ -284,7 +239,7 @@ testFromString =
                                     { solution = ' '
                                     , guess = ' '
                                     }
-                                    { startsEntries = StartsAcrossAndDown
+                                    { startsEntries = StartsAcrossAndDown { clue = "" } { clue = "" }
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
                                     }
@@ -294,7 +249,7 @@ testFromString =
                                     { solution = ' '
                                     , guess = ' '
                                     }
-                                    { startsEntries = StartsDown
+                                    { startsEntries = StartsDown { clue = "" }
                                     , inAcrossEntry = 1
                                     , inDownEntry = 2
                                     }
@@ -320,7 +275,7 @@ testFromString =
                                     { solution = ' '
                                     , guess = ' '
                                     }
-                                    { startsEntries = StartsAcrossAndDown
+                                    { startsEntries = StartsAcrossAndDown { clue = "" } { clue = "" }
                                     , inAcrossEntry = 1
                                     , inDownEntry = 1
                                     }
@@ -333,7 +288,7 @@ testFromString =
                                     { solution = ' '
                                     , guess = ' '
                                     }
-                                    { startsEntries = StartsAcrossAndDown
+                                    { startsEntries = StartsAcrossAndDown { clue = "" } { clue = "" }
                                     , inAcrossEntry = 2
                                     , inDownEntry = 2
                                     }
