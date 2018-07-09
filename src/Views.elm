@@ -5,6 +5,7 @@ import Grid exposing (Grid)
 import Square exposing (Square(..))
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
+import Maybe.Extra as Maybe
 import Html exposing (Html, div, text, textarea)
 import Html.Attributes exposing (class, style, value)
 import Html.Events exposing (onClick, onInput, onFocus, onMouseDown)
@@ -44,18 +45,28 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                 highlightStyle =
                     case currentSelection of
                         Just ( selectionCoordinate, direction ) ->
-                            case direction of
-                                Across ->
-                                    if coordinate == selectionCoordinate then
-                                        [ ( "background-color", "#009dff" ) ]
-                                    else
-                                        []
+                            let
+                                selectedSquare =
+                                    Grid.squareAtCoordinate grid selectionCoordinate
 
-                                Down ->
-                                    if coordinate == selectionCoordinate then
-                                        [ ( "background-color", "#009dff" ) ]
-                                    else
-                                        []
+                                selectedClue =
+                                    case direction of
+                                        Across ->
+                                            Maybe.map Square.acrossEntryNumber selectedSquare
+                                                |> Maybe.join
+                                                |> Maybe.withDefault -1
+
+                                        Down ->
+                                            Maybe.map Square.downEntryNumber selectedSquare
+                                                |> Maybe.join
+                                                |> Maybe.withDefault -1
+                            in
+                                if coordinate == selectionCoordinate then
+                                    [ ( "background-color", "#009dff" ) ]
+                                else if Square.isInEntry selectedClue direction square then
+                                    [ ( "background-color", "#ccebff" ) ]
+                                else
+                                    []
 
                         Nothing ->
                             []

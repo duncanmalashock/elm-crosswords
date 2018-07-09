@@ -1,6 +1,7 @@
 module Square exposing (..)
 
 import Coordinate exposing (Coordinate)
+import Direction exposing (Direction(..))
 import Char
 
 
@@ -85,6 +86,21 @@ entryNumber square =
             Nothing
 
 
+isInEntry : Int -> Direction -> Square -> Bool
+isInEntry entryNumber direction square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case direction of
+                Across ->
+                    entryNumber == entryData.inAcrossEntry
+
+                Down ->
+                    entryNumber == entryData.inDownEntry
+
+        BlockSquare _ ->
+            False
+
+
 acrossClue : Square -> Maybe String
 acrossClue square =
     case square of
@@ -122,6 +138,26 @@ downClue square =
 
                 NoStart ->
                     Nothing
+
+        BlockSquare _ ->
+            Nothing
+
+
+acrossEntryNumber : Square -> Maybe Int
+acrossEntryNumber square =
+    case square of
+        LetterSquare _ _ entryData ->
+            Just entryData.inAcrossEntry
+
+        BlockSquare _ ->
+            Nothing
+
+
+downEntryNumber : Square -> Maybe Int
+downEntryNumber square =
+    case square of
+        LetterSquare _ _ entryData ->
+            Just entryData.inDownEntry
 
         BlockSquare _ ->
             Nothing
