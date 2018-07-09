@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+def run_cmd(chdir, message, cmd, failure_msg)
+  Dir.chdir(chdir) do
+    puts message
+    puts cmd
+    unless system cmd
+      puts "Command failed: #{cmd}"
+      failure failure_msg
+    end
+  end
+end
+
+cmd = "elm make Main.elm --output js/elm.js"
+run_cmd(Dir.pwd, "Building...", cmd, "Failed to compile")
