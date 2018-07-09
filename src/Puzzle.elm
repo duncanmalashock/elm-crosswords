@@ -17,7 +17,7 @@ module Puzzle
         , typeLetters
         , deleteLetter
         , setEditMode
-        , updateEntry
+        , setGuess
         )
 
 import Grid exposing (Grid)
@@ -72,11 +72,11 @@ typeLetter char puzzle =
         Just ( coord, direction ) ->
             case direction of
                 Across ->
-                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
+                    { puzzle | grid = Result.map (Grid.setGuess coord char) puzzle.grid }
                         |> moveSelectionRight
 
                 Down ->
-                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord char) puzzle.grid }
+                    { puzzle | grid = Result.map (Grid.setGuess coord char) puzzle.grid }
                         |> moveSelectionDown
 
         Nothing ->
@@ -89,11 +89,11 @@ deleteLetter puzzle =
         Just ( coord, direction ) ->
             case direction of
                 Across ->
-                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord ' ') puzzle.grid }
+                    { puzzle | grid = Result.map (Grid.setGuess coord ' ') puzzle.grid }
                         |> moveSelectionLeft
 
                 Down ->
-                    { puzzle | grid = Result.map (Grid.updateLetterSquare coord ' ') puzzle.grid }
+                    { puzzle | grid = Result.map (Grid.setGuess coord ' ') puzzle.grid }
                         |> moveSelectionUp
 
         Nothing ->
@@ -256,6 +256,6 @@ setEditMode editMode puzzle =
     { puzzle | editMode = editMode }
 
 
-updateEntry : Puzzle -> Coordinate -> Puzzle
-updateEntry puzzle coordinate =
-    puzzle
+setGuess : Puzzle -> Coordinate -> Char -> Puzzle
+setGuess puzzle coordinate char =
+    { puzzle | grid = Result.map (Grid.setGuess coordinate char) puzzle.grid }

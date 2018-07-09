@@ -95,7 +95,7 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                         ]
                             ++ highlightStyle
                     ]
-                    ([ text (String.fromChar letterData.solution)
+                    ([ text (String.fromChar letterData.guess)
                      ]
                         ++ entryNumberView
                     )

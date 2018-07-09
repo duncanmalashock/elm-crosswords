@@ -12,7 +12,7 @@ module Grid
         , coordIsInBounds
         , squareAtCoordinate
         , hasLetterSquareAt
-        , updateLetterSquare
+        , setGuess
         )
 
 import Char
@@ -375,6 +375,17 @@ hasLetterSquareAtLeft grid coordinate =
         |> Maybe.withDefault False
 
 
-updateLetterSquare : Coordinate -> Char -> Grid -> Grid
-updateLetterSquare ( x, y ) char grid =
-    grid
+setGuess : Coordinate -> Char -> Grid -> Grid
+setGuess ( x, y ) newGuess grid =
+    let
+        updateGuess =
+            (\square ->
+                case square of
+                    LetterSquare coord letterData entryData ->
+                        LetterSquare coord { letterData | guess = newGuess } entryData
+
+                    BlockSquare coord ->
+                        BlockSquare coord
+            )
+    in
+        Matrix.update x y updateGuess grid
