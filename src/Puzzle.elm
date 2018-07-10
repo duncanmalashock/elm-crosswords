@@ -8,7 +8,6 @@ module Puzzle
         , selectionCoordinate
         , switchSelectionDirection
         , setSelection
-        , setSelectionDirection
         , clearSelection
         , moveSelectionLeft
         , moveSelectionRight
@@ -130,20 +129,6 @@ switchSelectionDirection puzzle =
 
                         Down ->
                             Just ( coord, Across )
-
-                Nothing ->
-                    Nothing
-    in
-        { puzzle | currentSelection = updatedSelection }
-
-
-setSelectionDirection : Direction -> Puzzle -> Puzzle
-setSelectionDirection direction puzzle =
-    let
-        updatedSelection =
-            case puzzle.currentSelection of
-                Just ( coord, _ ) ->
-                    Just ( coord, direction )
 
                 Nothing ->
                     Nothing
