@@ -170,7 +170,7 @@ isGuessed square =
             letterData.guess /= ' '
 
         BlockSquare _ ->
-            False
+            True
 
 
 hasCorrectGuess : Square -> Bool
