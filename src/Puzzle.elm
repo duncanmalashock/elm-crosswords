@@ -16,6 +16,7 @@ module Puzzle
         , typeLetters
         , deleteLetter
         , setEditMode
+        , selectEntry
         , setGuess
         , updateCompletionState
         )
@@ -25,6 +26,7 @@ import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
 import Keyboard.Extra exposing (Key(..))
+import Maybe.Extra as Maybe
 import Dict
 
 
@@ -237,6 +239,18 @@ setSelection (( x, y ) as coordinate) puzzle =
 clearSelection : Puzzle -> Puzzle
 clearSelection puzzle =
     { puzzle | currentSelection = Nothing }
+
+
+selectEntry : Puzzle -> Direction -> Int -> Puzzle
+selectEntry puzzle direction entryNumber =
+    let
+        selection =
+            Result.map (Grid.entryCoordinate direction entryNumber) puzzle.grid
+                |> Result.toMaybe
+                |> Maybe.join
+                |> Maybe.map (\num -> ( num, direction ))
+    in
+        { puzzle | currentSelection = selection }
 
 
 setEditMode : EditMode -> Puzzle -> Puzzle

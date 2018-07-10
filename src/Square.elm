@@ -101,6 +101,65 @@ isInEntry entryNumber direction square =
             False
 
 
+startsEntry : Int -> Direction -> Square -> Bool
+startsEntry entryNumber direction square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case direction of
+                Across ->
+                    (entryNumber == entryData.inAcrossEntry)
+                        && startsAcrossEntry square
+
+                Down ->
+                    (entryNumber == entryData.inDownEntry)
+                        && startsDownEntry square
+
+        BlockSquare _ ->
+            False
+
+
+startsAcrossEntry : Square -> Bool
+startsAcrossEntry square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case entryData.startsEntries of
+                StartsAcross _ ->
+                    True
+
+                StartsDown _ ->
+                    False
+
+                StartsAcrossAndDown _ _ ->
+                    True
+
+                NoStart ->
+                    False
+
+        BlockSquare _ ->
+            False
+
+
+startsDownEntry : Square -> Bool
+startsDownEntry square =
+    case square of
+        LetterSquare _ _ entryData ->
+            case entryData.startsEntries of
+                StartsAcross _ ->
+                    False
+
+                StartsDown _ ->
+                    True
+
+                StartsAcrossAndDown _ _ ->
+                    True
+
+                NoStart ->
+                    False
+
+        BlockSquare _ ->
+            False
+
+
 acrossClue : Square -> Maybe ( Int, String )
 acrossClue square =
     case square of

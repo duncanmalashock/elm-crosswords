@@ -11,6 +11,7 @@ module Grid
         , toString
         , isAcrossEntryStart
         , isDownEntryStart
+        , entryCoordinate
         , coordIsInBounds
         , squareAtCoordinate
         , hasLetterSquareAt
@@ -272,6 +273,15 @@ findDownEntryStartNumberHelp square =
 
         BlockSquare _ ->
             Nothing
+
+
+entryCoordinate : Direction -> Int -> Grid -> Maybe Coordinate
+entryCoordinate direction entryNumber grid =
+    Matrix.toIndexedArray grid
+        |> Array.filter (\( c, s ) -> (Square.startsEntry entryNumber direction s))
+        |> Array.toList
+        |> List.head
+        |> Maybe.map (\( c, s ) -> c)
 
 
 toRows : Grid -> List (List ( Coordinate, Square ))

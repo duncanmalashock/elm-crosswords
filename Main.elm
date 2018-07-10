@@ -32,6 +32,7 @@ type alias Model =
 type Msg
     = ClickedSquare Coordinate
     | KeyboardMsg Keyboard.Extra.Msg
+    | ClickedClue Int Direction
 
 
 subscriptions : Model -> Sub Msg
@@ -108,6 +109,14 @@ update msg model =
             in
                 updateWithNewPressedKeys newPressedKeys model
 
+        ClickedClue entryNumber direction ->
+            ( { model
+                | puzzle =
+                    Puzzle.selectEntry model.puzzle direction entryNumber
+              }
+            , Cmd.none
+            )
+
 
 updateWithNewPressedKeys : List Key -> Model -> ( Model, Cmd Msg )
 updateWithNewPressedKeys newPressedKeys model =
@@ -145,9 +154,9 @@ updateWithNewPressedKeys newPressedKeys model =
         )
 
 
-clueView : ( Int, String ) -> Html Msg
-clueView ( clueNumber, clueString ) =
-    div []
+clueView : Direction -> ( Int, String ) -> Html Msg
+clueView direction ( clueNumber, clueString ) =
+    div [ onClick <| ClickedClue clueNumber direction ]
         [ text <| (toString clueNumber) ++ ": " ++ clueString ]
 
 
@@ -161,8 +170,8 @@ view model =
                     model.puzzle.currentSelection
                     ClickedSquare
                 ]
-                    ++ List.map clueView (Grid.acrossClues grid)
-                    ++ List.map clueView (Grid.downClues grid)
+                    ++ List.map (clueView Across) (Grid.acrossClues grid)
+                    ++ List.map (clueView Down) (Grid.downClues grid)
 
         Err string ->
-            div [] [ text "couldn't load!" ]
+            div [] [ text <| "Couldn't load: " ++ string ]
