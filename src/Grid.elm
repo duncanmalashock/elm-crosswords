@@ -2,6 +2,7 @@ module Grid
     exposing
         ( Grid
         , CompletionState(..)
+        , Clues
         , width
         , height
         , blank
@@ -20,6 +21,7 @@ module Grid
         )
 
 import Char
+import Dict exposing (Dict)
 import Square exposing (Square(..), EntryData, StartsEntries(..))
 import Maybe.Extra as Maybe
 import Direction exposing (Direction(..))
@@ -41,10 +43,22 @@ type CompletionState
     | NotCompleted
 
 
+type alias Clues =
+    { across : Dict Int String
+    , down : Dict Int String
+    }
+
+
 blankEntryData =
     { startsEntries = NoStart
     , inAcrossEntry = -1
     , inDownEntry = -1
+    }
+
+
+blankClues =
+    { across = Dict.fromList []
+    , down = Dict.fromList []
     }
 
 
@@ -65,11 +79,11 @@ blank gridWidth gridHeight =
             String.fromChar Square.blankChar
                 |> String.repeat (gridWidth * gridHeight)
     in
-        fromString gridWidth gridHeight initString
+        fromString gridWidth gridHeight initString blankClues
 
 
-fromString : Int -> Int -> String -> Result String Grid
-fromString gridWidth gridHeight string =
+fromString : Int -> Int -> String -> Clues -> Result String Grid
+fromString gridWidth gridHeight string clues =
     let
         input =
             string
@@ -82,14 +96,14 @@ fromString gridWidth gridHeight string =
     in
         case input of
             Ok charList ->
-                fromStringHelp gridWidth gridHeight ( 0, 0 ) charList 0 startingGrid
+                fromStringHelp gridWidth gridHeight ( 0, 0 ) charList 0 startingGrid clues
 
             Err error ->
                 Err error
 
 
-fromStringHelp : Int -> Int -> Coordinate -> List Char -> Int -> Result String Grid -> Result String Grid
-fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gridSoFar =
+fromStringHelp : Int -> Int -> Coordinate -> List Char -> Int -> Result String Grid -> Clues -> Result String Grid
+fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gridSoFar clues =
     case charList of
         [] ->
             gridSoFar
@@ -117,14 +131,33 @@ fromStringHelp gridWidth gridHeight ( curX, curY ) charList entryNumberSoFar gri
                 newGrid =
                     Result.map2
                         (Matrix.set newX newY)
-                        (charToSquare head ( newX, newY ) newEntryNumber gridSoFar)
+                        (charToSquare head ( newX, newY ) newEntryNumber gridSoFar clues)
                         gridSoFar
             in
-                fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber newGrid
+                fromStringHelp gridWidth gridHeight ( newX + 1, newY ) tail newEntryNumber newGrid clues
 
 
-getEntryData : Grid -> Coordinate -> Int -> EntryData
-getEntryData grid ( x, y ) newEntryNumber =
+charToSquare : Char -> Coordinate -> Int -> Result String Grid -> Clues -> Result String Square
+charToSquare char ( x, y ) entryNumber gridResult clues =
+    case gridResult of
+        Ok grid ->
+            if char == Square.blankChar then
+                Ok <|
+                    blankSquare ( x, y ) (getEntryData grid ( x, y ) entryNumber clues)
+            else if Square.isLetterChar char then
+                Ok <|
+                    letterSquare ( x, y ) (Char.toUpper char) (getEntryData grid ( x, y ) entryNumber clues)
+            else if char == Square.blockChar then
+                Ok (blockSquare ( x, y ))
+            else
+                Err <| "Invalid character: " ++ (String.fromChar char)
+
+        Err message ->
+            Err message
+
+
+getEntryData : Grid -> Coordinate -> Int -> Clues -> EntryData
+getEntryData grid ( x, y ) newEntryNumber clues =
     let
         acrossEntryNumber =
             if isAcrossEntryStart ( x, y ) grid then
@@ -140,13 +173,27 @@ getEntryData grid ( x, y ) newEntryNumber =
                 findDownEntryStartNumber grid ( x, y )
                     |> Maybe.withDefault -1
 
+        clueAt direction clueIndex =
+            case direction of
+                Across ->
+                    Dict.get clueIndex clues.across
+                        |> Maybe.withDefault ""
+
+                Down ->
+                    Dict.get clueIndex clues.down
+                        |> Maybe.withDefault ""
+
         startsEntriesValue =
             if (isAcrossEntryStart ( x, y ) grid) && (isDownEntryStart ( x, y ) grid) then
-                StartsAcrossAndDown { clue = "" } { clue = "" }
+                StartsAcrossAndDown
+                    { clue = clueAt Across acrossEntryNumber }
+                    { clue = clueAt Down downEntryNumber }
             else if (isAcrossEntryStart ( x, y ) grid) then
-                StartsAcross { clue = "" }
+                StartsAcross
+                    { clue = clueAt Across acrossEntryNumber }
             else if (isDownEntryStart ( x, y ) grid) then
-                StartsDown { clue = "" }
+                StartsDown
+                    { clue = clueAt Down downEntryNumber }
             else
                 NoStart
     in
@@ -181,25 +228,6 @@ rowToString row =
     in
         List.map Square.toString squares
             |> String.join ""
-
-
-charToSquare : Char -> Coordinate -> Int -> Result String Grid -> Result String Square
-charToSquare char ( x, y ) entryNumber gridResult =
-    case gridResult of
-        Ok grid ->
-            if char == Square.blankChar then
-                Ok <|
-                    blankSquare ( x, y ) (getEntryData grid ( x, y ) entryNumber)
-            else if Square.isLetterChar char then
-                Ok <|
-                    letterSquare ( x, y ) (Char.toUpper char) (getEntryData grid ( x, y ) entryNumber)
-            else if char == Square.blockChar then
-                Ok (blockSquare ( x, y ))
-            else
-                Err <| "Invalid character: " ++ (String.fromChar char)
-
-        Err message ->
-            Err message
 
 
 findAcrossEntryStartNumber : Grid -> Coordinate -> Maybe Int
@@ -401,7 +429,7 @@ setGuess ( x, y ) newGuess grid =
         Matrix.update x y updateGuess grid
 
 
-acrossClues : Grid -> List String
+acrossClues : Grid -> List ( Int, String )
 acrossClues grid =
     let
         maybesToList maybes =
@@ -424,7 +452,7 @@ acrossClues grid =
             |> maybesToList
 
 
-downClues : Grid -> List String
+downClues : Grid -> List ( Int, String )
 downClues grid =
     let
         maybesToList maybes =

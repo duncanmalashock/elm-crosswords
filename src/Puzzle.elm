@@ -20,7 +20,7 @@ module Puzzle
         , updateCompletionState
         )
 
-import Grid exposing (Grid, CompletionState(..))
+import Grid exposing (Grid, CompletionState(..), Clues)
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
@@ -48,11 +48,11 @@ type EditMode
     | Editing
 
 
-fromString : Int -> Int -> String -> EditMode -> Puzzle
-fromString gridWidth gridHeight string editMode =
+fromString : Int -> Int -> String -> Clues -> EditMode -> Puzzle
+fromString gridWidth gridHeight string clues editMode =
     let
         gridResult =
-            Grid.fromString gridWidth gridHeight string
+            Grid.fromString gridWidth gridHeight string clues
     in
         { grid = gridResult
         , currentSelection = Nothing

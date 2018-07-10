@@ -43,25 +43,34 @@ init : ( Model, Cmd Msg )
 init =
     let
         stringInput =
-            [ "HAZY*BRECHT*ECO"
-            , "OREO*MULLAH*COX"
-            , "STAYSINSIDE*URI"
-            , "**LOW*TACOSTAND"
-            , "THOMAS***NOIDEA"
-            , "HITANERVE*UBOAT"
-            , "YDS**REIN*TERSE"
-            , "***LEFTRIGHT***"
-            , "STREP*ONAT**ATL"
-            , "THANI*WACOTEXAS"
-            , "ARMADA***SAILED"
-            , "MORSECODE*LTR**"
-            , "IWO*MUSICSCHOOL"
-            , "NOD*ITHACA*ESSO"
-            , "ANS*CEASED*REST"
+            [ "*STEP"
+            , "CHINA"
+            , "HINDI"
+            , "ANGEL"
+            , "DYED*"
             ]
                 |> String.concat
+
+        clues =
+            { across =
+                Dict.fromList
+                    [ ( 1, "Aerobics class with an elevated block" )
+                    , ( 5, "U.S. tariff war opponent" )
+                    , ( 6, "Official language of India" )
+                    , ( 7, "Heavenly figure in Michelangelo's \"The Last Judgement\"" )
+                    , ( 8, "Changed the color of" )
+                    ]
+            , down =
+                Dict.fromList
+                    [ ( 1, "Like a very distracting object" )
+                    , ( 2, "Hint of color" )
+                    , ( 3, "Brought to a close" )
+                    , ( 4, "Sand castle mold" )
+                    , ( 5, "Country between Niger and Sudan" )
+                    ]
+            }
     in
-        ( { puzzle = Puzzle.fromString 15 15 stringInput Solving
+        ( { puzzle = Puzzle.fromString 5 5 stringInput clues Solving
           , pressedKeys = []
           }
         , Cmd.none
@@ -136,10 +145,10 @@ updateWithNewPressedKeys newPressedKeys model =
         )
 
 
-clueView : String -> Html Msg
-clueView clueString =
+clueView : ( Int, String ) -> Html Msg
+clueView ( clueNumber, clueString ) =
     div []
-        [ text <| "Clue: " ++ clueString ]
+        [ text <| (toString clueNumber) ++ ": " ++ clueString ]
 
 
 view : Model -> Html Msg
@@ -152,8 +161,8 @@ view model =
                     model.puzzle.currentSelection
                     ClickedSquare
                 ]
+                    ++ List.map clueView (Grid.acrossClues grid)
+                    ++ List.map clueView (Grid.downClues grid)
 
-        -- ++ List.map clueView (Grid.acrossClues grid)
-        -- ++ List.map clueView (Grid.downClues grid)
         Err string ->
             div [] [ text "couldn't load!" ]

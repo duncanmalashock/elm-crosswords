@@ -101,19 +101,19 @@ isInEntry entryNumber direction square =
             False
 
 
-acrossClue : Square -> Maybe String
+acrossClue : Square -> Maybe ( Int, String )
 acrossClue square =
     case square of
         LetterSquare _ _ entryData ->
             case entryData.startsEntries of
                 StartsAcross clueData ->
-                    Just clueData.clue
+                    Just ( entryData.inAcrossEntry, clueData.clue )
 
                 StartsDown _ ->
                     Nothing
 
-                StartsAcrossAndDown clueDataAcross _ ->
-                    Just clueDataAcross.clue
+                StartsAcrossAndDown clueData _ ->
+                    Just ( entryData.inAcrossEntry, clueData.clue )
 
                 NoStart ->
                     Nothing
@@ -122,7 +122,7 @@ acrossClue square =
             Nothing
 
 
-downClue : Square -> Maybe String
+downClue : Square -> Maybe ( Int, String )
 downClue square =
     case square of
         LetterSquare _ _ entryData ->
@@ -131,10 +131,10 @@ downClue square =
                     Nothing
 
                 StartsDown clueData ->
-                    Just clueData.clue
+                    Just ( entryData.inDownEntry, clueData.clue )
 
-                StartsAcrossAndDown _ clueDataDown ->
-                    Just clueDataDown.clue
+                StartsAcrossAndDown _ clueData ->
+                    Just ( entryData.inDownEntry, clueData.clue )
 
                 NoStart ->
                     Nothing
