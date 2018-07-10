@@ -11,5 +11,5 @@ def run_cmd(chdir, message, cmd, failure_msg)
   end
 end
 
-cmd = "elm make Main.elm --output js/elm.js"
+cmd = "elm make Main.elm --output js/elm.js --debug"
 run_cmd(Dir.pwd, "Building...", cmd, "Failed to compile")
