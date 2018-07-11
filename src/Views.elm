@@ -137,3 +137,39 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                     ]
                 ]
                 []
+
+
+clueView : Grid -> Direction -> Maybe Puzzle.Selection -> (Int -> Direction -> msg) -> ( Int, String ) -> Html msg
+clueView grid direction selection clickMsg ( clueNumber, clueString ) =
+    let
+        highlightStyle =
+            case selection of
+                Nothing ->
+                    []
+
+                Just ( selectedCoordinate, selectedDirection ) ->
+                    let
+                        selectedClues =
+                            Grid.cluesAtCoordinate selectedCoordinate grid
+
+                        selectedClueNumber =
+                            case direction of
+                                Across ->
+                                    selectedClues.across
+
+                                Down ->
+                                    selectedClues.down
+                    in
+                        if
+                            (selectedClueNumber == clueNumber)
+                                && (selectedDirection == direction)
+                        then
+                            [ ( "background-color", "#009dff" ) ]
+                        else
+                            []
+    in
+        div
+            [ onMouseDown <| clickMsg clueNumber direction
+            , style highlightStyle
+            ]
+            [ text <| (toString clueNumber) ++ ": " ++ clueString ]

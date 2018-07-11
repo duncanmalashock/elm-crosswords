@@ -154,42 +154,6 @@ updateWithNewPressedKeys newPressedKeys model =
         )
 
 
-clueView : Grid -> Direction -> Maybe Puzzle.Selection -> ( Int, String ) -> Html Msg
-clueView grid direction selection ( clueNumber, clueString ) =
-    let
-        highlightStyle =
-            case selection of
-                Nothing ->
-                    []
-
-                Just ( selectedCoordinate, selectedDirection ) ->
-                    let
-                        selectedClues =
-                            Grid.cluesAtCoordinate selectedCoordinate grid
-
-                        selectedClueNumber =
-                            case direction of
-                                Across ->
-                                    selectedClues.across
-
-                                Down ->
-                                    selectedClues.down
-                    in
-                        if
-                            (selectedClueNumber == clueNumber)
-                                && (selectedDirection == direction)
-                        then
-                            [ ( "background-color", "#009dff" ) ]
-                        else
-                            []
-    in
-        div
-            [ onClick <| ClickedClue clueNumber direction
-            , style highlightStyle
-            ]
-            [ text <| (toString clueNumber) ++ ": " ++ clueString ]
-
-
 view : Model -> Html Msg
 view model =
     case model.puzzle.grid of
@@ -200,8 +164,8 @@ view model =
                     model.puzzle.currentSelection
                     ClickedSquare
                 ]
-                    ++ List.map (clueView grid Across model.puzzle.currentSelection) (Grid.acrossClues grid)
-                    ++ List.map (clueView grid Down model.puzzle.currentSelection) (Grid.downClues grid)
+                    ++ List.map (Views.clueView grid Across model.puzzle.currentSelection ClickedClue) (Grid.acrossClues grid)
+                    ++ List.map (Views.clueView grid Down model.puzzle.currentSelection ClickedClue) (Grid.downClues grid)
 
         Err string ->
             div [] [ text <| "Couldn't load: " ++ string ]
