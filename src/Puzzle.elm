@@ -21,7 +21,7 @@ module Puzzle
         , updateCompletionState
         )
 
-import Grid exposing (Grid, CompletionState(..), Clues)
+import Grid exposing (Grid, CompletionState(..), CluesDict)
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
 import KeyboardUtils
@@ -50,7 +50,7 @@ type EditMode
     | Editing
 
 
-fromString : Int -> Int -> String -> Clues -> EditMode -> Puzzle
+fromString : Int -> Int -> String -> CluesDict -> EditMode -> Puzzle
 fromString gridWidth gridHeight string clues editMode =
     let
         gridResult =

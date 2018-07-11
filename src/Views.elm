@@ -62,20 +62,16 @@ squareView grid currentSelection clickMsg (( x, y ) as coordinate) square =
                     case currentSelection of
                         Just ( selectionCoordinate, direction ) ->
                             let
-                                selectedSquare =
-                                    Grid.squareAtCoordinate grid selectionCoordinate
+                                clues =
+                                    Grid.cluesAtCoordinate selectionCoordinate grid
 
                                 selectedClue =
                                     case direction of
                                         Across ->
-                                            Maybe.map Square.acrossEntryNumber selectedSquare
-                                                |> Maybe.join
-                                                |> Maybe.withDefault -1
+                                            clues.across
 
                                         Down ->
-                                            Maybe.map Square.downEntryNumber selectedSquare
-                                                |> Maybe.join
-                                                |> Maybe.withDefault -1
+                                            clues.down
                             in
                                 if coordinate == selectionCoordinate then
                                     [ ( "background-color", "#009dff" ) ]

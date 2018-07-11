@@ -28,6 +28,12 @@ type alias ClueData =
     }
 
 
+type alias Clues =
+    { across : Int
+    , down : Int
+    }
+
+
 type StartsEntries
     = StartsAcross ClueData
     | StartsDown ClueData
