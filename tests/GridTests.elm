@@ -3,6 +3,7 @@ module GridTests exposing (..)
 import Grid
 import Square exposing (Square(..), StartsEntries(..))
 import Direction exposing (Direction(..))
+import Dict
 import Test exposing (Test, describe, test, skip)
 import Expect
 
@@ -52,7 +53,7 @@ testIsAcrossEntry =
                         Ok True
 
                     input =
-                        Grid.fromString 2 2 ".**."
+                        Grid.fromString 2 2 ".**." Grid.blankClues
                             |> Result.map
                                 (Grid.isAcrossEntryStart ( 0, 0 ))
                 in
@@ -64,7 +65,7 @@ testIsAcrossEntry =
                         Ok False
 
                     input =
-                        Grid.fromString 2 2 "...."
+                        Grid.fromString 2 2 "...." Grid.blankClues
                             |> Result.map
                                 (Grid.isAcrossEntryStart ( 1, 0 ))
                 in
@@ -76,7 +77,7 @@ testIsAcrossEntry =
                         Ok True
 
                     input =
-                        Grid.fromString 2 2 "****"
+                        Grid.fromString 2 2 "****" Grid.blankClues
                             |> Result.map
                                 (Grid.isAcrossEntryStart ( 0, 0 ))
                 in
@@ -94,7 +95,7 @@ testIsDownEntry =
                         Ok True
 
                     input =
-                        Grid.fromString 2 2 ".**."
+                        Grid.fromString 2 2 ".**." Grid.blankClues
                             |> Result.map
                                 (Grid.isDownEntryStart ( 0, 0 ))
                 in
@@ -106,7 +107,7 @@ testIsDownEntry =
                         Ok False
 
                     input =
-                        Grid.fromString 2 2 "...."
+                        Grid.fromString 2 2 "...." Grid.blankClues
                             |> Result.map
                                 (Grid.isDownEntryStart ( 0, 1 ))
                 in
@@ -118,7 +119,7 @@ testIsDownEntry =
                         Ok True
 
                     input =
-                        Grid.fromString 2 2 "****"
+                        Grid.fromString 2 2 "****" Grid.blankClues
                             |> Result.map
                                 (Grid.isDownEntryStart ( 0, 0 ))
                 in
@@ -136,7 +137,7 @@ testSquareAtCoordinate =
                         Ok Nothing
 
                     input =
-                        Grid.fromString 2 2 "ABCD"
+                        Grid.fromString 2 2 "ABCD" Grid.blankClues
                             |> Result.map
                                 (\g -> Grid.squareAtCoordinate g ( 3, 3 ))
                 in
@@ -148,7 +149,7 @@ testSquareAtCoordinate =
                         Ok (Just "B")
 
                     input =
-                        Grid.fromString 2 2 "ABCD"
+                        Grid.fromString 2 2 "ABCD" Grid.blankClues
                             |> Result.map
                                 (\g ->
                                     Grid.squareAtCoordinate g ( 1, 0 )
@@ -163,7 +164,7 @@ testSquareAtCoordinate =
                         Ok (Just "*")
 
                     input =
-                        Grid.fromString 2 2 "ABC*"
+                        Grid.fromString 2 2 "ABC*" Grid.blankClues
                             |> Result.map
                                 (\g ->
                                     Grid.squareAtCoordinate g ( 1, 1 )
@@ -181,7 +182,7 @@ testWidth =
             \_ ->
                 let
                     grid =
-                        Grid.fromString 2 2 "...."
+                        Grid.fromString 2 2 "...." Grid.blankClues
                 in
                     Expect.equal (Result.map Grid.width grid) <| Ok 2
         ]
@@ -194,9 +195,9 @@ testHeight =
             \_ ->
                 let
                     grid =
-                        Grid.fromString 2 2 "...."
+                        Grid.fromString 2 2 "...." Grid.blankClues
                 in
-                    Expect.equal (Result.map Grid.height grid) <| Ok 2
+                    Expect.equal (Result.map Grid.height grid) (Ok 2)
         ]
 
 
@@ -225,7 +226,7 @@ testFromString =
                         "."
                 in
                     Expect.equal
-                        (Grid.fromString 1 1 input
+                        ((Grid.fromString 1 1 input Grid.blankClues)
                             |> Result.map Grid.toRows
                         )
                         expectedOutput
@@ -261,7 +262,7 @@ testFromString =
                         ".."
                 in
                     Expect.equal
-                        (Grid.fromString 2 1 input
+                        (Grid.fromString 2 1 input Grid.blankClues
                             |> Result.map Grid.toRows
                         )
                         expectedOutput
@@ -300,7 +301,7 @@ testFromString =
                         ".**."
                 in
                     Expect.equal
-                        (Grid.fromString 2 2 input
+                        (Grid.fromString 2 2 input Grid.blankClues
                             |> Result.map Grid.toRows
                         )
                         expectedOutput
@@ -314,7 +315,7 @@ testFromString =
                         "&$()"
                 in
                     Expect.equal
-                        (Grid.fromString 2 2 input
+                        (Grid.fromString 2 2 input Grid.blankClues
                             |> Result.map Grid.toRows
                         )
                         expectedOutput
@@ -328,7 +329,7 @@ testFromString =
                         ".."
                 in
                     Expect.equal
-                        (Grid.fromString 2 2 input
+                        (Grid.fromString 2 2 input Grid.blankClues
                             |> Result.map Grid.toRows
                         )
                         expectedOutput
@@ -342,7 +343,7 @@ testFromString =
                         ".........."
                 in
                     Expect.equal
-                        (Grid.fromString 3 3 input
+                        (Grid.fromString 3 3 input Grid.blankClues
                             |> Result.map Grid.toRows
                         )
                         expectedOutput

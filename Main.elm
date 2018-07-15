@@ -24,7 +24,7 @@ main =
 
 
 type alias Model =
-    { puzzle : Puzzle
+    { puzzle : Result String Puzzle
     , pressedKeys : List Key
     }
 
@@ -83,22 +83,22 @@ update msg model =
     case msg of
         ClickedSquare coordinate ->
             let
-                updateSelectionDirectionFn =
-                    case model.puzzle.currentSelection of
+                updateSelectionDirectionFn puzzle =
+                    case puzzle.currentSelection of
                         Just ( currentCoordinate, _ ) ->
                             if currentCoordinate == coordinate then
-                                (\m -> { m | puzzle = Puzzle.switchSelectionDirection m.puzzle })
+                                Puzzle.switchSelectionDirection puzzle
                             else
-                                identity
+                                puzzle
 
                         Nothing ->
-                            identity
+                            puzzle
             in
                 ( { model
                     | puzzle =
-                        Puzzle.setSelection coordinate model.puzzle
+                        Result.map (Puzzle.setSelection coordinate) model.puzzle
+                            |> Result.map updateSelectionDirectionFn
                   }
-                    |> updateSelectionDirectionFn
                 , Cmd.none
                 )
 
@@ -112,7 +112,7 @@ update msg model =
         ClickedClue entryNumber direction ->
             ( { model
                 | puzzle =
-                    Puzzle.selectEntry model.puzzle direction entryNumber
+                    Result.map (Puzzle.selectEntry direction entryNumber) model.puzzle
               }
             , Cmd.none
             )
@@ -126,29 +126,29 @@ updateWithNewPressedKeys newPressedKeys model =
                 (\k -> not (List.member k model.pressedKeys))
                 newPressedKeys
 
-        updatedPuzzle =
+        updatedPuzzle puzzle =
             if (List.member Keyboard.Extra.ArrowLeft changedKeys) then
-                Puzzle.moveSelectionLeft model.puzzle
+                Puzzle.moveSelectionLeft puzzle
             else if (List.member Keyboard.Extra.ArrowRight changedKeys) then
-                Puzzle.moveSelectionRight model.puzzle
+                Puzzle.moveSelectionRight puzzle
             else if (List.member Keyboard.Extra.ArrowUp changedKeys) then
-                Puzzle.moveSelectionUp model.puzzle
+                Puzzle.moveSelectionUp puzzle
             else if (List.member Keyboard.Extra.ArrowDown changedKeys) then
-                Puzzle.moveSelectionDown model.puzzle
+                Puzzle.moveSelectionDown puzzle
             else if (List.member Keyboard.Extra.Space changedKeys) then
-                Puzzle.switchSelectionDirection model.puzzle
+                Puzzle.switchSelectionDirection puzzle
             else if (KeyboardUtils.containsLetterKeys changedKeys) then
-                Puzzle.typeLetters changedKeys model.puzzle
+                (Puzzle.typeLetters changedKeys) puzzle
             else if (List.member Keyboard.Extra.BackSpace changedKeys) then
-                Puzzle.deleteLetter model.puzzle
+                Puzzle.deleteLetter puzzle
             else
-                model.puzzle
+                puzzle
     in
         ( { model
             | pressedKeys = newPressedKeys
             , puzzle =
-                updatedPuzzle
-                    |> Puzzle.updateCompletionState
+                Result.map updatedPuzzle model.puzzle
+                    |> Result.map Puzzle.updateCompletionState
           }
         , Cmd.none
         )
@@ -156,16 +156,16 @@ updateWithNewPressedKeys newPressedKeys model =
 
 view : Model -> Html Msg
 view model =
-    case model.puzzle.grid of
-        Ok grid ->
+    case model.puzzle of
+        Ok puzzle ->
             div [] <|
-                [ Views.completedView model.puzzle
-                , Views.gridView grid
-                    model.puzzle.currentSelection
+                [ Views.completedView puzzle
+                , Views.gridView puzzle.grid
+                    puzzle.currentSelection
                     ClickedSquare
                 ]
-                    ++ List.map (Views.clueView grid Across model.puzzle.currentSelection ClickedClue) (Grid.acrossClues grid)
-                    ++ List.map (Views.clueView grid Down model.puzzle.currentSelection ClickedClue) (Grid.downClues grid)
+                    ++ List.map (Views.clueView puzzle.grid Across puzzle.currentSelection ClickedClue) (Grid.acrossClues puzzle.grid)
+                    ++ List.map (Views.clueView puzzle.grid Down puzzle.currentSelection ClickedClue) (Grid.downClues puzzle.grid)
 
-        Err string ->
-            div [] [ text <| "Couldn't load: " ++ string ]
+        Err error ->
+            text <| "Couldn't load puzzle: " ++ error

@@ -6,6 +6,7 @@ module Grid
         , width
         , height
         , blank
+        , blankClues
         , fromString
         , toRows
         , toString

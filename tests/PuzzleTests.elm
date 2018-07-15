@@ -1,6 +1,7 @@
 module PuzzleTests exposing (..)
 
 import Puzzle exposing (EditMode(..))
+import Grid
 import Square exposing (Square(..))
 import Direction exposing (Direction(..))
 import Test exposing (Test, describe, test, skip)
@@ -15,30 +16,30 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzleSelectionCoordinate =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 1 )
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelectionCoordinate <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelectionCoordinate <| Ok (Just ( 0, 1 ))
             , test "doesn't set an invalid selection" <|
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 6 )
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 6 ))
                     in
-                        Expect.equal newPuzzle.currentSelection Nothing
+                        Expect.equal (Result.map .currentSelection newPuzzle) (Ok Nothing)
             ]
         , describe "with only letter squares permitted for selection"
             [ test "doesn't select a block square" <|
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "AB*D" Solving
-                                |> Puzzle.setSelection ( 0, 1 )
+                            Puzzle.fromString 2 2 "AB*D" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
                     in
-                        Expect.equal newPuzzle.currentSelection <| Nothing
+                        Expect.equal (Result.map .currentSelection newPuzzle) (Ok Nothing)
             ]
         ]
 
@@ -50,14 +51,14 @@ testSwitchSelectionDirection =
             \_ ->
                 let
                     newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD" Solving
-                            |> Puzzle.setSelection ( 0, 1 )
+                        Puzzle.fromString 2 2 "ABCD" Grid.blankClues Solving
+                            |> Result.map (Puzzle.setSelection ( 0, 1 ))
 
                     input =
-                        Puzzle.switchSelectionDirection newPuzzle
-                            |> .currentSelection
+                        Result.map Puzzle.switchSelectionDirection newPuzzle
+                            |> Result.map .currentSelection
                 in
-                    Expect.equal input (Just <| ( ( 0, 1 ), Down ))
+                    Expect.equal input (Ok (Just <| ( ( 0, 1 ), Down )))
         ]
 
 
@@ -69,37 +70,37 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 1, 0 )
-                                |> Puzzle.moveSelectionLeft
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 1, 0 ))
+                                |> Result.map Puzzle.moveSelectionLeft
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 0 ))
             , test "doesn't move left if there is no square in bounds" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 1 )
-                                |> Puzzle.moveSelectionLeft
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
+                                |> Result.map Puzzle.moveSelectionLeft
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 1 ))
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
-                                |> Puzzle.setSelection ( 2, 1 )
-                                |> Puzzle.moveSelectionLeft
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 2, 1 ))
+                                |> Result.map Puzzle.moveSelectionLeft
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 1 ))
             ]
         ]
 
@@ -112,37 +113,37 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 0 )
-                                |> Puzzle.moveSelectionRight
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 0 ))
+                                |> Result.map Puzzle.moveSelectionRight
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 1, 0 ))
             , test "doesn't move right if there is no square in bounds" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 1, 1 )
-                                |> Puzzle.moveSelectionRight
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 1, 1 ))
+                                |> Result.map Puzzle.moveSelectionRight
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 1, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 1, 1 ))
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
-                                |> Puzzle.setSelection ( 0, 1 )
-                                |> Puzzle.moveSelectionRight
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
+                                |> Result.map Puzzle.moveSelectionRight
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 2, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 2, 1 ))
             ]
         ]
 
@@ -155,37 +156,37 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 1 )
-                                |> Puzzle.moveSelectionUp
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
+                                |> Result.map Puzzle.moveSelectionUp
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 0 ))
             , test "doesn't move up if there is no square in bounds" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 0 )
-                                |> Puzzle.moveSelectionUp
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 0 ))
+                                |> Result.map Puzzle.moveSelectionUp
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 0 ))
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
-                                |> Puzzle.setSelection ( 1, 2 )
-                                |> Puzzle.moveSelectionUp
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 1, 2 ))
+                                |> Result.map Puzzle.moveSelectionUp
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 1, 0 ))
             ]
         ]
 
@@ -198,47 +199,47 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 0 )
-                                |> Puzzle.moveSelectionDown
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 0 ))
+                                |> Result.map Puzzle.moveSelectionDown
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 1 ))
             , test "doesn't move down if there is no square in bounds" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Editing
-                                |> Puzzle.setSelection ( 0, 1 )
-                                |> Puzzle.moveSelectionDown
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                                |> Result.map (Puzzle.setSelection ( 0, 1 ))
+                                |> Result.map Puzzle.moveSelectionDown
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 0, 1 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 0, 1 ))
             ]
         , describe "with only letter squares permitted for selection"
             [ test "jumps over block squares to the next available letter square" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Solving
-                                |> Puzzle.setSelection ( 1, 0 )
-                                |> Puzzle.moveSelectionDown
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 1, 0 ))
+                                |> Result.map Puzzle.moveSelectionDown
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 1, 2 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 1, 2 ))
             , test "doesn't move if there are no valid squares left in the column" <|
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FG*I" Solving
-                                |> Puzzle.setSelection ( 1, 0 )
-                                |> Puzzle.moveSelectionDown
-                                |> Puzzle.selection
-                                |> Maybe.map Puzzle.selectionCoordinate
+                            Puzzle.fromString 3 3 "ABCD*FG*I" Grid.blankClues Solving
+                                |> Result.map (Puzzle.setSelection ( 1, 0 ))
+                                |> Result.map Puzzle.moveSelectionDown
+                                |> Result.map Puzzle.selection
+                                |> Result.map (Maybe.map Puzzle.selectionCoordinate)
                     in
-                        Expect.equal newPuzzleSelection <| Just ( 1, 0 )
+                        Expect.equal newPuzzleSelection <| Ok (Just ( 1, 0 ))
             ]
         ]

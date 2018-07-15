@@ -40,16 +40,13 @@ gridView grid currentSelection clickMsg =
 completedView : Puzzle -> Html msg
 completedView puzzle =
     case puzzle.completed of
-        Ok (Grid.CompletedSuccessfully) ->
+        Grid.CompletedSuccessfully ->
             div [] [ text "You finished it!" ]
 
-        Ok (Grid.CompletedWithMistakes mistakes) ->
+        Grid.CompletedWithMistakes mistakes ->
             div [] [ text <| "You still have " ++ toString mistakes ++ " mistakes." ]
 
-        Ok (Grid.NotCompleted) ->
-            text ""
-
-        Err _ ->
+        Grid.NotCompleted ->
             text ""
 
 

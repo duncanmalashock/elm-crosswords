@@ -30,14 +30,11 @@ import Maybe.Extra as Maybe
 import Dict
 
 
--- TODO: puzzle should be the thing that's wrapped (in a result), not the grid
-
-
 type alias Puzzle =
-    { grid : Result String Grid
+    { grid : Grid
     , currentSelection : Maybe Selection
     , editMode : EditMode
-    , completed : Result String CompletionState
+    , completed : CompletionState
     }
 
 
@@ -50,17 +47,17 @@ type EditMode
     | Editing
 
 
-fromString : Int -> Int -> String -> CluesDict -> EditMode -> Puzzle
+fromString : Int -> Int -> String -> CluesDict -> EditMode -> Result String Puzzle
 fromString gridWidth gridHeight string clues editMode =
-    let
-        gridResult =
-            Grid.fromString gridWidth gridHeight string clues
-    in
-        { grid = gridResult
-        , currentSelection = Nothing
-        , editMode = editMode
-        , completed = Ok NotCompleted
-        }
+    Grid.fromString gridWidth gridHeight string clues
+        |> Result.map
+            (\grid ->
+                { grid = grid
+                , currentSelection = Nothing
+                , editMode = editMode
+                , completed = NotCompleted
+                }
+            )
 
 
 typeLetters : List Key -> Puzzle -> Puzzle
@@ -76,11 +73,11 @@ typeLetter char puzzle =
         Just ( coord, direction ) ->
             case direction of
                 Across ->
-                    { puzzle | grid = Result.map (Grid.setGuess coord char) puzzle.grid }
+                    { puzzle | grid = Grid.setGuess coord char puzzle.grid }
                         |> moveSelectionRight
 
                 Down ->
-                    { puzzle | grid = Result.map (Grid.setGuess coord char) puzzle.grid }
+                    { puzzle | grid = Grid.setGuess coord char puzzle.grid }
                         |> moveSelectionDown
 
         Nothing ->
@@ -93,11 +90,11 @@ deleteLetter puzzle =
         Just ( coord, direction ) ->
             case direction of
                 Across ->
-                    { puzzle | grid = Result.map (Grid.setGuess coord ' ') puzzle.grid }
+                    { puzzle | grid = Grid.setGuess coord ' ' puzzle.grid }
                         |> moveSelectionLeft
 
                 Down ->
-                    { puzzle | grid = Result.map (Grid.setGuess coord ' ') puzzle.grid }
+                    { puzzle | grid = Grid.setGuess coord ' ' puzzle.grid }
                         |> moveSelectionUp
 
         Nothing ->
@@ -173,13 +170,13 @@ moveSelection startingSelection newCoordFn puzzle =
                     (Grid.hasLetterSquareAt grid newCoordToTry)
                         || (puzzle.editMode == Editing)
             in
-                case (Result.map newCoordIsInBounds puzzle.grid) of
-                    Ok True ->
-                        case (Result.map newSquareIsPermitted puzzle.grid) of
-                            Ok True ->
+                case newCoordIsInBounds puzzle.grid of
+                    True ->
+                        case newSquareIsPermitted puzzle.grid of
+                            True ->
                                 setSelection newCoordToTry puzzle
 
-                            Ok False ->
+                            False ->
                                 moveSelection
                                     startingSelection
                                     newCoordFn
@@ -189,14 +186,8 @@ moveSelection startingSelection newCoordFn puzzle =
                                                 puzzle.currentSelection
                                     }
 
-                            Err _ ->
-                                puzzle
-
-                    Ok False ->
+                    False ->
                         { puzzle | currentSelection = startingSelection }
-
-                    Err _ ->
-                        puzzle
 
         Nothing ->
             puzzle
@@ -204,36 +195,31 @@ moveSelection startingSelection newCoordFn puzzle =
 
 setSelection : Coordinate -> Puzzle -> Puzzle
 setSelection (( x, y ) as coordinate) puzzle =
-    case puzzle.grid of
-        Ok grid ->
-            let
-                isInXBounds xVal =
-                    xVal >= 0 && xVal < (Grid.width grid)
+    let
+        isInXBounds xVal =
+            xVal >= 0 && xVal < (Grid.width puzzle.grid)
 
-                isInYBounds yVal =
-                    yVal >= 0 && yVal < (Grid.height grid)
+        isInYBounds yVal =
+            yVal >= 0 && yVal < (Grid.height puzzle.grid)
 
-                squareIsPermitted =
-                    (Grid.hasLetterSquareAt grid coordinate)
-                        || (puzzle.editMode == Editing)
-            in
-                if (isInXBounds x && isInYBounds y && squareIsPermitted) then
-                    case puzzle.currentSelection of
-                        Just selection ->
-                            { puzzle
-                                | currentSelection =
-                                    Maybe.map
-                                        (selectionMapToCoordinate (\_ -> coordinate))
-                                        puzzle.currentSelection
-                            }
+        squareIsPermitted =
+            (Grid.hasLetterSquareAt puzzle.grid coordinate)
+                || (puzzle.editMode == Editing)
+    in
+        if (isInXBounds x && isInYBounds y && squareIsPermitted) then
+            case puzzle.currentSelection of
+                Just selection ->
+                    { puzzle
+                        | currentSelection =
+                            Maybe.map
+                                (selectionMapToCoordinate (\_ -> coordinate))
+                                puzzle.currentSelection
+                    }
 
-                        Nothing ->
-                            { puzzle | currentSelection = Just ( coordinate, Across ) }
-                else
-                    puzzle
-
-        Err _ ->
-            { puzzle | currentSelection = Nothing }
+                Nothing ->
+                    { puzzle | currentSelection = Just ( coordinate, Across ) }
+        else
+            puzzle
 
 
 clearSelection : Puzzle -> Puzzle
@@ -241,13 +227,11 @@ clearSelection puzzle =
     { puzzle | currentSelection = Nothing }
 
 
-selectEntry : Puzzle -> Direction -> Int -> Puzzle
-selectEntry puzzle direction entryNumber =
+selectEntry : Direction -> Int -> Puzzle -> Puzzle
+selectEntry direction entryNumber puzzle =
     let
         selection =
-            Result.map (Grid.entryCoordinate direction entryNumber) puzzle.grid
-                |> Result.toMaybe
-                |> Maybe.join
+            Grid.entryCoordinate direction entryNumber puzzle.grid
                 |> Maybe.map (\num -> ( num, direction ))
     in
         { puzzle | currentSelection = selection }
@@ -260,9 +244,9 @@ setEditMode editMode puzzle =
 
 setGuess : Puzzle -> Coordinate -> Char -> Puzzle
 setGuess puzzle coordinate char =
-    { puzzle | grid = Result.map (Grid.setGuess coordinate char) puzzle.grid }
+    { puzzle | grid = Grid.setGuess coordinate char puzzle.grid }
 
 
 updateCompletionState : Puzzle -> Puzzle
 updateCompletionState puzzle =
-    { puzzle | completed = Result.map Grid.completionState puzzle.grid }
+    { puzzle | completed = Grid.completionState puzzle.grid }
