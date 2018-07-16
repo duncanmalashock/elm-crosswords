@@ -24,6 +24,7 @@ module Puzzle
 import Grid exposing (Grid, CompletionState(..), CluesDict)
 import Direction exposing (Direction(..))
 import Coordinate exposing (Coordinate)
+import Date exposing (Date)
 import KeyboardUtils
 import Keyboard.Extra exposing (Key(..))
 import Maybe.Extra as Maybe
@@ -32,6 +33,8 @@ import Dict
 
 type alias Puzzle =
     { grid : Grid
+    , author : AuthorInfo
+    , createdAt : Date
     , currentSelection : Maybe Selection
     , editMode : EditMode
     , completed : CompletionState
@@ -47,12 +50,19 @@ type EditMode
     | Editing
 
 
-fromString : Int -> Int -> String -> CluesDict -> EditMode -> Result String Puzzle
-fromString gridWidth gridHeight string clues editMode =
-    Grid.fromString gridWidth gridHeight string clues
+type alias AuthorInfo =
+    { name : String
+    }
+
+
+fromString : Int -> Int -> String -> String -> CluesDict -> Date -> EditMode -> Result String Puzzle
+fromString gridWidth gridHeight gridString authorName clues createdAt editMode =
+    Grid.fromString gridWidth gridHeight gridString clues
         |> Result.map
             (\grid ->
                 { grid = grid
+                , author = { name = authorName }
+                , createdAt = createdAt
                 , currentSelection = Nothing
                 , editMode = editMode
                 , completed = NotCompleted

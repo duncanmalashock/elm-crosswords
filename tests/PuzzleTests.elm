@@ -4,8 +4,14 @@ import Puzzle exposing (EditMode(..))
 import Grid
 import Square exposing (Square(..))
 import Direction exposing (Direction(..))
+import Date exposing (Date)
 import Test exposing (Test, describe, test, skip)
 import Expect
+
+
+someDate : Date
+someDate =
+    Date.fromTime 1531702462
 
 
 testSetSelection : Test
@@ -16,7 +22,7 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzleSelectionCoordinate =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                                 |> Result.map Puzzle.selection
                                 |> Result.map (Maybe.map Puzzle.selectionCoordinate)
@@ -26,7 +32,7 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 6 ))
                     in
                         Expect.equal (Result.map .currentSelection newPuzzle) (Ok Nothing)
@@ -36,7 +42,7 @@ testSetSelection =
                 \_ ->
                     let
                         newPuzzle =
-                            Puzzle.fromString 2 2 "AB*D" Grid.blankClues Solving
+                            Puzzle.fromString 2 2 "AB*D" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                     in
                         Expect.equal (Result.map .currentSelection newPuzzle) (Ok Nothing)
@@ -51,7 +57,7 @@ testSwitchSelectionDirection =
             \_ ->
                 let
                     newPuzzle =
-                        Puzzle.fromString 2 2 "ABCD" Grid.blankClues Solving
+                        Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Solving
                             |> Result.map (Puzzle.setSelection ( 0, 1 ))
 
                     input =
@@ -70,7 +76,7 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 1, 0 ))
                                 |> Result.map Puzzle.moveSelectionLeft
                                 |> Result.map Puzzle.selection
@@ -81,7 +87,7 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                                 |> Result.map Puzzle.moveSelectionLeft
                                 |> Result.map Puzzle.selection
@@ -94,7 +100,7 @@ testMoveSelectionLeft =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                            Puzzle.fromString 3 3 "ABCD*FGHI" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 2, 1 ))
                                 |> Result.map Puzzle.moveSelectionLeft
                                 |> Result.map Puzzle.selection
@@ -113,7 +119,7 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 0 ))
                                 |> Result.map Puzzle.moveSelectionRight
                                 |> Result.map Puzzle.selection
@@ -124,7 +130,7 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 1, 1 ))
                                 |> Result.map Puzzle.moveSelectionRight
                                 |> Result.map Puzzle.selection
@@ -137,7 +143,7 @@ testMoveSelectionRight =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                            Puzzle.fromString 3 3 "ABCD*FGHI" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                                 |> Result.map Puzzle.moveSelectionRight
                                 |> Result.map Puzzle.selection
@@ -156,7 +162,7 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                                 |> Result.map Puzzle.moveSelectionUp
                                 |> Result.map Puzzle.selection
@@ -167,7 +173,7 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 0 ))
                                 |> Result.map Puzzle.moveSelectionUp
                                 |> Result.map Puzzle.selection
@@ -180,7 +186,7 @@ testMoveSelectionUp =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                            Puzzle.fromString 3 3 "ABCD*FGHI" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 1, 2 ))
                                 |> Result.map Puzzle.moveSelectionUp
                                 |> Result.map Puzzle.selection
@@ -199,7 +205,7 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 0 ))
                                 |> Result.map Puzzle.moveSelectionDown
                                 |> Result.map Puzzle.selection
@@ -210,7 +216,7 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 2 2 "ABCD" Grid.blankClues Editing
+                            Puzzle.fromString 2 2 "ABCD" "Arthur Wynne" Grid.blankClues someDate Editing
                                 |> Result.map (Puzzle.setSelection ( 0, 1 ))
                                 |> Result.map Puzzle.moveSelectionDown
                                 |> Result.map Puzzle.selection
@@ -223,7 +229,7 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FGHI" Grid.blankClues Solving
+                            Puzzle.fromString 3 3 "ABCD*FGHI" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 1, 0 ))
                                 |> Result.map Puzzle.moveSelectionDown
                                 |> Result.map Puzzle.selection
@@ -234,7 +240,7 @@ testMoveSelectionDown =
                 \_ ->
                     let
                         newPuzzleSelection =
-                            Puzzle.fromString 3 3 "ABCD*FG*I" Grid.blankClues Solving
+                            Puzzle.fromString 3 3 "ABCD*FG*I" "Arthur Wynne" Grid.blankClues someDate Solving
                                 |> Result.map (Puzzle.setSelection ( 1, 0 ))
                                 |> Result.map Puzzle.moveSelectionDown
                                 |> Result.map Puzzle.selection
