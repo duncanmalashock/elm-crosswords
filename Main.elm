@@ -170,12 +170,14 @@ view model =
                     ]
 
                 cluesView =
-                    List.map (Views.clueView puzzle.grid Across puzzle.currentSelection ClickedClue) (Grid.acrossClues puzzle.grid)
-                        ++ List.map (Views.clueView puzzle.grid Down puzzle.currentSelection ClickedClue) (Grid.downClues puzzle.grid)
+                    Divider.divider
+                        [ ( {}, List.map (Views.clueView puzzle.grid Across puzzle.currentSelection ClickedClue >> fromUnstyled) (Grid.acrossClues puzzle.grid) )
+                        , ( {}, List.map (Views.clueView puzzle.grid Down puzzle.currentSelection ClickedClue >> fromUnstyled) (Grid.downClues puzzle.grid) )
+                        ]
             in
                 Divider.divider
                     [ ( {}, List.map fromUnstyled gridView )
-                    , ( {}, List.map fromUnstyled cluesView )
+                    , ( {}, [ cluesView ] )
                     ]
 
         Err error ->

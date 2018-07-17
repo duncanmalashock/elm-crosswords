@@ -17,8 +17,7 @@ divider sections =
             [ displayFlex
             , flexDirection row
             , justifyContent spaceBetween
-            , alignItems center
-            , height (pct 100)
+            , alignItems stretch
             ]
         ]
         (List.map sectionView sections)
