@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Views
+import DesignSystem.Layout.Divider as Divider
 import Puzzle exposing (Puzzle, EditMode(..))
 import Coordinate exposing (Coordinate)
 import Direction exposing (Direction(..))
@@ -8,7 +9,9 @@ import Grid exposing (Grid)
 import Dict
 import Keyboard.Extra exposing (Key(..))
 import KeyboardUtils
-import Html exposing (Html, div, text, input, label)
+import Date
+import Html
+import Html.Styled exposing (..)
 import Html.Attributes exposing (type_, id, name, for, value, checked, style)
 import Html.Events exposing (onClick)
 
@@ -17,7 +20,7 @@ main : Program Never Model Msg
 main =
     Html.program
         { init = init
-        , view = view
+        , view = view >> toUnstyled
         , update = update
         , subscriptions = subscriptions
         }
@@ -71,7 +74,7 @@ init =
                     ]
             }
     in
-        ( { puzzle = Puzzle.fromString 5 5 stringInput clues Solving
+        ( { puzzle = Puzzle.fromString 5 5 stringInput "Doink" clues (Date.fromTime (12343234)) Solving
           , pressedKeys = []
           }
         , Cmd.none
@@ -96,8 +99,8 @@ update msg model =
             in
                 ( { model
                     | puzzle =
-                        Result.map (Puzzle.setSelection coordinate) model.puzzle
-                            |> Result.map updateSelectionDirectionFn
+                        Result.map updateSelectionDirectionFn model.puzzle
+                            |> Result.map (Puzzle.setSelection coordinate)
                   }
                 , Cmd.none
                 )
@@ -158,14 +161,22 @@ view : Model -> Html Msg
 view model =
     case model.puzzle of
         Ok puzzle ->
-            div [] <|
-                [ Views.completedView puzzle
-                , Views.gridView puzzle.grid
-                    puzzle.currentSelection
-                    ClickedSquare
-                ]
-                    ++ List.map (Views.clueView puzzle.grid Across puzzle.currentSelection ClickedClue) (Grid.acrossClues puzzle.grid)
-                    ++ List.map (Views.clueView puzzle.grid Down puzzle.currentSelection ClickedClue) (Grid.downClues puzzle.grid)
+            let
+                gridView =
+                    [ Views.completedView puzzle
+                    , Views.gridView puzzle.grid
+                        puzzle.currentSelection
+                        ClickedSquare
+                    ]
+
+                cluesView =
+                    List.map (Views.clueView puzzle.grid Across puzzle.currentSelection ClickedClue) (Grid.acrossClues puzzle.grid)
+                        ++ List.map (Views.clueView puzzle.grid Down puzzle.currentSelection ClickedClue) (Grid.downClues puzzle.grid)
+            in
+                Divider.divider
+                    [ ( {}, List.map fromUnstyled gridView )
+                    , ( {}, List.map fromUnstyled cluesView )
+                    ]
 
         Err error ->
             text <| "Couldn't load puzzle: " ++ error
